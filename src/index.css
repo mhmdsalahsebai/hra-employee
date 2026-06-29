@@ -1,0 +1,277 @@
+@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap");
+@import "tailwindcss";
+
+/* ───────────────────────────────────────────────────────────────────────────
+   cura · design language - clinical daylight
+   ----------------------------------------------------------------------------
+   A serious, data-driven health product with a calm light interface. Principles:
+     1. Soft daylight canvas, crisp white surfaces, and visible hairlines.
+     2. Teal brand accent + coral secondary, used sparingly for action and focus.
+     3. IBM Plex Sans Arabic for voice, IBM Plex Mono for scores and labels.
+     4. Compact geometry, quiet shadows, and no decorative haze.
+   ─────────────────────────────────────────────────────────────────────────── */
+@theme {
+  --font-sans: "IBM Plex Sans Arabic", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", "Menlo", monospace;
+
+  /* Brand - confident teal for actions, focus states, and score rings. */
+  --color-brand-50: #e9f7f8;
+  --color-brand-100: #d3eef2;
+  --color-brand-200: #a9dde6;
+  --color-brand-300: #77c7d5;
+  --color-brand-400: #3fa9bc;
+  --color-brand-500: #178fa3;
+  --color-brand-600: #0f7384;
+  --color-brand-700: #115d6b;
+  --color-brand-800: #124b56;
+  --color-brand-900: #123f49;
+  --color-brand-950: #0a2930;
+  --color-brand-soft: rgba(23, 143, 163, 0.12);
+
+  /* Coral - warm secondary accent for offers, logout, and urgency. */
+  --color-coral-50: #fff1ee;
+  --color-coral-100: #ffe1dc;
+  --color-coral-200: #ffc7bd;
+  --color-coral-300: #ffa395;
+  --color-coral-400: #f27967;
+  --color-coral-500: #dc604f;
+  --color-coral-600: #bd4d40;
+  --color-coral-soft: rgba(220, 96, 79, 0.12);
+
+  /* Ink - normal light-mode scale. ink-900 is primary text, ink-50 is quiet fill. */
+  --color-ink-900: #18211f;
+  --color-ink-800: #273230;
+  --color-ink-700: #3e4c49;
+  --color-ink-600: #586966;
+  --color-ink-500: #70807d;
+  --color-ink-400: #94a19e;
+  --color-ink-300: #bcc5c2;
+  --color-ink-200: #d9e1de;
+  --color-ink-100: #e8eeeb;
+  --color-ink-50: #f3f7f5;
+
+  /* Surfaces */
+  --color-canvas: #f5f7f4;
+  --color-surface: #ffffff;
+  --color-sand: #edf4f1;
+
+  /* Semantic - tuned darker for readable status text on light surfaces. */
+  --color-good: #16855f;
+  --color-good-soft: rgba(22, 133, 95, 0.12);
+  --color-warn: #b77118;
+  --color-warn-soft: rgba(183, 113, 24, 0.13);
+  --color-alert: #cc4d3f;
+  --color-alert-soft: rgba(204, 77, 63, 0.12);
+
+  /* Elevation - soft enough for healthcare, crisp enough for dense data. */
+  --shadow-soft: 0 1px 2px rgb(18 33 31 / 0.04), 0 12px 28px -22px rgb(18 33 31 / 0.28);
+  --shadow-card: 0 1px 2px rgb(18 33 31 / 0.05), 0 24px 54px -34px rgb(18 33 31 / 0.34);
+  --shadow-pop: 0 22px 70px -28px rgb(18 33 31 / 0.38);
+
+  /* Radii — tight, technical. */
+  --radius-xl: 1.25rem;
+  --radius-card: 1rem;
+  --radius-md: 0.75rem;
+  --radius-sm: 0.5rem;
+  --radius-pill: 999px;
+}
+
+@layer base {
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  html {
+    /* Lock typography to the design size — no iOS "boost" on rotate — and keep
+       page-level scrolling instant; screens animate, they don't smooth-scroll. */
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  body {
+    margin: 0;
+    min-width: 320px;
+    background: var(--color-canvas);
+    color: var(--color-ink-800);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    /* Native chrome: no pull-to-refresh / scroll chaining past the app shell,
+       no tap-zoom delay, and UI text isn't selectable or long-press-callable —
+       the things that otherwise instantly read as "this is a web page". */
+    overscroll-behavior: none;
+    touch-action: manipulation;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+  }
+
+  /* But real input still selects, and anything tagged `.selectable` opts back
+     in (e.g. content a user may genuinely want to copy). */
+  input,
+  textarea,
+  [contenteditable],
+  .selectable {
+    -webkit-user-select: text;
+    user-select: text;
+    -webkit-touch-callout: default;
+  }
+
+  #root {
+    min-height: 100dvh;
+  }
+
+  button {
+    cursor: pointer;
+  }
+
+  ::selection {
+    background: rgba(23, 143, 163, 0.2);
+    color: var(--color-ink-900);
+  }
+
+  input::placeholder {
+    color: var(--color-ink-400);
+  }
+
+  input[type="number"]::-webkit-outer-spin-button,
+  input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  input[type="number"] {
+    -moz-appearance: textfield;
+    appearance: textfield;
+  }
+}
+
+/* Hide scrollbars on horizontal "shelves" without losing scrollability. */
+@utility no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Every number, delta and metric label is mono + tabular — data looks like data. */
+@utility nums {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums lining-nums;
+  letter-spacing: 0;
+}
+
+/* Small technical eyebrow label - mono, compact, muted. */
+@utility eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+/* A faint instrument grid for the app base. */
+@utility grid-texture {
+  background-image:
+    radial-gradient(120% 80% at 50% -10%, rgba(23, 143, 163, 0.08), transparent 62%),
+    linear-gradient(rgba(18, 63, 73, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(18, 63, 73, 0.035) 1px, transparent 1px);
+  background-size: 100% 100%, 30px 30px, 30px 30px;
+}
+
+/* Focused accent glow for primary surfaces. */
+@utility glow-brand {
+  box-shadow: 0 0 0 1px rgb(23 143 163 / 0.16), 0 18px 42px -26px rgb(23 143 163 / 0.36);
+}
+
+/* ── Motion ──────────────────────────────────────────────────────────────── */
+
+@keyframes cura-rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@utility animate-rise {
+  animation: cura-rise 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@utility stagger {
+  & > * {
+    animation: cura-rise 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  & > *:nth-child(1) { animation-delay: 0.02s; }
+  & > *:nth-child(2) { animation-delay: 0.06s; }
+  & > *:nth-child(3) { animation-delay: 0.1s; }
+  & > *:nth-child(4) { animation-delay: 0.14s; }
+  & > *:nth-child(5) { animation-delay: 0.18s; }
+  & > *:nth-child(6) { animation-delay: 0.22s; }
+  & > *:nth-child(7) { animation-delay: 0.26s; }
+  & > *:nth-child(8) { animation-delay: 0.3s; }
+  & > *:nth-child(9) { animation-delay: 0.34s; }
+}
+
+/* Swiper card-effect shell shared by both assessment entry points. The slide
+   owns elevation because Swiper clips each transformed card by design. */
+.question-card-deck {
+  overflow: visible;
+  isolation: isolate;
+}
+
+.question-card-deck .swiper-wrapper {
+  align-items: stretch;
+}
+
+.question-card-deck .question-card-slide {
+  height: 100%;
+  border-radius: 24px;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
+}
+
+.question-card-deck .swiper-slide-shadow {
+  border-radius: inherit;
+  background: rgba(18, 33, 31, 0.14);
+}
+
+/* Recommendation shelf: Swiper owns the gesture and snap behavior while these
+   small controls keep its navigation aligned with cura's quiet data palette. */
+.recommended-content-swiper {
+  padding-bottom: 1.6rem !important;
+}
+
+.recommended-content-swiper .swiper-pagination {
+  bottom: 0 !important;
+}
+
+.recommended-content-swiper .swiper-pagination-bullet {
+  width: 0.35rem;
+  height: 0.35rem;
+  margin-inline: 0.2rem !important;
+  background: var(--color-ink-300);
+  opacity: 0.7;
+  transition: width 180ms ease, background-color 180ms ease, opacity 180ms ease;
+}
+
+.recommended-content-swiper .swiper-pagination-bullet-active {
+  width: 1rem;
+  border-radius: var(--radius-pill);
+  background: var(--color-brand-600);
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-delay: 0ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}

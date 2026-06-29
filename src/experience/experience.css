@@ -1,0 +1,142 @@
+/* ───────────────────────────────────────────────────────────────────────────
+   Wellbeing experience · premium dark survey flow
+   ----------------------------------------------------------------------------
+   A self-contained Arabic/RTL dark experience layered on top of the main app.
+   It owns its direction and motion so it never
+   leaks into — or inherits from — the "clinical daylight" design system.
+   Everything is scoped under `.exp-root`. Calm, human, premium — not clinical.
+   ─────────────────────────────────────────────────────────────────────────── */
+.exp-root {
+  direction: rtl;
+  font-family: "IBM Plex Sans Arabic", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color: #10121a;
+}
+
+/* The dark stage colour, shared by every screen. */
+.exp-night {
+  background: radial-gradient(130% 100% at 50% -10%, #1a1f30 0%, #10121a 58%, #0c0e15 100%);
+}
+
+/* Hide the scrollbar inside the survey card without losing scrollability. */
+.exp-noscroll {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.exp-noscroll::-webkit-scrollbar {
+  display: none;
+}
+
+/* ── Motion ────────────────────────────────────────────────────────────────
+   Easing: easeOutExpo for entrances (settles softly), easeInOutCubic for the
+   question-to-question slides (symmetric, premium). Durations stay 150–700ms. */
+
+@keyframes exp-card-rise {
+  from { opacity: 0; transform: translateY(46px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.exp-card-rise {
+  animation: exp-card-rise 0.62s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes exp-fade-up {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.exp-fade-up {
+  animation: exp-fade-up 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Staggered reveal for content rows (text fades in slightly after the card). */
+.exp-stagger > * {
+  animation: exp-fade-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.exp-stagger > *:nth-child(1) { animation-delay: 0.10s; }
+.exp-stagger > *:nth-child(2) { animation-delay: 0.16s; }
+.exp-stagger > *:nth-child(3) { animation-delay: 0.22s; }
+.exp-stagger > *:nth-child(4) { animation-delay: 0.28s; }
+.exp-stagger > *:nth-child(5) { animation-delay: 0.34s; }
+.exp-stagger > *:nth-child(6) { animation-delay: 0.40s; }
+
+/* Question card transitions — slide + gentle 3D rotation, direction-aware. */
+@keyframes exp-q-in-next {
+  from { opacity: 0; transform: translateX(64px) rotateY(-7deg); }
+  to   { opacity: 1; transform: translateX(0) rotateY(0); }
+}
+@keyframes exp-q-in-back {
+  from { opacity: 0; transform: translateX(-64px) rotateY(7deg); }
+  to   { opacity: 1; transform: translateX(0) rotateY(0); }
+}
+.exp-q-next {
+  animation: exp-q-in-next 0.52s cubic-bezier(0.65, 0, 0.35, 1) both;
+}
+.exp-q-back {
+  animation: exp-q-in-back 0.52s cubic-bezier(0.65, 0, 0.35, 1) both;
+}
+
+/* Completion card floats up from the bottom. */
+@keyframes exp-scale-in {
+  from { opacity: 0; transform: translateY(60px) scale(0.96); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.exp-scale-in {
+  animation: exp-scale-in 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Illustration: slow breathing + a faint vertical float above the card. */
+@keyframes exp-breathe {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50%      { transform: translateY(-10px) scale(1.035); }
+}
+.exp-breathe {
+  animation: exp-breathe 7s ease-in-out infinite;
+}
+
+/* Background "wellness signals" — slow drift, never busy. */
+@keyframes exp-drift {
+  0%, 100% { transform: translateY(0); opacity: var(--exp-dot-opacity, 0.6); }
+  50%      { transform: translateY(-22px); opacity: calc(var(--exp-dot-opacity, 0.6) * 1.6); }
+}
+.exp-drift {
+  animation: exp-drift var(--exp-dot-dur, 9s) ease-in-out infinite;
+  animation-delay: var(--exp-dot-delay, 0s);
+}
+
+/* A soft pulsing halo on a few signal dots. */
+@keyframes exp-pulse {
+  0%, 100% { transform: scale(1); opacity: 0.5; }
+  50%      { transform: scale(1.9); opacity: 0; }
+}
+.exp-pulse {
+  animation: exp-pulse var(--exp-dot-dur, 6s) ease-out infinite;
+  animation-delay: var(--exp-dot-delay, 0s);
+}
+
+@keyframes exp-spin {
+  to { transform: rotate(360deg); }
+}
+.exp-spin {
+  animation: exp-spin 0.7s linear infinite;
+}
+
+/* Selection "pop" — a brief soft scale used by survey options on select. */
+@keyframes exp-pop {
+  0%   { transform: scale(1); }
+  45%  { transform: scale(1.015); }
+  100% { transform: scale(1); }
+}
+.exp-pop {
+  animation: exp-pop 0.22s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .exp-root *,
+  .exp-root *::before,
+  .exp-root *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    animation-delay: 0ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
