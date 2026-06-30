@@ -14,6 +14,7 @@ import { Avatar, ProgressBar, ScoreRing } from "../components/ui";
 import { IconTile } from "../components/ui/Card";
 import { DimensionDeepCard } from "../components/cards/DimensionCard";
 import { DetailedInsights } from "../components/cards/DetailedInsights";
+import { MetricsBreakdown } from "../components/cards/MetricsBreakdown";
 import { Spotlight } from "../components/Spotlight";
 import { Radar } from "../components/charts/Radar";
 import { Sparkline } from "../components/charts/Sparkline";
@@ -23,6 +24,7 @@ import { cn } from "../lib/cn";
 import { scoreMeta, LEVEL_CLASS, LEVEL_HEX } from "../lib/score";
 import { useAssessment } from "../assessment/useAssessment";
 import { useInsights } from "../assessment/useInsights";
+import { useMetrics } from "../assessment/useMetrics";
 import { usePlan } from "../plan/usePlan";
 import { dimensionsById, tileStyle } from "../data/dimensions";
 import {
@@ -49,6 +51,7 @@ export function Report() {
   const navigate = useNavigate();
   const plan = usePlan();
   const insights = useInsights();
+  const metricGroups = useMetrics();
   const {
     overallScore,
     results,
@@ -201,6 +204,9 @@ export function Report() {
 
       {/* ── Detailed health insights — derived live from every answer ────── */}
       <DetailedInsights summary={insights} />
+
+      {/* ── Full metrics breakdown — every sub-scale, scored 0–100 ────────── */}
+      <MetricsBreakdown groups={metricGroups} />
 
       {/* ── Strengths ────────────────────────────────────────────────────── */}
       <section className="px-5 pt-6">
