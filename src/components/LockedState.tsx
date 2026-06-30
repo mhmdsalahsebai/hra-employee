@@ -1,4 +1,4 @@
-import { Lock } from "lucide-react";
+import { Illustration, type IllustrationName } from "../illustrations/Illustration";
 import { Button, ProgressBar } from "./ui";
 
 /** Empty / gated screen shown before the assessment unlocks a feature. */
@@ -8,6 +8,7 @@ export function LockedState({
   ctaLabel,
   onCta,
   progress,
+  illustration = "mindfulness",
 }: {
   title: string;
   subtitle: string;
@@ -15,14 +16,18 @@ export function LockedState({
   onCta: () => void;
   /** Optional progress bar (used for the "mid-assessment" state). */
   progress?: number;
+  /** Calm illustration that sets the mood of the empty state. */
+  illustration?: IllustrationName;
 }) {
   return (
     <div className="px-5 pt-6">
       <div className="flex flex-col items-center rounded-xl border border-ink-100 bg-surface px-7 py-10 text-center shadow-soft">
-        <span className="relative grid h-16 w-16 place-items-center rounded-[1.1rem] bg-sand ring-1 ring-ink-100">
-          <Lock className="h-7 w-7 text-ink-400" strokeWidth={2} />
-        </span>
-        <h2 className="mt-5 text-lg font-bold text-ink-900">{title}</h2>
+        <Illustration
+          name={illustration}
+          className="mb-6 w-44 max-w-[60%]"
+          tone="var(--color-brand-400)"
+        />
+        <h2 className="mt-1 text-lg font-bold text-ink-900">{title}</h2>
         <p className="mt-2 max-w-xs text-sm leading-relaxed text-ink-500">{subtitle}</p>
 
         {progress !== undefined && (

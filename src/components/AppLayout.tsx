@@ -10,7 +10,10 @@ import { RouteTransition } from "../motion/RouteTransition";
  *  (without turning `main` into a vertical scroll container). */
 export function AppLayout() {
   return (
-    <div className="mx-auto flex min-h-dvh w-full max-w-[480px] flex-col bg-canvas">
+    <div className="relative mx-auto flex min-h-dvh w-full max-w-[480px] flex-col">
+      {/* Soft decorative colour wash behind everything — gentle rose/violet/peach
+          orbs that give the shell depth and warmth (see `app-aurora`). */}
+      <div className="app-aurora pointer-events-none fixed inset-0 -z-10" aria-hidden />
       <main className="relative flex-1 overflow-x-clip pb-28">
         <RouteTransition />
       </main>

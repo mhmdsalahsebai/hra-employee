@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  Check,
   Clock,
   Gift,
   Loader2,
@@ -15,6 +14,7 @@ import {
   X,
 } from "lucide-react";
 import { Avatar, Badge, Button } from "../components/ui";
+import { Illustration } from "../illustrations/Illustration";
 import { PageHeader } from "../components/PageHeader";
 import { cn } from "../lib/cn";
 import { experts, type Expert } from "../data/app";
@@ -236,13 +236,7 @@ export function Consultation() {
       <div className="animate-rise">
         <PageHeader title="انتهت الاستشارة" />
         <div className="flex flex-col items-center px-6 pt-8 text-center">
-          <div className="relative grid h-28 w-28 place-items-center">
-            <span className="absolute inset-0 rounded-full bg-good-soft" />
-            <span className="absolute inset-[0.85rem] rounded-full bg-good/15" />
-            <span className="relative grid h-14 w-14 place-items-center rounded-full bg-good text-white shadow-soft">
-              <Check className="h-8 w-8" strokeWidth={2.6} />
-            </span>
-          </div>
+          <Illustration name="well-done" className="w-48 max-w-[62%]" tone="var(--color-good)" />
           <h1 className="mt-6 text-2xl font-extrabold text-ink-900">شكرًا لك</h1>
           <p className="mt-2.5 max-w-xs text-[15px] leading-relaxed text-ink-500">
             انتهت استشارتك مع {expert.name}. سنرسل لك ملخّصًا وتوصيات المتابعة قريبًا.
@@ -278,8 +272,15 @@ export function Consultation() {
     <div className="animate-rise">
       <PageHeader title="استشارة فورية" subtitle="مع خبراء معتمدين" />
 
-      {/* Free banner */}
+      {/* Calm hero — sets a warm, human tone before the data-heavy steps */}
       <section className="px-5 pt-2">
+        <div className="overflow-hidden rounded-xl bg-sand px-6 pt-7">
+          <Illustration name="medical-care" className="mx-auto w-56 max-w-[72%]" />
+        </div>
+      </section>
+
+      {/* Free banner */}
+      <section className="px-5 pt-5">
         <div className="flex items-center gap-4 rounded-xl bg-coral-500 p-5 text-white shadow-soft">
           <span className="grid h-12 w-12 shrink-0 place-items-center rounded-[0.85rem] bg-white/15">
             <Gift className="h-6 w-6" strokeWidth={2} />

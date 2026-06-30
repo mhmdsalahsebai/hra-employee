@@ -16,7 +16,7 @@ const base =
 const variants: Record<ButtonVariant, string> = {
   // Confident primary action on light surfaces.
   primary:
-    "bg-brand-600 text-white shadow-[0_14px_34px_-18px_rgba(15,115,132,0.5)] hover:bg-brand-700",
+    "bg-brand-600 text-white shadow-[0_14px_34px_-18px_rgba(226,62,107,0.5)] hover:bg-brand-700",
   // Neutral elevated surface.
   dark: "border border-ink-200 bg-surface text-ink-900 shadow-soft hover:border-ink-300 hover:bg-sand",
   coral:

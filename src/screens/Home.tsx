@@ -4,7 +4,6 @@ import {
   Check,
   ChevronLeft,
   GraduationCap,
-  ListChecks,
   Lock,
   MessageCircleHeart,
   RefreshCw,
@@ -13,9 +12,8 @@ import {
   Video,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-import type { ReactNode } from "react";
-import { Avatar, ProgressBar, ScoreRing, SectionHeader } from "../components/ui";
-import { Spotlight } from "../components/Spotlight";
+import { Avatar, ScoreRing, SectionHeader } from "../components/ui";
+import { Illustration } from "../illustrations/Illustration";
 import { RecommendedContentSwiper } from "../components/cards/RecommendedContentSwiper";
 import { ProgramRecommendationCard } from "../components/cards/ProgramRecommendationCard";
 import { WellbeingTrackers } from "../components/cards/WellbeingTrackers";
@@ -28,6 +26,9 @@ import { currentUser } from "../data/app";
 import { dimensions, type Dimension } from "../data/dimensions";
 import { recommendPrograms } from "../data/programs";
 import { useContentRecommendations } from "../content/useContentRecommendations";
+
+/** Soft pastel fill from a solid accent — the modern colour-blocked card look. */
+const pastel = (hex: string, pct = 12) => `color-mix(in srgb, ${hex} ${pct}%, white)`;
 
 export function Home() {
   const navigate = useNavigate();
@@ -53,192 +54,202 @@ export function Home() {
 
   return (
     <div className="animate-rise pb-4">
-      {/* ── Header — a premium dark spotlight that unifies the greeting with the
-          adaptive wellbeing hero: the overall score once the assessment is
-          complete, the journey progress before that, each with its own next
-          best action. This is the one place the home goes dark. ── */}
+      {/* ── Friendly greeting — light, airy, personal ── */}
       <section className="px-5 pt-[max(1.25rem,env(safe-area-inset-top))]">
-        <Spotlight className="p-5">
-          {/* identity + notifications */}
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex min-w-0 items-center gap-3">
-              <Avatar name={currentUser.name} size={46} className="ring-2 ring-white/15" />
-              <div className="min-w-0 leading-tight">
-                <p className="truncate text-[13px] font-bold text-white">{currentUser.org}</p>
-                <p className="truncate text-[11px] font-semibold text-white/55">{currentUser.role}</p>
-              </div>
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex min-w-0 items-center gap-3">
+            <Avatar name={currentUser.name} size={50} className="shadow-soft ring-2 ring-white" />
+            <div className="min-w-0 leading-tight">
+              <p className="text-[13px] font-semibold text-ink-500">{greeting} 👋</p>
+              <h1 className="truncate text-[1.6rem] font-extrabold text-ink-900">
+                {currentUser.firstName}
+              </h1>
             </div>
-            <button
-              aria-label="الإشعارات"
-              className="relative grid h-10 w-10 shrink-0 place-items-center rounded-full bg-white/10 text-white/90 backdrop-blur transition hover:bg-white/20 active:scale-95"
-            >
-              <Bell className="h-[1.15rem] w-[1.15rem]" strokeWidth={2} />
-              <span className="absolute right-2.5 top-2.5 h-2 w-2 rounded-full bg-coral-500 ring-2 ring-brand-900" />
-            </button>
           </div>
+          <button
+            aria-label="الإشعارات"
+            className="relative grid h-12 w-12 shrink-0 place-items-center rounded-full bg-surface text-ink-700 shadow-soft transition hover:-translate-y-0.5 active:scale-95"
+          >
+            <Bell className="h-[1.2rem] w-[1.2rem]" strokeWidth={2} />
+            <span className="absolute right-3 top-3 h-2.5 w-2.5 rounded-full bg-coral-500 ring-2 ring-surface" />
+          </button>
+        </div>
+      </section>
 
-          {/* greeting */}
-          <div className="mt-5">
-            <p className="text-[13px] font-semibold text-white/55">{greeting}،</p>
-            <h1 className="mt-1 text-[1.85rem] font-extrabold leading-tight text-white">
-              {currentUser.firstName}
-            </h1>
-          </div>
+      {/* ── Adaptive wellbeing hero — a soft pastel card, not a clinical slab.
+          Shows the overall score once complete, journey progress before that. ── */}
+      <section className="px-5 pt-5">
+        <div
+          className="relative overflow-hidden rounded-[1.75rem] p-5 shadow-soft"
+          style={{ background: "linear-gradient(140deg, #ffe2ec 0%, #f1ecff 54%, #ffeede 100%)" }}
+        >
+          <span
+            className="pointer-events-none absolute -right-10 -top-12 h-44 w-44 rounded-full"
+            style={{ background: "radial-gradient(circle, rgba(242,86,126,0.30), transparent 70%)" }}
+          />
+          <span
+            className="pointer-events-none absolute -bottom-14 -left-10 h-40 w-40 rounded-full"
+            style={{ background: "radial-gradient(circle, rgba(124,110,230,0.22), transparent 70%)" }}
+          />
 
-          {/* adaptive hero block */}
-          <div className="mt-5 rounded-lg bg-white/[0.07] p-4 ring-1 ring-inset ring-white/10">
-            <div className="flex items-center gap-4">
+          <div className="relative flex items-center gap-4">
+            <span className="grid place-items-center rounded-full bg-white/70 p-1.5 shadow-soft backdrop-blur">
               <ScoreRing
                 value={hasResults ? overallScore : journeyPct}
-                size={82}
-                stroke={8}
-                gradient={["#9fe3ef", "#39b4cb"]}
-                trackClassName="text-white/12"
+                size={84}
+                stroke={9}
+                gradient={["#fb7396", "#e23e6b"]}
+                trackClassName="text-white"
               >
                 {hasResults ? (
                   <div className="leading-none">
-                    <span className="nums text-[1.5rem] font-extrabold text-white">{overallScore}</span>
-                    <span className="mt-0.5 block text-[10px] font-bold text-white/45">من ١٠٠</span>
+                    <span className="nums text-[1.5rem] font-extrabold text-ink-900">{overallScore}</span>
+                    <span className="mt-0.5 block text-[10px] font-bold text-ink-400">من ١٠٠</span>
                   </div>
                 ) : (
                   <div className="leading-none">
-                    <span dir="ltr" className="nums text-[1.3rem] font-extrabold text-white">
+                    <span dir="ltr" className="nums text-[1.3rem] font-extrabold text-ink-900">
                       {completedCount}
-                      <span className="text-white/45">/{totalDimensions}</span>
+                      <span className="text-ink-400">/{totalDimensions}</span>
                     </span>
-                    <span className="mt-0.5 block text-[10px] font-bold text-white/45">أبعاد</span>
+                    <span className="mt-0.5 block text-[10px] font-bold text-ink-400">أبعاد</span>
                   </div>
                 )}
               </ScoreRing>
+            </span>
 
-              <div className="min-w-0 flex-1">
-                {hasResults ? (
-                  <>
-                    <span className="inline-flex items-center gap-1 rounded-pill bg-white/10 px-2.5 py-1 text-[11px] font-bold text-[#9fe3ef]">
-                      <Check className="h-3 w-3" strokeWidth={3} />
-                      اكتمل تقييمك
-                    </span>
-                    <p className="mt-2 text-[1.2rem] font-extrabold leading-snug text-white">
-                      رفاهيتك {meta.label}
-                    </p>
-                    <p className="mt-1 text-xs font-semibold leading-relaxed text-white/55">
-                      تحدّث الآن مع مختص رفاهية في استشارة فورية مجانية
-                    </p>
-                  </>
-                ) : (
-                  <>
-                    <p className="text-[0.8125rem] font-bold text-[#9fe3ef]">
-                      {started ? "رحلة رفاهيتك" : "أهلًا بك في رحلتك"}
-                    </p>
-                    <p className="mt-1.5 text-[1.2rem] font-extrabold leading-snug text-white">
-                      {started ? "خطوة كل يوم نحو توازنك" : "لنبدأ رحلتك نحو توازن أفضل"}
-                    </p>
-                  </>
-                )}
-              </div>
-            </div>
-
-            <button
-              onClick={() =>
-                hasResults
-                  ? navigate("/consultation")
-                  : nextDim
-                    ? navigate(`/dimension/${nextDim.id}`)
-                    : navigate("/report")
-              }
-              className="mt-4 flex w-full items-center justify-center gap-2 rounded-pill bg-white py-3.5 text-[0.8125rem] font-bold text-brand-900 shadow-soft transition hover:bg-white/90 active:scale-[0.99]"
-            >
+            <div className="min-w-0 flex-1">
               {hasResults ? (
                 <>
-                  <Video className="h-4 w-4" strokeWidth={2.2} />
-                  ابدأ استشارة فورية الآن
+                  <span className="inline-flex items-center gap-1 rounded-pill bg-white/70 px-2.5 py-1 text-[11px] font-bold text-brand-700">
+                    <Check className="h-3 w-3" strokeWidth={3} />
+                    اكتمل تقييمك
+                  </span>
+                  <p className="mt-2 text-[1.25rem] font-extrabold leading-snug text-ink-900">
+                    رفاهيتك {meta.label}
+                  </p>
+                  <p className="mt-1 text-xs font-semibold leading-relaxed text-ink-600">
+                    تحدّث الآن مع مختص في استشارة فورية مجانية
+                  </p>
                 </>
               ) : (
                 <>
-                  {started && nextDim
-                    ? `تابع: بُعد ${nextDim.title}`
-                    : nextDim
-                      ? `ابدأ ببُعد ${nextDim.title}`
-                      : "اعرض تقريرك"}
-                  <ChevronLeft className="h-4 w-4" strokeWidth={2.4} />
+                  <p className="text-[0.8125rem] font-bold text-brand-700">
+                    {started ? "رحلة رفاهيتك" : "أهلًا بك في رحلتك"}
+                  </p>
+                  <p className="mt-1.5 text-[1.25rem] font-extrabold leading-snug text-ink-900">
+                    {started ? "خطوة كل يوم نحو توازنك" : "لنبدأ رحلتك نحو توازن أفضل"}
+                  </p>
                 </>
               )}
-            </button>
+            </div>
           </div>
-        </Spotlight>
+
+          <button
+            onClick={() =>
+              hasResults
+                ? navigate("/consultation")
+                : nextDim
+                  ? navigate(`/dimension/${nextDim.id}`)
+                  : navigate("/report")
+            }
+            className="relative mt-5 flex w-full items-center justify-center gap-2 rounded-pill bg-brand-600 py-3.5 text-[0.875rem] font-bold text-white shadow-soft transition hover:bg-brand-700 active:scale-[0.99]"
+          >
+            {hasResults ? (
+              <>
+                <Video className="h-4 w-4" strokeWidth={2.2} />
+                ابدأ استشارة فورية الآن
+              </>
+            ) : (
+              <>
+                {started && nextDim
+                  ? `تابع: بُعد ${nextDim.title}`
+                  : nextDim
+                    ? `ابدأ ببُعد ${nextDim.title}`
+                    : "اعرض تقريرك"}
+                <ChevronLeft className="h-4 w-4" strokeWidth={2.4} />
+              </>
+            )}
+          </button>
+        </div>
       </section>
 
-      {/* Wellbeing path — assessment → report → expert consultation */}
+      {/* First-run welcome — a warm illustrated greeting the brand-new employee sees. */}
+      {!started && (
+        <section className="px-5 pt-4">
+          <div
+            className="relative overflow-hidden rounded-[1.75rem] p-5"
+            style={{ background: pastel("#7f6ee6", 11) }}
+          >
+            {/* decorative shapes */}
+            <span
+              className="pointer-events-none absolute -right-8 -top-8 h-28 w-28 rounded-full"
+              style={{ background: "radial-gradient(circle, rgba(242,86,126,0.22), transparent 70%)" }}
+            />
+            <span className="dot-cluster pointer-events-none absolute bottom-4 left-4 h-12 w-16 text-violet-400/40" />
+            <Illustration
+              name="journey"
+              className="relative mx-auto w-52 max-w-[68%]"
+              tone="#6757b8"
+            />
+            <div className="relative pt-3 text-center">
+              <h2 className="text-base font-extrabold text-ink-900">رحلتك تبدأ من هنا</h2>
+              <p className="mx-auto mt-1.5 max-w-xs text-[13px] leading-relaxed text-ink-600">
+                أجب عن أبعادك التسعة لتكشف صورة رفاهيتك الكاملة — خطوة واحدة كل يوم.
+              </p>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ── Wellbeing dimensions — soft pastel colour-blocked cards ── */}
       <section className="px-5 pt-7">
-        <div className="mb-4">
-          <h2 className="text-[1.0625rem] font-bold text-ink-900">مسار رفاهيتك</h2>
-          <p className="mt-0.5 text-xs font-semibold text-ink-400">
-            من التقييم إلى استشارة خبير الرفاهية
-          </p>
+        <div className="mb-4 flex items-end justify-between gap-3">
+          <div>
+            <h2 className="text-[1.15rem] font-extrabold text-ink-900">أبعاد رفاهيتك</h2>
+            <p className="mt-0.5 text-xs font-semibold text-ink-400">
+              {hasResults ? "اكتمل تقييمك عبر الأبعاد التسعة" : "أجب لتكشف صورتك الكاملة"}
+            </p>
+          </div>
+          <span className="nums shrink-0 rounded-pill bg-brand-600 px-3 py-1.5 text-[12px] font-bold text-white shadow-soft">
+            {completedCount}/{totalDimensions}
+          </span>
         </div>
 
-        <div>
-          {/* Stage 1 — the assessment, with its nine dimensions */}
-          <StageRow state={hasResults ? "done" : "active"} icon={ListChecks}>
-            <div className="rounded-xl bg-surface p-4 shadow-soft">
-              <div className="flex items-center justify-between gap-3">
-                <div className="min-w-0">
-                  <h3 className="text-[15px] font-bold text-ink-900">التقييم</h3>
-                  <p className="mt-0.5 text-xs font-semibold text-ink-400">
-                    {hasResults
-                      ? "اكتمل تقييمك عبر الأبعاد التسعة"
-                      : "أجب عن أبعادك التسعة لتكشف حالتك"}
-                  </p>
-                </div>
-                <span className="nums shrink-0 rounded-pill bg-brand-soft px-2.5 py-1 text-[11px] font-bold text-brand-700">
-                  {completedCount}/{totalDimensions}
-                </span>
-              </div>
-              <ProgressBar value={journeyPct} barClassName="bg-brand-500" className="mt-3" />
-            </div>
-
-            <div className="stagger mt-3 space-y-2.5">
-              {dimensions.map((d, i) => (
-                <DimensionCard
-                  key={d.id}
-                  dimension={d}
-                  result={results[i]}
-                  isNext={i === nextIndex}
-                  onClick={() => navigate(`/dimension/${d.id}`)}
-                />
-              ))}
-            </div>
-          </StageRow>
-
-          {/* Stage 2 — the report, unlocked once the assessment is complete */}
-          <StageRow state={hasResults ? "active" : "locked"} icon={ScrollText}>
-            <DeliverableCard
-              title="تقريرك"
-              desc={
-                hasResults
-                  ? "تحليل مفصّل لإجاباتك ونقاط تركيزك"
-                  : "يُفتح بعد إنهاء التقييم"
-              }
-              cta="اعرض التقرير"
-              unlocked={hasResults}
-              onClick={() => navigate("/report")}
+        <div className="stagger space-y-3">
+          {dimensions.map((d, i) => (
+            <DimensionCard
+              key={d.id}
+              dimension={d}
+              result={results[i]}
+              isNext={i === nextIndex}
+              onClick={() => navigate(`/dimension/${d.id}`)}
             />
-          </StageRow>
+          ))}
+        </div>
+      </section>
 
-          {/* Stage 3 — a free session with a wellbeing expert */}
-          <StageRow state={hasResults ? "active" : "locked"} icon={MessageCircleHeart} last>
-            <DeliverableCard
-              title="استشارة مع خبير الرفاهية"
-              desc={
-                hasResults
-                  ? "استشارة فورية مجانية مع مختص متاح الآن"
-                  : "تُفتح بعد ظهور تقريرك"
-              }
-              cta="ابدأ فورًا"
-              unlocked={hasResults}
-              onClick={() => navigate("/consultation")}
-            />
-          </StageRow>
+      {/* ── Your deliverables — report + free consultation, as colourful cards ── */}
+      <section className="px-5 pt-5">
+        <div className="grid grid-cols-2 gap-3">
+          <DeliverableTile
+            icon={ScrollText}
+            title="تقريرك"
+            desc={hasResults ? "تحليل مفصّل لإجاباتك" : "يُفتح بعد التقييم"}
+            cta="اعرض التقرير"
+            tint="#7c6ee6"
+            unlocked={hasResults}
+            onClick={() => navigate("/report")}
+          />
+          <DeliverableTile
+            icon={MessageCircleHeart}
+            title="استشارة خبير"
+            desc={hasResults ? "جلسة فورية مجانية الآن" : "تُفتح بعد تقريرك"}
+            cta="ابدأ فورًا"
+            tint="#dc604f"
+            unlocked={hasResults}
+            onClick={() => navigate("/consultation")}
+          />
         </div>
       </section>
 
@@ -310,68 +321,22 @@ export function Home() {
   );
 }
 
-/* ── One milestone on the wellbeing path (assessment → report → consult) ───── */
+/* ── A deliverable (report / consultation) as a colourful pastel tile ───────── */
 
-type StageState = "done" | "active" | "locked";
-
-function StageRow({
-  state,
+function DeliverableTile({
   icon: Icon,
-  last,
-  children,
-}: {
-  state: StageState;
-  icon: LucideIcon;
-  last?: boolean;
-  children: ReactNode;
-}) {
-  return (
-    <div className="flex gap-3">
-      {/* connector rail */}
-      <div className="flex w-9 shrink-0 flex-col items-center">
-        <span
-          className={cn(
-            "grid h-9 w-9 place-items-center rounded-full shadow-soft",
-            state === "done" && "bg-good text-white",
-            state === "active" && "bg-brand-600 text-white ring-4 ring-brand-100",
-            state === "locked" && "bg-ink-100 text-ink-400",
-          )}
-        >
-          {state === "done" ? (
-            <Check className="h-[1.05rem] w-[1.05rem]" strokeWidth={3} />
-          ) : state === "locked" ? (
-            <Lock className="h-4 w-4" strokeWidth={2.4} />
-          ) : (
-            <Icon className="h-[1.05rem] w-[1.05rem]" strokeWidth={2.2} />
-          )}
-        </span>
-        {!last && (
-          <span
-            className={cn(
-              "mt-1.5 w-0.5 flex-1 rounded-full",
-              state === "locked" ? "bg-ink-100" : "bg-brand-200",
-            )}
-          />
-        )}
-      </div>
-
-      <div className={cn("min-w-0 flex-1", !last && "pb-4")}>{children}</div>
-    </div>
-  );
-}
-
-/* ── A deliverable on the path that unlocks after the assessment ───────────── */
-
-function DeliverableCard({
   title,
   desc,
   cta,
+  tint,
   unlocked,
   onClick,
 }: {
+  icon: LucideIcon;
   title: string;
   desc: string;
   cta: string;
+  tint: string;
   unlocked: boolean;
   onClick: () => void;
 }) {
@@ -379,31 +344,43 @@ function DeliverableCard({
     <button
       disabled={!unlocked}
       onClick={onClick}
+      style={{ background: unlocked ? pastel(tint, 13) : undefined }}
       className={cn(
-        "flex w-full items-center gap-3 rounded-xl p-4 text-right shadow-soft transition duration-200",
+        "relative flex h-full flex-col items-start gap-2 overflow-hidden rounded-[1.4rem] p-4 text-right transition duration-200",
         unlocked
-          ? "bg-surface hover:-translate-y-0.5 hover:shadow-card active:translate-y-0"
-          : "cursor-not-allowed bg-surface/60",
+          ? "shadow-soft hover:-translate-y-0.5 active:translate-y-0"
+          : "cursor-not-allowed border border-ink-100 bg-surface/60",
       )}
     >
-      <div className="min-w-0 flex-1">
-        <h3 className={cn("text-[15px] font-bold", unlocked ? "text-ink-900" : "text-ink-400")}>
+      {unlocked && (
+        <span
+          className="pointer-events-none absolute -left-6 -top-6 h-20 w-20 rounded-full"
+          style={{ background: `radial-gradient(circle, ${pastel(tint, 40)}, transparent 70%)` }}
+        />
+      )}
+      <span
+        className="grid h-11 w-11 place-items-center rounded-2xl bg-white shadow-soft"
+        style={{ color: unlocked ? tint : "var(--color-ink-300)" }}
+      >
+        {unlocked ? <Icon className="h-5 w-5" strokeWidth={2.1} /> : <Lock className="h-4 w-4" strokeWidth={2.2} />}
+      </span>
+      <div className="min-w-0">
+        <h3 className={cn("text-[15px] font-extrabold", unlocked ? "text-ink-900" : "text-ink-400")}>
           {title}
         </h3>
-        <p className="mt-0.5 text-xs font-semibold text-ink-400">{desc}</p>
+        <p className="mt-0.5 text-[11px] font-semibold leading-relaxed text-ink-500">{desc}</p>
       </div>
-      {unlocked ? (
-        <span className="shrink-0 rounded-pill bg-brand-600 px-3.5 py-1.5 text-[11px] font-bold text-white shadow-soft">
-          {cta}
-        </span>
-      ) : (
-        <Lock className="h-4 w-4 shrink-0 text-ink-300" strokeWidth={2.2} />
-      )}
+      <span
+        className="mt-auto text-[11px] font-bold"
+        style={{ color: unlocked ? tint : "var(--color-ink-400)" }}
+      >
+        {unlocked ? `${cta} ←` : "مقفل"}
+      </span>
     </button>
   );
 }
 
-/* ── One dimension on the wellbeing journey ────────────────────────────────── */
+/* ── One wellbeing dimension — a soft, colour-blocked card in its own accent ── */
 
 function DimensionCard({
   dimension,
@@ -421,18 +398,19 @@ function DimensionCard({
   return (
     <button
       onClick={onClick}
-      className={cn(
-        "flex w-full items-center gap-3.5 rounded-xl bg-surface p-3.5 text-right shadow-soft transition duration-200 hover:-translate-y-0.5 hover:shadow-card active:translate-y-0",
-        isNext && !done && "ring-2 ring-brand-500/55 ring-offset-2 ring-offset-canvas",
-      )}
+      style={{
+        background: pastel(dimension.accent.solid, 12),
+        boxShadow: isNext && !done ? `0 0 0 2px ${dimension.accent.solid}` : undefined,
+      }}
+      className="flex w-full items-center gap-3.5 rounded-[1.4rem] p-3.5 text-right shadow-soft transition duration-200 hover:-translate-y-0.5 active:translate-y-0"
     >
-      {/* pastel squircle icon tile */}
+      {/* icon tile */}
       <span
-        className="relative grid h-[3.25rem] w-[3.25rem] shrink-0 place-items-center rounded-[1.05rem] transition"
+        className="relative grid h-[3.25rem] w-[3.25rem] shrink-0 place-items-center rounded-[1.05rem] shadow-soft"
         style={
           done
             ? { background: dimension.accent.solid, color: "#fff" }
-            : { background: dimension.accent.soft, color: dimension.accent.fg }
+            : { background: "#fff", color: dimension.accent.fg }
         }
       >
         <dimension.icon className="h-6 w-6" strokeWidth={2} />
@@ -444,22 +422,16 @@ function DimensionCard({
       </span>
 
       <div className="min-w-0 flex-1">
-        <h3 className="text-[15px] font-bold text-ink-900">{dimension.title}</h3>
+        <h3 className="text-[15px] font-extrabold text-ink-900">{dimension.title}</h3>
         <div className="mt-1 flex items-center gap-1.5">
           <span
             className="h-1.5 w-1.5 shrink-0 rounded-full"
-            style={{
-              background: done
-                ? LEVEL_HEX[result.level]
-                : isNext
-                  ? "#178fa3"
-                  : "#bcc5c2",
-            }}
+            style={{ background: done ? LEVEL_HEX[result.level] : dimension.accent.solid }}
           />
           <span
             className={cn(
               "line-clamp-1 text-xs font-semibold",
-              done ? meta.text : isNext ? "text-brand-700" : "text-ink-400",
+              done ? meta.text : "text-ink-500",
             )}
           >
             {done ? result.band.title : isNext ? "ابدأ الآن — لم تُجب بعد" : dimension.tagline}
@@ -475,14 +447,20 @@ function DimensionCard({
           >
             {result.score}
           </span>
-          <span className="mt-0.5 block text-[10px] font-bold text-ink-300">من ١٠٠</span>
+          <span className="mt-0.5 block text-[10px] font-bold text-ink-400">من ١٠٠</span>
         </div>
       ) : isNext ? (
-        <span className="shrink-0 rounded-pill bg-brand-600 px-3.5 py-1.5 text-[11px] font-bold text-white shadow-soft">
+        <span
+          className="shrink-0 rounded-pill px-3.5 py-1.5 text-[11px] font-bold text-white shadow-soft"
+          style={{ background: dimension.accent.solid }}
+        >
           ابدأ
         </span>
       ) : (
-        <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-ink-50 text-ink-400">
+        <span
+          className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-white/70"
+          style={{ color: dimension.accent.fg }}
+        >
           <ChevronLeft className="h-4 w-4" strokeWidth={2.4} />
         </span>
       )}

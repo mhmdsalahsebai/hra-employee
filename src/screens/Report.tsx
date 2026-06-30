@@ -122,7 +122,7 @@ export function Report() {
               value={overallScore}
               size={120}
               stroke={10}
-              gradient={["#cfeaf4", "#3fa1cb"]}
+              gradient={["#ffd0dc", "#fb7396"]}
               trackClassName="text-white/12"
             >
               <div className="leading-none">

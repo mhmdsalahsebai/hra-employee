@@ -42,12 +42,14 @@ const litersPerCup = goals.waterLiters / goals.waterCups;
 
 const ar = (n: number) => n.toLocaleString("ar-EG");
 const pct = (cur: number, goal: number) => Math.min(100, Math.round((cur / goal) * 100));
+/** Soft pastel fill from a solid accent — the modern colour-blocked card look. */
+const pastel = (hex: string, p = 12) => `color-mix(in srgb, ${hex} ${p}%, white)`;
 
 const moods: { id: WellbeingMoodId; icon: LucideIcon; label: string; color: string }[] = [
   { id: "hard", icon: Frown, label: "سيئ", color: "#c0653e" },
   { id: "tired", icon: Meh, label: "متعب", color: "#b8923a" },
   { id: "good", icon: Smile, label: "جيد", color: "#2f8a66" },
-  { id: "great", icon: Laugh, label: "رائع", color: "#178fa3" },
+  { id: "great", icon: Laugh, label: "رائع", color: "#e23e6b" },
 ];
 
 type EditableMetric = "waterCups" | "steps" | "sleepHours" | "activeMinutes" | "calories";
@@ -100,10 +102,10 @@ function WaterBottle({ level }: { level: number }) {
 }
 
 /** Small icon chip used beside a tracker label. */
-function LabelChip({ icon: Icon, label, fg, soft }: { icon: LucideIcon; label: string; fg: string; soft: string }) {
+function LabelChip({ icon: Icon, label, fg }: { icon: LucideIcon; label: string; fg: string }) {
   return (
     <div className="flex items-center gap-2">
-      <span className="grid h-7 w-7 place-items-center rounded-[0.65rem]" style={{ background: soft, color: fg }}>
+      <span className="grid h-7 w-7 place-items-center rounded-[0.65rem] bg-white shadow-soft" style={{ color: fg }}>
         <Icon className="h-[1.05rem] w-[1.05rem]" strokeWidth={2.2} />
       </span>
       <p className="text-xs font-bold text-ink-600">{label}</p>
@@ -146,7 +148,7 @@ function RingTracker({
   canIncrease: boolean;
 }) {
   return (
-    <div className="flex w-full flex-col rounded-xl bg-surface p-4 shadow-soft">
+    <div className="flex w-full flex-col rounded-[1.4rem] p-4 shadow-soft" style={{ background: soft }}>
       <button
         type="button"
         onClick={onEdit}
@@ -154,7 +156,7 @@ function RingTracker({
         className="flex w-full flex-1 flex-col text-right transition active:scale-[0.98]"
       >
         <div className="flex w-full items-center justify-between gap-2">
-          <LabelChip icon={icon} label={label} fg={fg} soft={soft} />
+          <LabelChip icon={icon} label={label} fg={fg} />
           <Pencil className="h-3.5 w-3.5 text-ink-300" strokeWidth={2.2} />
         </div>
         <div className="my-2.5 grid w-full place-items-center">
@@ -168,13 +170,13 @@ function RingTracker({
         <p className="w-full text-center text-[11px] font-semibold text-ink-400">من {goal}</p>
       </button>
 
-      <div className="mt-2.5 flex w-full items-center gap-2 border-t border-ink-100 pt-2.5" dir="ltr">
+      <div className="mt-2.5 flex w-full items-center gap-2 border-t border-ink-900/5 pt-2.5" dir="ltr">
         <button
           type="button"
           onClick={onDecrease}
           disabled={!canDecrease}
           aria-label={`تقليل ${label}`}
-          className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-ink-50 text-ink-600 transition hover:bg-ink-100 active:scale-95 disabled:cursor-not-allowed disabled:opacity-35"
+          className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-white/70 text-ink-600 shadow-soft transition hover:bg-white active:scale-95 disabled:cursor-not-allowed disabled:opacity-35"
         >
           <Minus className="h-3.5 w-3.5" strokeWidth={2.6} />
         </button>
@@ -186,7 +188,8 @@ function RingTracker({
           onClick={onIncrease}
           disabled={!canIncrease}
           aria-label={`زيادة ${label}`}
-          className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-brand-soft text-brand-700 transition hover:bg-brand-100 active:scale-95 disabled:cursor-not-allowed disabled:opacity-35"
+          style={{ color: fg }}
+          className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-white shadow-soft transition hover:brightness-95 active:scale-95 disabled:cursor-not-allowed disabled:opacity-35"
         >
           <Plus className="h-3.5 w-3.5" strokeWidth={2.6} />
         </button>
@@ -244,21 +247,25 @@ export function WellbeingTrackers() {
   return (
     <section className="px-5 pt-7">
       <div className="mb-3.5">
-        <h2 className="text-[1.0625rem] font-bold text-ink-900">تتبّع يومك</h2>
+        <h2 className="text-[1.15rem] font-extrabold text-ink-900">تتبّع يومك</h2>
         <p className="mt-0.5 text-xs font-semibold text-ink-400">تقدّم اليوم يُحفظ تلقائيًا</p>
       </div>
 
       <div className="grid grid-cols-2 gap-3">
         {/* Water — tall feature card with a filling bottle */}
-        <div className="row-span-2 flex flex-col rounded-xl bg-surface p-4 shadow-soft">
+        <div
+          className="row-span-2 flex flex-col rounded-[1.4rem] p-4 shadow-soft"
+          style={{ background: pastel("#178fa3", 11) }}
+        >
           <div className="flex items-start justify-between">
-            <LabelChip icon={Droplet} label="الماء" fg="#178fa3" soft="#e1f1f5" />
+            <LabelChip icon={Droplet} label="الماء" fg="#0e7d92" />
             <button
               type="button"
               onClick={() => commit({ waterCups: Math.min(16, entry.waterCups + 1) })}
               disabled={entry.waterCups >= 16}
               aria-label="أضف كوبًا"
-              className="grid h-8 w-8 place-items-center rounded-full bg-brand-soft text-brand-700 transition hover:bg-brand-100 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40"
+              style={{ color: "#0e7d92" }}
+              className="grid h-8 w-8 place-items-center rounded-full bg-white shadow-soft transition hover:brightness-95 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40"
             >
               <Plus className="h-4 w-4" strokeWidth={2.6} />
             </button>
@@ -267,7 +274,7 @@ export function WellbeingTrackers() {
           <button
             type="button"
             onClick={() => setEditing("waterCups")}
-            className="mt-2 flex items-center gap-1.5 self-start rounded-md text-right leading-none transition hover:text-brand-700"
+            className="mt-2 flex items-center gap-1.5 self-start rounded-md text-right leading-none transition hover:opacity-70"
             aria-label="تحديث كمية الماء"
           >
             <span className="nums text-[1.3rem] font-extrabold text-ink-900">{ar(waterLiters)}</span>
@@ -287,7 +294,7 @@ export function WellbeingTrackers() {
             {Array.from({ length: goals.waterCups }).map((_, i) => (
               <span
                 key={i}
-                className={"h-1.5 flex-1 rounded-full " + (i < entry.waterCups ? "bg-brand-500" : "bg-ink-100")}
+                className={"h-1.5 flex-1 rounded-full " + (i < entry.waterCups ? "bg-[#178fa3]" : "bg-white/70")}
               />
             ))}
           </div>
@@ -372,9 +379,9 @@ export function WellbeingTrackers() {
       </div>
 
       {/* Mood check-in — replaces the old "mindful minutes" strip */}
-      <div className="mt-3 rounded-xl bg-surface p-4 shadow-soft">
+      <div className="mt-3 rounded-[1.4rem] p-4 shadow-soft" style={{ background: "#f3eeff" }}>
         <div className="mb-3 flex items-center gap-2">
-          <span className="grid h-7 w-7 place-items-center rounded-[0.65rem] bg-[#e1f1f5] text-[#178fa3]">
+          <span className="grid h-7 w-7 place-items-center rounded-[0.65rem] bg-white text-[#6354cc] shadow-soft">
             <Smile className="h-[1.05rem] w-[1.05rem]" strokeWidth={2.2} />
           </span>
           <p className="text-[14px] font-bold text-ink-900">كيف تشعر اليوم؟</p>
@@ -390,7 +397,7 @@ export function WellbeingTrackers() {
                 aria-pressed={selected}
                 className={
                   "flex flex-1 flex-col items-center gap-1.5 rounded-[0.9rem] py-2.5 transition active:scale-95 " +
-                  (selected ? "bg-canvas" : "hover:bg-canvas/60")
+                  (selected ? "bg-white shadow-soft" : "hover:bg-white/60")
                 }
               >
                 <span
@@ -398,7 +405,7 @@ export function WellbeingTrackers() {
                   style={
                     selected
                       ? { background: m.color, color: "#fff" }
-                      : { background: "#f0ede6", color: "#9aa39e" }
+                      : { background: "rgba(255,255,255,0.65)", color: "#9aa39e" }
                   }
                 >
                   <m.icon className="h-5 w-5" strokeWidth={2.2} />

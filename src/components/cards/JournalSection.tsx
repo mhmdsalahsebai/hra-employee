@@ -39,7 +39,7 @@ const moods: MoodOption[] = [
   { id: "hard", icon: Frown, label: "صعب", color: "#c0653e", soft: "#fae3dd" },
   { id: "tired", icon: Meh, label: "متعب", color: "#b8923a", soft: "#f4ecd8" },
   { id: "good", icon: Smile, label: "جيد", color: "#2f8a66", soft: "#e1efe8" },
-  { id: "great", icon: Laugh, label: "رائع", color: "#178fa3", soft: "#e1f1f5" },
+  { id: "great", icon: Laugh, label: "رائع", color: "#e23e6b", soft: "#ffe1ea" },
 ];
 
 type JournalScreen =
@@ -128,9 +128,10 @@ export function JournalSection() {
 
       <button
         onClick={() => setScreen({ kind: "editor", returnTo: "home" })}
-        className="flex w-full items-center gap-3.5 rounded-xl bg-surface p-4 text-right shadow-soft transition duration-200 hover:-translate-y-0.5 hover:shadow-card active:translate-y-0"
+        style={{ background: "color-mix(in srgb, #f2567e 11%, white)" }}
+        className="flex w-full items-center gap-3.5 rounded-[1.4rem] p-4 text-right shadow-soft transition duration-200 hover:-translate-y-0.5 hover:shadow-card active:translate-y-0"
       >
-        <span className="grid h-11 w-11 shrink-0 place-items-center rounded-[1rem] bg-brand-soft text-brand-700">
+        <span className="grid h-11 w-11 shrink-0 place-items-center rounded-[1rem] bg-white text-brand-600 shadow-soft">
           <PenLine className="h-5 w-5" strokeWidth={2} />
         </span>
         <div className="min-w-0 flex-1">
@@ -197,7 +198,7 @@ function JournalEntryRow({ entry, onClick }: { entry: JournalEntry; onClick: () 
   return (
     <button
       onClick={onClick}
-      className="flex w-full items-start gap-3 rounded-xl bg-surface p-3.5 text-right shadow-soft transition duration-200 hover:-translate-y-0.5 hover:shadow-card active:translate-y-0"
+      className="flex w-full items-start gap-3 rounded-[1.4rem] bg-surface p-3.5 text-right shadow-soft transition duration-200 hover:-translate-y-0.5 hover:shadow-card active:translate-y-0"
     >
       <span
         className="grid h-9 w-9 shrink-0 place-items-center rounded-full"

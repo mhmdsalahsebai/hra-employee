@@ -14,19 +14,20 @@
   --font-sans: "IBM Plex Sans Arabic", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", "Menlo", monospace;
 
-  /* Brand - confident teal for actions, focus states, and score rings. */
-  --color-brand-50: #e9f7f8;
-  --color-brand-100: #d3eef2;
-  --color-brand-200: #a9dde6;
-  --color-brand-300: #77c7d5;
-  --color-brand-400: #3fa9bc;
-  --color-brand-500: #178fa3;
-  --color-brand-600: #0f7384;
-  --color-brand-700: #115d6b;
-  --color-brand-800: #124b56;
-  --color-brand-900: #123f49;
-  --color-brand-950: #0a2930;
-  --color-brand-soft: rgba(23, 143, 163, 0.12);
+  /* Brand - warm rose for actions, focus states, and score rings. A friendly,
+     modern wellbeing primary that pairs with the pastel dimension palette. */
+  --color-brand-50: #fff1f4;
+  --color-brand-100: #ffe2e9;
+  --color-brand-200: #ffc8d6;
+  --color-brand-300: #ff9fb7;
+  --color-brand-400: #fb7396;
+  --color-brand-500: #f2567e;
+  --color-brand-600: #e23e6b;
+  --color-brand-700: #c02f58;
+  --color-brand-800: #9c2949;
+  --color-brand-900: #7c243d;
+  --color-brand-950: #4d1322;
+  --color-brand-soft: rgba(242, 86, 126, 0.12);
 
   /* Coral - warm secondary accent for offers, logout, and urgency. */
   --color-coral-50: #fff1ee;
@@ -37,6 +38,14 @@
   --color-coral-500: #dc604f;
   --color-coral-600: #bd4d40;
   --color-coral-soft: rgba(220, 96, 79, 0.12);
+
+  /* Violet - a cool tertiary accent for decorative depth against the rose. */
+  --color-violet-100: #ece8ff;
+  --color-violet-200: #d6ccff;
+  --color-violet-300: #b3a6f7;
+  --color-violet-400: #927ef0;
+  --color-violet-500: #7c6ee6;
+  --color-violet-soft: rgba(124, 110, 230, 0.13);
 
   /* Ink - normal light-mode scale. ink-900 is primary text, ink-50 is quiet fill. */
   --color-ink-900: #18211f;
@@ -127,7 +136,7 @@
   }
 
   ::selection {
-    background: rgba(23, 143, 163, 0.2);
+    background: rgba(242, 86, 126, 0.2);
     color: var(--color-ink-900);
   }
 
@@ -144,6 +153,18 @@
     -moz-appearance: textfield;
     appearance: textfield;
   }
+}
+
+/* Themed unDraw illustrations: the wrapper sizes the art, the inline <svg>
+   fills it, and `--primary-svg-color` (set per surface) tints the accent. */
+.cura-illustration {
+  display: block;
+  width: 100%;
+}
+.cura-illustration svg {
+  display: block;
+  width: 100%;
+  height: auto;
 }
 
 /* Hide scrollbars on horizontal "shelves" without losing scrollability. */
@@ -174,15 +195,34 @@
 /* A faint instrument grid for the app base. */
 @utility grid-texture {
   background-image:
-    radial-gradient(120% 80% at 50% -10%, rgba(23, 143, 163, 0.08), transparent 62%),
-    linear-gradient(rgba(18, 63, 73, 0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(18, 63, 73, 0.035) 1px, transparent 1px);
+    radial-gradient(120% 80% at 50% -10%, rgba(242, 86, 126, 0.08), transparent 62%),
+    linear-gradient(rgba(124, 36, 61, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(124, 36, 61, 0.03) 1px, transparent 1px);
   background-size: 100% 100%, 30px 30px, 30px 30px;
 }
 
 /* Focused accent glow for primary surfaces. */
 @utility glow-brand {
-  box-shadow: 0 0 0 1px rgb(23 143 163 / 0.16), 0 18px 42px -26px rgb(23 143 163 / 0.36);
+  box-shadow: 0 0 0 1px rgb(242 86 126 / 0.16), 0 18px 42px -26px rgb(242 86 126 / 0.36);
+}
+
+/* ── Decorative colour wash for the app shell ─────────────────────────────────
+   Soft, low-opacity orbs (rose + violet + peach) that give the background gentle
+   colour and depth without hurting text contrast. Sits behind all content. */
+@utility app-aurora {
+  background-color: var(--color-canvas);
+  background-image:
+    radial-gradient(38% 24% at 100% 0%, rgba(242, 86, 126, 0.16), transparent 70%),
+    radial-gradient(34% 22% at 0% 6%, rgba(124, 110, 230, 0.14), transparent 70%),
+    radial-gradient(46% 26% at 50% 100%, rgba(247, 170, 120, 0.12), transparent 72%);
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+}
+
+/* A soft scatter of decorative dots for card / section corners. */
+@utility dot-cluster {
+  background-image: radial-gradient(currentColor 1.4px, transparent 1.6px);
+  background-size: 12px 12px;
 }
 
 /* ── Motion ──────────────────────────────────────────────────────────────── */
