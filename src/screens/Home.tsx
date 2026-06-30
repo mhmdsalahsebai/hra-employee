@@ -3,6 +3,7 @@ import {
   Bell,
   Check,
   ChevronLeft,
+  GraduationCap,
   ListChecks,
   Lock,
   MessageCircleHeart,
@@ -16,13 +17,16 @@ import type { ReactNode } from "react";
 import { Avatar, ProgressBar, ScoreRing, SectionHeader } from "../components/ui";
 import { Spotlight } from "../components/Spotlight";
 import { RecommendedContentSwiper } from "../components/cards/RecommendedContentSwiper";
+import { ProgramRecommendationCard } from "../components/cards/ProgramRecommendationCard";
 import { WellbeingTrackers } from "../components/cards/WellbeingTrackers";
 import { JournalSection } from "../components/cards/JournalSection";
 import { cn } from "../lib/cn";
 import { scoreMeta, LEVEL_HEX, LEVEL_CLASS } from "../lib/score";
 import { useAssessment, type DimensionResult } from "../assessment/useAssessment";
+import { useInsights } from "../assessment/useInsights";
 import { currentUser } from "../data/app";
 import { dimensions, type Dimension } from "../data/dimensions";
+import { recommendPrograms } from "../data/programs";
 import { useContentRecommendations } from "../content/useContentRecommendations";
 
 export function Home() {
@@ -35,6 +39,7 @@ export function Home() {
     hasResults,
     started,
   } = useAssessment();
+  const insights = useInsights();
   const hour = new Date().getHours();
   const greeting = hour < 12 ? "صباح الخير" : "مساء الخير";
   const nextIndex = results.findIndex((r) => !r.complete);
@@ -42,6 +47,9 @@ export function Home() {
   const journeyPct = Math.round((completedCount / totalDimensions) * 100);
   const meta = scoreMeta(overallScore);
   const recommendations = useContentRecommendations(results);
+  const recommendedPrograms = hasResults
+    ? recommendPrograms(insights.insights).slice(0, 2)
+    : [];
 
   return (
     <div className="animate-rise pb-4">
@@ -239,6 +247,34 @@ export function Home() {
 
       {/* Daily journaling */}
       <JournalSection />
+
+      {/* Recommended expert-led programs — only after the full assessment. */}
+      {hasResults && recommendedPrograms.length > 0 && (
+        <section className="px-5 pt-8">
+          <SectionHeader
+            title="برامج رفاهية مقترحة"
+            action="عرض الخطة"
+            onAction={() => navigate("/plan")}
+          />
+          <div className="mb-3 flex items-center gap-2.5 rounded-lg border border-brand-100 bg-brand-50 px-3 py-2.5">
+            <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-surface text-brand-700 shadow-soft">
+              <GraduationCap className="h-4 w-4" strokeWidth={2.2} />
+            </span>
+            <p className="text-[11px] font-bold leading-relaxed text-brand-800">
+              أعلى البرامج أولوية لك بعد تحليل نتائج تقييمك الكامل
+            </p>
+          </div>
+          <div className="space-y-2.5">
+            {recommendedPrograms.map((recommendation) => (
+              <ProgramRecommendationCard
+                key={recommendation.program.id}
+                recommendation={recommendation}
+                onOpen={() => navigate(`/program/${recommendation.program.id}`)}
+              />
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Recommended content — swipeable carousel */}
       <section className="pt-8">

@@ -13,13 +13,13 @@ import {
   ShieldAlert,
   Sparkles,
   Stethoscope,
-  Video,
   Wind,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-import { Avatar, Badge } from "../components/ui";
+import { Avatar } from "../components/ui";
 import { Spotlight } from "../components/Spotlight";
 import { LockedState } from "../components/LockedState";
+import { ProgramRecommendationCard } from "../components/cards/ProgramRecommendationCard";
 import { cn } from "../lib/cn";
 import { useAssessment } from "../assessment/useAssessment";
 import { useInsights } from "../assessment/useInsights";
@@ -27,7 +27,7 @@ import { usePlan } from "../plan/usePlan";
 import { type TaskKind } from "../data/app";
 import { dimensionsById, tileStyle } from "../data/dimensions";
 import { buildPlan, type PlanFocusItem } from "../data/planEngine";
-import { recommendPrograms, type RecommendedProgram } from "../data/programs";
+import { recommendPrograms } from "../data/programs";
 import type { InsightSeverity } from "../data/insights";
 
 const kindIcon: Record<TaskKind, LucideIcon> = {
@@ -206,9 +206,9 @@ export function Plan() {
           />
           <div className="space-y-2.5">
             {recommendedPrograms.map((rec) => (
-              <ProgramCard
+              <ProgramRecommendationCard
                 key={rec.program.id}
-                rec={rec}
+                recommendation={rec}
                 onOpen={() => navigate(`/program/${rec.program.id}`)}
               />
             ))}
@@ -469,44 +469,6 @@ function PriorityCard({ item }: { item: PlanFocusItem }) {
       </div>
       <p className="mt-2.5 text-[0.8125rem] font-semibold leading-relaxed text-ink-700">{item.step}</p>
     </div>
-  );
-}
-
-function ProgramCard({ rec, onOpen }: { rec: RecommendedProgram; onOpen: () => void }) {
-  const { program, matches } = rec;
-  const dim = dimensionsById[program.dimension];
-  const Icon = program.icon;
-  return (
-    <button
-      onClick={onOpen}
-      className="flex w-full items-center gap-3.5 rounded-card border border-ink-100 bg-surface p-4 text-right shadow-soft transition duration-200 hover:border-ink-200 active:scale-[0.99]"
-    >
-      <span
-        className="grid h-12 w-12 shrink-0 place-items-center rounded-[0.8rem]"
-        style={tileStyle(dim.accent)}
-      >
-        <Icon className="h-6 w-6" strokeWidth={2} />
-      </span>
-      <div className="min-w-0 flex-1">
-        <div className="flex items-center gap-2">
-          <h3 className="truncate text-[0.9375rem] font-bold text-ink-900">{program.title}</h3>
-          <Badge className="shrink-0 bg-brand-soft text-brand-700">{program.tag}</Badge>
-        </div>
-        <p className="mt-0.5 truncate text-[11px] font-semibold text-ink-400">
-          مع {program.expert.name} · {program.expert.title}
-        </p>
-        <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] font-bold text-ink-500">
-          <span className="inline-flex items-center gap-1">
-            <Video className="h-3.5 w-3.5 text-brand-500" strokeWidth={2.2} />
-            <span className="nums">{program.sessions.length.toLocaleString("ar-EG")}</span> جلسات
-          </span>
-          <span className="truncate text-ink-400">
-            يعالج: {matches.map((m) => m.title.replace(/\(.*?\)/g, "").trim()).join("، ")}
-          </span>
-        </div>
-      </div>
-      <ChevronLeft className="h-5 w-5 shrink-0 text-ink-300" strokeWidth={2.2} />
-    </button>
   );
 }
 

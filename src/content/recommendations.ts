@@ -1,6 +1,6 @@
 import type { DimensionResult } from "../assessment/useAssessment";
 import { content, type ContentItem } from "../data/content";
-import { dimensions, dimensionsById, type DimensionId } from "../data/dimensions";
+import { dimensions, type DimensionId } from "../data/dimensions";
 
 export interface ContentRecommendations {
   items: ContentItem[];
@@ -28,16 +28,16 @@ function freshFirst(items: ContentItem[], openedIds: Set<string>, offset: number
 }
 
 /**
- * Builds a small recommendation shelf from actual assessment results.
- * Completed dimensions are safe to score, so the weakest completed result is
- * considered first. Before that point, a rotating cross-dimension mix keeps
- * the shelf useful without pretending that it is personalized.
+ * Builds a recommendation shelf from the complete assessment profile. Once
+ * all dimensions are complete, every dimension contributes one item and the
+ * shelf is ordered from the lowest score upward. Before that point, completed
+ * dimensions come first and the remaining slots stay intentionally diverse.
  */
 export function buildContentRecommendations({
   results,
   openedIds,
   rotation,
-  limit = 4,
+  limit = dimensions.length,
 }: {
   results: DimensionResult[];
   openedIds: string[];
@@ -51,7 +51,7 @@ export function buildContentRecommendations({
   const started = results.some((result) => result.answered > 0);
   const completedOrder = completed.map((result) => result.slug);
   const dimensionOrder = completedOrder.length
-    ? [completedOrder[0], ...rotated(completedOrder.slice(1), rotation)]
+    ? completedOrder
     : rotated(
         dimensions.map((dimension) => dimension.id),
         rotation,
@@ -81,16 +81,19 @@ export function buildContentRecommendations({
   }
 
   const focusDimension = completed[0]?.slug;
-  const reason = focusDimension
-    ? `مختار حسب نتائج بُعدك ${dimensionsById[focusDimension].title}`
-    : started
-      ? "اقتراحات متنوعة الآن، وتزداد دقتها مع اكتمال أبعادك"
-      : "بداية متوازنة من موضوعات رفاهية مختلفة";
+  const allDimensionsComplete = results.length > 0 && completed.length === results.length;
+  const reason = allDimensionsComplete
+    ? "مختار بناءً على نتائج أبعاد رفاهيتك التسعة، مرتّب من الأكثر احتياجًا للدعم"
+    : completed.length > 0
+      ? `مختار من نتائج ${completed.length.toLocaleString("ar-EG")} أبعاد مكتملة، ويزداد دقة مع إكمال التقييم`
+      : started
+        ? "اقتراحات متنوعة الآن، وتزداد دقتها مع اكتمال أبعادك"
+        : "بداية متوازنة من موضوعات رفاهية مختلفة";
 
   return {
     items: selected,
     reason,
-    personalized: Boolean(focusDimension),
+    personalized: completed.length > 0,
     focusDimension,
   };
 }

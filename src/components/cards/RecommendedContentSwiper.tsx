@@ -44,9 +44,10 @@ export function RecommendedContentSwiper({
       }}
     >
       {items.map((item) => (
-        <SwiperSlide key={item.id} className="!w-[10.5rem] pb-1">
+        <SwiperSlide key={item.id} className="!h-auto !w-[10.5rem] pb-1">
           <ContentCard
             item={item}
+            className="h-full"
             opened={openedIds.includes(item.id)}
             onClick={() => onOpen(item)}
           />
@@ -55,4 +56,3 @@ export function RecommendedContentSwiper({
     </Swiper>
   );
 }
-

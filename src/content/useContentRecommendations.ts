@@ -33,6 +33,13 @@ function persistEngagement(engagement: ContentEngagement) {
   }
 }
 
+/** Records opens that happen outside the home recommendation shelf. */
+export function recordContentOpened(id: string) {
+  const current = readEngagement();
+  if (current.openedIds.includes(id)) return;
+  persistEngagement({ ...current, openedIds: [...current.openedIds, id] });
+}
+
 function todayRotation() {
   const today = new Date();
   return Math.floor(Date.UTC(today.getFullYear(), today.getMonth(), today.getDate()) / 86_400_000);
@@ -76,4 +83,3 @@ export function useContentRecommendations(results: DimensionResult[]) {
     refresh,
   };
 }
-

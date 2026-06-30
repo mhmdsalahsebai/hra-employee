@@ -246,6 +246,14 @@
   padding-bottom: 1.6rem !important;
 }
 
+.recommended-content-swiper .swiper-wrapper {
+  align-items: stretch;
+}
+
+.recommended-content-swiper .swiper-slide {
+  height: auto;
+}
+
 .recommended-content-swiper .swiper-pagination {
   bottom: 0 !important;
 }

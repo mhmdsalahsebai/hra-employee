@@ -76,12 +76,28 @@ export function ContentCard({
 }
 
 /** Wide content row for the library list. */
-export function ContentRow({ item }: { item: ContentItem }) {
+export function ContentRow({
+  item,
+  active = false,
+  onClick,
+}: {
+  item: ContentItem;
+  active?: boolean;
+  onClick?: () => void;
+}) {
   const Icon = typeIcon[item.type];
   const dim = dimensionsById[item.dimension];
 
   return (
-    <button className="flex w-full items-center gap-3.5 rounded-card border border-ink-100 bg-surface p-3 text-right shadow-soft transition duration-200 hover:border-ink-200 active:scale-[0.99]">
+    <button
+      onClick={onClick}
+      aria-label={`افتح ${contentTypeLabels[item.type]}: ${item.title}`}
+      aria-current={active ? "true" : undefined}
+      className={cn(
+        "flex w-full items-center gap-3.5 rounded-card border bg-surface p-3 text-right shadow-soft transition duration-200 hover:border-ink-200 active:scale-[0.99]",
+        active ? "border-brand-300 ring-2 ring-brand-100" : "border-ink-100",
+      )}
+    >
       <div
         className="relative grid h-16 w-16 shrink-0 place-items-center overflow-hidden rounded-md"
         style={{ background: dim.accent.soft }}
