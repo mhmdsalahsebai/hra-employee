@@ -104,7 +104,7 @@ export function PersonalInfoSurveyScreen({
           key={q.id}
           dir="rtl"
           className={cn(
-            "flex flex-1 flex-col rounded-[24px] bg-white p-6 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.55)]",
+            "flex min-h-0 flex-1 flex-col rounded-[24px] bg-white p-6 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.55)]",
             // RTL-aware: forward slides in from the leading (left) edge.
             direction === "next" ? "exp-q-back" : "exp-q-next",
           )}
@@ -126,8 +126,9 @@ export function PersonalInfoSurveyScreen({
             </h2>
           </div>
 
-          {/* body — radios for choices/booleans, a field for inputs */}
-          <div className="mt-6">
+          {/* body — radios for choices/booleans, a field for inputs;
+              scrolls within the card when a question has many/long options */}
+          <div className="-mx-1 mt-6 min-h-0 flex-1 overflow-y-auto px-1">
             {q.kind === "choice" && (
               <div className="exp-stagger flex flex-col gap-2.5">
                 {q.answers.map((opt) => (
@@ -180,7 +181,7 @@ export function PersonalInfoSurveyScreen({
           </div>
 
           {/* navigation — anchored to the bottom of the tall card */}
-          <div className="mt-auto flex items-center gap-3 pt-8">
+          <div className="flex shrink-0 items-center gap-3 pt-6">
             <button
               type="button"
               onClick={goBack}

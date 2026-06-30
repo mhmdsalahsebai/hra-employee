@@ -34,7 +34,7 @@ export function SurveyQuestionCard({
   return (
     <div
       className={cn(
-        "flex flex-1 flex-col rounded-[24px] bg-white p-6 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.55)]",
+        "flex min-h-0 flex-1 flex-col rounded-[24px] bg-white p-6 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.55)]",
         direction === "back" ? "exp-q-back" : "exp-q-next",
       )}
     >
@@ -52,8 +52,8 @@ export function SurveyQuestionCard({
         <h2 className="text-[21px] font-bold leading-[1.34] text-[#10121a]">{question.question}</h2>
       </div>
 
-      {/* answers */}
-      <div className="exp-stagger mt-6 flex flex-col gap-2.5">
+      {/* answers — scroll within the card when a question has many/long options */}
+      <div className="exp-stagger -mx-1 mt-6 flex min-h-0 flex-1 flex-col gap-2.5 overflow-y-auto px-1">
         {question.options.map((opt) => (
           <SurveyOption
             key={opt.id}
@@ -66,7 +66,7 @@ export function SurveyQuestionCard({
       </div>
 
       {/* navigation — anchored to the bottom of the tall card */}
-      <div className="mt-auto flex items-center gap-3 pt-8">
+      <div className="flex shrink-0 items-center gap-3 pt-6">
         <button
           type="button"
           onClick={onBack}

@@ -162,7 +162,7 @@ export function Consultation() {
   if (phase === "in-call" && expert) {
     const dim = dimensionsById[expert.specialty];
     return (
-      <div className="fixed inset-0 z-50 flex flex-col bg-brand-950">
+      <div className="fixed inset-y-0 left-1/2 z-50 flex w-full max-w-[480px] -translate-x-1/2 flex-col bg-brand-950">
         {/* "Video feed" — the specialist, filling the frame */}
         <div className="relative flex-1 overflow-hidden">
           <div
@@ -349,7 +349,7 @@ export function Consultation() {
 
 function CallStage({ children }: { children: React.ReactNode }) {
   return (
-    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-brand-950 px-6 text-center">
+    <div className="fixed inset-y-0 left-1/2 z-50 flex w-full max-w-[480px] -translate-x-1/2 flex-col items-center justify-center bg-brand-950 px-6 text-center">
       {children}
     </div>
   );
