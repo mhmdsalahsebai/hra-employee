@@ -6,6 +6,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Clock,
+  Home,
   Lock,
   MessageCircleHeart,
   PlayCircle,
@@ -189,6 +190,14 @@ export function Assessment() {
               {dimIndex + 1}
               <span className="text-ink-300"> / {TOTAL_DIMS}</span>
             </span>
+            <button
+              onClick={() => navigate("/")}
+              aria-label="العودة للرئيسية"
+              title="العودة للرئيسية — تقدّمك محفوظ"
+              className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-ink-200 bg-surface text-ink-700 transition hover:border-ink-300 active:scale-95"
+            >
+              <Home className="h-5 w-5" strokeWidth={2.2} />
+            </button>
           </>
         )}
       </div>
