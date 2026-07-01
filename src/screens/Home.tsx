@@ -14,6 +14,7 @@ import {
 import type { LucideIcon } from "lucide-react";
 import { Avatar, ScoreRing, SectionHeader } from "../components/ui";
 import { Illustration } from "../illustrations/Illustration";
+import { ExpertAvatarStack } from "../components/ExpertAvatarStack";
 import { RecommendedContentSwiper } from "../components/cards/RecommendedContentSwiper";
 import { ProgramRecommendationCard } from "../components/cards/ProgramRecommendationCard";
 import { WellbeingTrackers } from "../components/cards/WellbeingTrackers";
@@ -81,11 +82,11 @@ export function Home() {
       <section className="px-5 pt-5">
         <div
           className="relative overflow-hidden rounded-[1.75rem] p-5 shadow-soft"
-          style={{ background: "linear-gradient(140deg, #ffe2ec 0%, #f1ecff 54%, #ffeede 100%)" }}
+          style={{ background: "linear-gradient(140deg, #e3f0fd 0%, #eae9fb 54%, #e6f5fb 100%)" }}
         >
           <span
             className="pointer-events-none absolute -right-10 -top-12 h-44 w-44 rounded-full"
-            style={{ background: "radial-gradient(circle, rgba(242,86,126,0.30), transparent 70%)" }}
+            style={{ background: "radial-gradient(circle, rgba(46,128,210,0.30), transparent 70%)" }}
           />
           <span
             className="pointer-events-none absolute -bottom-14 -left-10 h-40 w-40 rounded-full"
@@ -98,13 +99,13 @@ export function Home() {
                 value={hasResults ? overallScore : journeyPct}
                 size={84}
                 stroke={9}
-                gradient={["#fb7396", "#e23e6b"]}
+                gradient={["#5aa2e6", "#1f68bb"]}
                 trackClassName="text-white"
               >
                 {hasResults ? (
                   <div className="leading-none">
                     <span className="nums text-[1.5rem] font-extrabold text-ink-900">{overallScore}</span>
-                    <span className="mt-0.5 block text-[10px] font-bold text-ink-400">من ١٠٠</span>
+                    <span className="mt-0.5 block text-[10px] font-bold text-ink-400">من 100</span>
                   </div>
                 ) : (
                   <div className="leading-none">
@@ -184,7 +185,7 @@ export function Home() {
             {/* decorative shapes */}
             <span
               className="pointer-events-none absolute -right-8 -top-8 h-28 w-28 rounded-full"
-              style={{ background: "radial-gradient(circle, rgba(242,86,126,0.22), transparent 70%)" }}
+              style={{ background: "radial-gradient(circle, rgba(46,128,210,0.22), transparent 70%)" }}
             />
             <span className="dot-cluster pointer-events-none absolute bottom-4 left-4 h-12 w-16 text-violet-400/40" />
             <Illustration
@@ -248,6 +249,7 @@ export function Home() {
             cta="ابدأ فورًا"
             tint="#dc604f"
             unlocked={hasResults}
+            experts
             onClick={() => navigate("/consultation")}
           />
         </div>
@@ -331,6 +333,7 @@ function DeliverableTile({
   tint,
   unlocked,
   onClick,
+  experts,
 }: {
   icon: LucideIcon;
   title: string;
@@ -339,6 +342,8 @@ function DeliverableTile({
   tint: string;
   unlocked: boolean;
   onClick: () => void;
+  /** Show a live doctor-avatar stack — used to make the consultation inviting. */
+  experts?: boolean;
 }) {
   return (
     <button
@@ -370,6 +375,15 @@ function DeliverableTile({
         </h3>
         <p className="mt-0.5 text-[11px] font-semibold leading-relaxed text-ink-500">{desc}</p>
       </div>
+      {experts && unlocked && (
+        <div className="mt-1 flex items-center gap-2">
+          <ExpertAvatarStack size={26} max={3} ringClassName="ring-white" />
+          <span className="flex items-center gap-1 text-[10px] font-bold text-good">
+            <span className="h-1.5 w-1.5 rounded-full bg-good" />
+            متاحون الآن
+          </span>
+        </div>
+      )}
       <span
         className="mt-auto text-[11px] font-bold"
         style={{ color: unlocked ? tint : "var(--color-ink-400)" }}
@@ -447,7 +461,7 @@ function DimensionCard({
           >
             {result.score}
           </span>
-          <span className="mt-0.5 block text-[10px] font-bold text-ink-400">من ١٠٠</span>
+          <span className="mt-0.5 block text-[10px] font-bold text-ink-400">من 100</span>
         </div>
       ) : isNext ? (
         <span

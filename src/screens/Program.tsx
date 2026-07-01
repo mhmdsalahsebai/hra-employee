@@ -5,8 +5,7 @@ import { PageHeader } from "../components/PageHeader";
 import { programsById } from "../data/programs";
 import { dimensionsById, tileStyle } from "../data/dimensions";
 
-/** Western → Arabic-Indic digits, to match the RTL UI. */
-const ar = (n: number) => n.toLocaleString("ar-EG");
+const ar = (n: number) => n.toLocaleString("en-US");
 
 export function Program() {
   const { id = "" } = useParams();

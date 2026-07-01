@@ -150,7 +150,7 @@ export function MetricsBreakdown({ groups }: { groups: DimensionMetrics[] }) {
         كل المؤشرات التفصيلية
       </h2>
       <p className="mb-3.5 text-xs font-semibold text-ink-400">
-        <span className="nums font-bold text-ink-600">{total}</span> مؤشرًا فرعيًا محسوبًا من إجاباتك عبر الأبعاد التسعة — درجة كل مؤشر من ١٠٠
+        <span className="nums font-bold text-ink-600">{total}</span> مؤشرًا فرعيًا محسوبًا من إجاباتك عبر الأبعاد التسعة — درجة كل مؤشر من 100
       </p>
       <div className="space-y-3">
         {groups.map((group) => (

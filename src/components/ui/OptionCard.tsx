@@ -1,11 +1,11 @@
 import { cn } from "../../lib/cn";
 import type { DimensionAccent } from "../../data/dimensions";
 
-/** Brand rose, used when a caller doesn't theme the option to a dimension. */
+/** Brand blue, used when a caller doesn't theme the option to a dimension. */
 const BRAND_ACCENT: DimensionAccent = {
-  fg: "#c02f58",
-  soft: "rgba(242,86,126,0.12)",
-  solid: "#f2567e",
+  fg: "#1c5599",
+  soft: "rgba(46,128,210,0.12)",
+  solid: "#2e80d2",
 };
 
 /**

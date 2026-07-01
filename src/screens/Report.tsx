@@ -10,8 +10,9 @@ import {
   TrendingDown,
   Users,
 } from "lucide-react";
-import { Avatar, ProgressBar, ScoreRing } from "../components/ui";
+import { ProgressBar, ScoreRing } from "../components/ui";
 import { IconTile } from "../components/ui/Card";
+import { ExpertAvatarStack } from "../components/ExpertAvatarStack";
 import { DimensionDeepCard } from "../components/cards/DimensionCard";
 import { DetailedInsights } from "../components/cards/DetailedInsights";
 import { MetricsBreakdown } from "../components/cards/MetricsBreakdown";
@@ -103,7 +104,7 @@ export function Report() {
         <div>
           <h1 className="text-2xl font-extrabold text-ink-900">تقريرك</h1>
           <p className="text-[0.8125rem] font-semibold text-ink-400">
-            آخر تقييم قبل ٦ أيام · <span className="nums">{answeredQuestions}</span> سؤال
+            آخر تقييم قبل 6 أيام · <span className="nums">{answeredQuestions}</span> سؤال
           </p>
         </div>
         <button
@@ -122,12 +123,12 @@ export function Report() {
               value={overallScore}
               size={120}
               stroke={10}
-              gradient={["#ffd0dc", "#fb7396"]}
+              gradient={["#bfe0ff", "#4f9ae2"]}
               trackClassName="text-white/12"
             >
               <div className="leading-none">
                 <span className="nums text-[2.25rem] font-extrabold">{overallScore}</span>
-                <span className="mt-0.5 block text-[10px] font-bold text-white/55">من ١٠٠</span>
+                <span className="mt-0.5 block text-[10px] font-bold text-white/55">من 100</span>
               </div>
             </ScoreRing>
             <div className="min-w-0 flex-1">
@@ -394,7 +395,7 @@ export function Report() {
 
       {/* ── Full breakdown — every dimension, tap to open ────────────────── */}
       <section className="px-5 pt-6">
-        <h2 className="mb-1 text-[1.0625rem] font-bold text-ink-900">تفصيل الأبعاد التسعة</h2>
+        <h2 className="mb-1 text-[1.0625rem] font-bold text-ink-900">تفاصيل الأبعاد</h2>
         <p className="mb-3.5 text-xs font-semibold text-ink-400">
           درجتك مقابل زملائك، قراءة حالتك، وأهم التوصيات في كل بُعد — مرتّبة من الأكثر حاجة للانتباه
         </p>
@@ -412,21 +413,33 @@ export function Report() {
       {/* ── Next step ────────────────────────────────────────────────────── */}
       <section className="px-5 pt-6">
         <Spotlight className="p-5 text-white">
-          <div className="flex items-center gap-3.5">
-            <Avatar name="ليان القحطاني" size={48} className="ring-white/15" />
-            <div className="flex-1">
-              <p className="text-[0.8125rem] font-semibold text-brand-200">خطوتك التالية</p>
-              <p className="text-[1.0625rem] font-bold">تحدّث مع خبير مجانًا</p>
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <ExpertAvatarStack size={44} ringClassName="ring-brand-900" />
+              <div className="min-w-0">
+                <p className="flex items-center gap-1.5 text-[0.8125rem] font-bold text-white">
+                  <span className="relative flex h-2 w-2">
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-good/80" />
+                    <span className="relative inline-flex h-2 w-2 rounded-full bg-good" />
+                  </span>
+                  مختصون متاحون الآن
+                </p>
+                <p className="mt-0.5 text-[11px] font-semibold text-white/55">انتظار أقل من دقيقة</p>
+              </div>
             </div>
+            <span className="shrink-0 rounded-pill bg-white/10 px-2.5 py-1 text-[11px] font-bold text-brand-100 ring-1 ring-inset ring-white/10">
+              مجانًا
+            </span>
           </div>
-          <p className="mt-3 text-[0.8125rem] leading-relaxed text-white/65">
-            احجز استشارتك المجانية لمناقشة نتائجك ووضع خطة عملية تناسبك.
+          <p className="mt-4 text-[1.0625rem] font-bold">تحدّث مع خبير حول نتائجك</p>
+          <p className="mt-1 text-[0.8125rem] leading-relaxed text-white/65">
+            احجز استشارتك المجانية لمناقشة تقريرك ووضع خطة عملية تناسبك — جلسة فيديو فورية بضغطة واحدة.
           </p>
           <button
             onClick={() => navigate("/consultation")}
             className="mt-4 flex w-full items-center justify-center gap-1.5 rounded-pill bg-white py-3 text-[15px] font-bold text-brand-900 transition hover:bg-brand-50 active:scale-[0.98]"
           >
-            احجز استشارتك
+            احجز استشارتك المجانية
             <ChevronLeft className="h-4 w-4" strokeWidth={2.4} />
           </button>
         </Spotlight>

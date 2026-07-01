@@ -9,7 +9,7 @@ export function Spotlight({ children, className }: { children: ReactNode; classN
         className="pointer-events-none absolute inset-0"
         style={{
           background:
-            "radial-gradient(120% 100% at 86% -12%, rgba(255,159,183,0.34), transparent 56%), radial-gradient(80% 80% at 0% 100%, rgba(124,110,230,0.22), transparent 58%)",
+            "radial-gradient(120% 100% at 86% -12%, rgba(131,187,238,0.34), transparent 56%), radial-gradient(80% 80% at 0% 100%, rgba(124,110,230,0.22), transparent 58%)",
         }}
       />
       {/* className styles the content area so callers can lay out children directly */}

@@ -14,20 +14,20 @@
   --font-sans: "IBM Plex Sans Arabic", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", "Menlo", monospace;
 
-  /* Brand - warm rose for actions, focus states, and score rings. A friendly,
-     modern wellbeing primary that pairs with the pastel dimension palette. */
-  --color-brand-50: #fff1f4;
-  --color-brand-100: #ffe2e9;
-  --color-brand-200: #ffc8d6;
-  --color-brand-300: #ff9fb7;
-  --color-brand-400: #fb7396;
-  --color-brand-500: #f2567e;
-  --color-brand-600: #e23e6b;
-  --color-brand-700: #c02f58;
-  --color-brand-800: #9c2949;
-  --color-brand-900: #7c243d;
-  --color-brand-950: #4d1322;
-  --color-brand-soft: rgba(242, 86, 126, 0.12);
+  /* Brand - calming wellbeing blue for actions, focus states, and score rings.
+     A serene, trustworthy azure that pairs with the pastel dimension palette. */
+  --color-brand-50: #eef6fd;
+  --color-brand-100: #d7eafb;
+  --color-brand-200: #b3d5f6;
+  --color-brand-300: #83bbee;
+  --color-brand-400: #4f9ae2;
+  --color-brand-500: #2e80d2;
+  --color-brand-600: #1f68bb;
+  --color-brand-700: #1c5599;
+  --color-brand-800: #1c477c;
+  --color-brand-900: #193b64;
+  --color-brand-950: #102843;
+  --color-brand-soft: rgba(46, 128, 210, 0.12);
 
   /* Coral - warm secondary accent for offers, logout, and urgency. */
   --color-coral-50: #fff1ee;
@@ -136,7 +136,7 @@
   }
 
   ::selection {
-    background: rgba(242, 86, 126, 0.2);
+    background: rgba(46, 128, 210, 0.2);
     color: var(--color-ink-900);
   }
 
@@ -195,15 +195,15 @@
 /* A faint instrument grid for the app base. */
 @utility grid-texture {
   background-image:
-    radial-gradient(120% 80% at 50% -10%, rgba(242, 86, 126, 0.08), transparent 62%),
-    linear-gradient(rgba(124, 36, 61, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(124, 36, 61, 0.03) 1px, transparent 1px);
+    radial-gradient(120% 80% at 50% -10%, rgba(46, 128, 210, 0.08), transparent 62%),
+    linear-gradient(rgba(16, 40, 67, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(16, 40, 67, 0.03) 1px, transparent 1px);
   background-size: 100% 100%, 30px 30px, 30px 30px;
 }
 
 /* Focused accent glow for primary surfaces. */
 @utility glow-brand {
-  box-shadow: 0 0 0 1px rgb(242 86 126 / 0.16), 0 18px 42px -26px rgb(242 86 126 / 0.36);
+  box-shadow: 0 0 0 1px rgb(46 128 210 / 0.16), 0 18px 42px -26px rgb(46 128 210 / 0.36);
 }
 
 /* ── Decorative colour wash for the app shell ─────────────────────────────────
@@ -212,9 +212,9 @@
 @utility app-aurora {
   background-color: var(--color-canvas);
   background-image:
-    radial-gradient(38% 24% at 100% 0%, rgba(242, 86, 126, 0.16), transparent 70%),
+    radial-gradient(38% 24% at 100% 0%, rgba(46, 128, 210, 0.16), transparent 70%),
     radial-gradient(34% 22% at 0% 6%, rgba(124, 110, 230, 0.14), transparent 70%),
-    radial-gradient(46% 26% at 50% 100%, rgba(247, 170, 120, 0.12), transparent 72%);
+    radial-gradient(46% 26% at 50% 100%, rgba(90, 190, 214, 0.12), transparent 72%);
   background-attachment: fixed;
   background-repeat: no-repeat;
 }

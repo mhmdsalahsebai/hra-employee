@@ -64,7 +64,7 @@ export function Dimension() {
             <ScoreRing value={r.score} size={150} stroke={12} className={meta.text} trackClassName="text-ink-100">
               <div className="leading-none">
                 <span className="nums text-[3rem] font-extrabold text-ink-900">{r.score}</span>
-                <span className="mt-1 block text-xs font-bold text-ink-400">من ١٠٠</span>
+                <span className="mt-1 block text-xs font-bold text-ink-400">من 100</span>
               </div>
             </ScoreRing>
             <span className={cn("mt-5 rounded-pill px-3 py-1 text-sm font-bold", meta.soft)}>

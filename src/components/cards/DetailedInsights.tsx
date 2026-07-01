@@ -124,7 +124,7 @@ function InsightCard({ insight }: { insight: Insight }) {
             {program && (
               <ActionChip
                 icon={GraduationCap}
-                label={`برنامج ${program.tag} · ٥ جلسات`}
+                label={`برنامج ${program.tag} · 5 جلسات`}
                 onClick={() => navigate(`/program/${program.id}`)}
               />
             )}

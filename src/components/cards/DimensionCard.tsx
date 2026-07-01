@@ -128,13 +128,25 @@ export function DimensionDeepCard({
         </div>
       </div>
 
-      {/* Score bar with a peer-average marker */}
+      {/* Score bar vs peers — a legend + a marker so it reads on its own.
+         The fill grows from the right (RTL), so the peer marker is anchored
+         from the right too, keeping it aligned on the same 0–100 scale. */}
       <div className="px-4">
+        <div className="mb-2 flex items-center justify-between text-[11px] font-semibold">
+          <span className="flex items-center gap-1.5 text-ink-700">
+            <span className="h-2.5 w-2.5 rounded-full" style={{ background: hex }} />
+            درجتك <span dir="ltr" className="nums font-bold">{r.score}</span>
+          </span>
+          <span className="flex items-center gap-1.5 text-ink-400">
+            <span className="h-3 w-[3px] rounded-full bg-ink-400" />
+            متوسط الزملاء <span dir="ltr" className="nums font-bold">{dimension.benchmark}</span>
+          </span>
+        </div>
         <div className="relative h-2 w-full rounded-pill bg-ink-100">
           <div className="h-full rounded-pill" style={{ width: `${r.score}%`, background: hex }} />
           <span
             className="absolute top-1/2 h-3.5 w-[3px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-ink-400 ring-2 ring-surface"
-            style={{ left: `${dimension.benchmark}%` }}
+            style={{ right: `${dimension.benchmark}%` }}
             title="متوسط الزملاء"
           />
         </div>
@@ -149,7 +161,7 @@ export function DimensionDeepCard({
                   {vsPeers > 0 ? "+" : "−"}
                   {Math.abs(vsPeers)}
                 </span>{" "}
-                مقابل متوسط الزملاء (<span dir="ltr" className="nums">{dimension.benchmark}</span>)
+                {vsPeers > 0 ? "فوق متوسط الزملاء" : "تحت متوسط الزملاء"}
               </>
             )}
           </span>

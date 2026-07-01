@@ -47,7 +47,7 @@ export interface Insight {
   detail: string;
   /** One concrete next step. */
   recommendation?: string;
-  /** Optional headline figure, e.g. "٢٩.٤" for a BMI. */
+  /** Optional headline figure, e.g. "29.4" for a BMI. */
   metric?: string;
   metricLabel?: string;
 }
@@ -78,9 +78,9 @@ const SEVERITY_RANK: Record<InsightSeverity, number> = {
 
 /* ── Small helpers ─────────────────────────────────────────────────────────── */
 
-const ar = (n: number) => n.toLocaleString("ar-EG");
+const ar = (n: number) => n.toLocaleString("en-US");
 const ar1 = (n: number) =>
-  n.toLocaleString("ar-EG", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  n.toLocaleString("en-US", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 
 type Answers = Record<string, number>;
 
@@ -116,20 +116,20 @@ function analyzeBody(pi: PersonalInfoAnswers, out: Insight[]) {
         id: "bmi", category: "body", severity: "critical",
         title: "سمنة من الدرجة الثانية", metric, metricLabel: "مؤشر كتلة الجسم",
         detail: `مؤشر كتلة جسمك ${metric}؛ هذا المستوى من السمنة يضاعف احتمالات الإصابة بأمراض مزمنة على المدى المتوسط.`,
-        recommendation: "ابدأ بهدف واقعي: خسارة ٥٪ من وزنك خلال ٣ أشهر عبر تعديل التغذية وزيادة الحركة.",
+        recommendation: "ابدأ بهدف واقعي: خسارة 5٪ من وزنك خلال 3 أشهر عبر تعديل التغذية وزيادة الحركة.",
       });
     } else if (bmi >= 30) {
       out.push({
         id: "bmi", category: "body", severity: "warning",
         title: "سمنة من الدرجة الأولى", metric, metricLabel: "مؤشر كتلة الجسم",
         detail: `مؤشر كتلة جسمك ${metric}، وهو ضمن نطاق السمنة. التدخّل الآن أسهل بكثير من علاج مضاعفاتها لاحقًا.`,
-        recommendation: "استهدف عجزًا حراريًا بسيطًا مع ٣٠ دقيقة مشي يوميًا — أثره تراكمي وملموس.",
+        recommendation: "استهدف عجزًا حراريًا بسيطًا مع 30 دقيقة مشي يوميًا — أثره تراكمي وملموس.",
       });
     } else if (bmi >= 25) {
       out.push({
         id: "bmi", category: "body", severity: "warning",
         title: "زيادة في الوزن", metric, metricLabel: "مؤشر كتلة الجسم",
-        detail: `مؤشر كتلة جسمك ${metric} (الوزن الطبيعي حتى ٢٤٫٩). أنت في مرحلة يسهل فيها العودة للنطاق الصحي.`,
+        detail: `مؤشر كتلة جسمك ${metric} (الوزن الطبيعي حتى 24.9). أنت في مرحلة يسهل فيها العودة للنطاق الصحي.`,
         recommendation: "ضبط حصص الطعام والمشي المنتظم كفيلان غالبًا بإعادتك للنطاق الطبيعي.",
       });
     } else if (bmi < 18.5) {
@@ -380,9 +380,9 @@ function analyzeLifestyle(a: Answers, out: Insight[]) {
   if (sleep !== undefined && sleep <= 2) {
     out.push({
       id: "sleep", category: "lifestyle", severity: sleep === 1 ? "warning" : "info",
-      title: sleep === 1 ? "نوم غير كافٍ (أقل من ٥ ساعات)" : "نوم أقل من الموصى به",
+      title: sleep === 1 ? "نوم غير كافٍ (أقل من 5 ساعات)" : "نوم أقل من الموصى به",
       detail: "قلة النوم ترفع التوتر والوزن وتضعف التركيز والمناعة، وتغذّي الإجهاد المهني والقلق.",
-      recommendation: "استهدف ٧–٨ ساعات بمواعيد نوم ثابتة وتقليل الشاشات قبل النوم.",
+      recommendation: "استهدف 7–8 ساعات بمواعيد نوم ثابتة وتقليل الشاشات قبل النوم.",
     });
   }
 
@@ -395,14 +395,14 @@ function analyzeLifestyle(a: Answers, out: Insight[]) {
       id: "inactivity", category: "lifestyle", severity: "warning",
       title: "مستوى نشاط بدني منخفض",
       detail: "إجاباتك تُظهر قلة في الحركة والتمارين، وهو ما يضعف اللياقة ويزيد مخاطر الوزن والقلب والمزاج المنخفض.",
-      recommendation: "ابدأ بهدف بسيط: ١٥٠ دقيقة نشاط متوسط أسبوعيًا، ولو على دفعات قصيرة.",
+      recommendation: "ابدأ بهدف بسيط: 150 دقيقة نشاط متوسط أسبوعيًا، ولو على دفعات قصيرة.",
     });
   } else if (sitting !== undefined && sitting === 1) {
     out.push({
       id: "sitting", category: "lifestyle", severity: "info",
-      title: "جلوس مطوّل (١٠ ساعات أو أكثر يوميًا)",
+      title: "جلوس مطوّل (10 ساعات أو أكثر يوميًا)",
       detail: "الجلوس الطويل عامل خطر مستقل حتى مع ممارسة الرياضة. الحركة المتكررة الخفيفة تكسر أثره.",
-      recommendation: "قف وتحرّك ٢–٣ دقائق كل نصف ساعة خلال يوم العمل.",
+      recommendation: "قف وتحرّك 2–3 دقائق كل نصف ساعة خلال يوم العمل.",
     });
   }
 
@@ -443,7 +443,7 @@ function analyzeFinancial(a: Answers, out: Insight[]) {
       id: "financial-cushion", category: "financial", severity: "info",
       title: "هشاشة في الاستعداد للطوارئ المالية",
       detail: "غياب صندوق طوارئ يجعل أي مصروف مفاجئ مصدر قلق. بناؤه تدريجيًا يمنحك راحة نفسية كبيرة.",
-      recommendation: "خصّص مبلغًا تلقائيًا بسيطًا شهريًا لبناء صندوق طوارئ يغطي نفقات ٣ أشهر.",
+      recommendation: "خصّص مبلغًا تلقائيًا بسيطًا شهريًا لبناء صندوق طوارئ يغطي نفقات 3 أشهر.",
     });
   }
 
@@ -467,7 +467,7 @@ function analyzeFinancial(a: Answers, out: Insight[]) {
       severity: retire === 1 ? "warning" : "info",
       title: retire === 1 ? "غياب الاستعداد المالي للتقاعد" : "ضعف الاستعداد المالي للتقاعد",
       detail: "لا تشعر بالاطمئنان تجاه استعدادك المالي لمرحلة التقاعد. كل سنة تأخير في الادخار للتقاعد تكلّف أضعافها لاحقًا بسبب فقدان أثر التراكم.",
-      recommendation: "ابدأ بادخار نسبة صغيرة ثابتة من دخلك في وعاء تقاعدي أو استثماري طويل الأجل، ولو ٥٪ شهريًا.",
+      recommendation: "ابدأ بادخار نسبة صغيرة ثابتة من دخلك في وعاء تقاعدي أو استثماري طويل الأجل، ولو 5٪ شهريًا.",
     });
   }
 

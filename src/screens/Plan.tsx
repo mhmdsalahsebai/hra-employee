@@ -16,7 +16,7 @@ import {
   Wind,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-import { Avatar } from "../components/ui";
+import { ExpertAvatarStack } from "../components/ExpertAvatarStack";
 import { Spotlight } from "../components/Spotlight";
 import { LockedState } from "../components/LockedState";
 import { ProgramRecommendationCard } from "../components/cards/ProgramRecommendationCard";
@@ -173,16 +173,23 @@ export function Plan() {
               الخطوة الأولى في خطتك
             </span>
           )}
-          <div className={cn("flex items-center gap-3.5", plan.priority.length === 0 && "mt-3.5")}>
-            <Avatar name="ليان القحطاني" size={48} className="ring-white/15" />
-            <div className="min-w-0 flex-1">
-              <p className="text-[1.0625rem] font-bold">استشارتك الأولى مجانية</p>
-              <p className="text-[0.8125rem] leading-relaxed text-white/65">
-                {plan.priority.length > 0
-                  ? "خبير يناقش معك هذه الملاحظات ويضع معك خطة آمنة للتعامل معها"
-                  : "يراجع معك نتائجك، ويساعدك على ترتيب أولويات خطتك"}
+          <div className={cn(plan.priority.length === 0 && "mt-3.5")}>
+            <div className="flex items-center gap-3">
+              <ExpertAvatarStack size={40} ringClassName="ring-brand-900" />
+              <p className="flex items-center gap-1.5 text-[0.8125rem] font-bold text-white">
+                <span className="relative flex h-2 w-2">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-good/80" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-good" />
+                </span>
+                مختصون متاحون الآن
               </p>
             </div>
+            <p className="mt-3.5 text-[1.0625rem] font-bold">استشارتك الأولى مجانية</p>
+            <p className="mt-1 text-[0.8125rem] leading-relaxed text-white/65">
+              {plan.priority.length > 0
+                ? "خبير يناقش معك هذه الملاحظات ويضع معك خطة آمنة للتعامل معها"
+                : "يراجع معك نتائجك، ويساعدك على ترتيب أولويات خطتك"}
+            </p>
           </div>
           <button
             onClick={() => navigate("/consultation")}
@@ -200,7 +207,7 @@ export function Plan() {
           <StepHeader
             n={2}
             title="برامج موصى بها لك"
-            subtitle="برامج علاجية من ٥ جلسات مع خبير مختص — مختارة حسب ما أظهره تقريرك"
+            subtitle="برامج علاجية من 5 جلسات مع خبير مختص — مختارة حسب ما أظهره تقريرك"
             icon={GraduationCap}
             tone="text-brand-600"
           />

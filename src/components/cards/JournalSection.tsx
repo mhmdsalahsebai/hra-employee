@@ -46,12 +46,12 @@ type JournalScreen =
   | { kind: "history" }
   | { kind: "editor"; entryId?: string; returnTo: "home" | "history" };
 
-const dayFormatter = new Intl.DateTimeFormat("ar-EG", {
+const dayFormatter = new Intl.DateTimeFormat("ar-EG-u-nu-latn", {
   day: "numeric",
   month: "long",
   year: "numeric",
 });
-const timeFormatter = new Intl.DateTimeFormat("ar-EG", {
+const timeFormatter = new Intl.DateTimeFormat("ar-EG-u-nu-latn", {
   hour: "numeric",
   minute: "2-digit",
 });
@@ -128,7 +128,7 @@ export function JournalSection() {
 
       <button
         onClick={() => setScreen({ kind: "editor", returnTo: "home" })}
-        style={{ background: "color-mix(in srgb, #f2567e 11%, white)" }}
+        style={{ background: "color-mix(in srgb, #2e80d2 11%, white)" }}
         className="flex w-full items-center gap-3.5 rounded-[1.4rem] p-4 text-right shadow-soft transition duration-200 hover:-translate-y-0.5 hover:shadow-card active:translate-y-0"
       >
         <span className="grid h-11 w-11 shrink-0 place-items-center rounded-[1rem] bg-white text-brand-600 shadow-soft">
@@ -352,7 +352,7 @@ function JournalHistory({
     <>
       <OverlayHeader
         title="يومياتك"
-        subtitle={entries.length ? `${entries.length.toLocaleString("ar-EG")} تدوينة خاصة` : "مساحتك الخاصة للتأمل"}
+        subtitle={entries.length ? `${entries.length.toLocaleString("en-US")} تدوينة خاصة` : "مساحتك الخاصة للتأمل"}
         onClose={onClose}
       />
 

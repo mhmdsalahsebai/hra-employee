@@ -65,7 +65,7 @@ export const patterns: Pattern[] = [
 export interface DeltaMeta {
   diff: number;
   dir: "up" | "down" | "flat";
-  /** e.g. "+٥" / "−٣" / "ثابت" — caller decides formatting around it. */
+  /** e.g. "+5" / "−3" / "ثابت" — caller decides formatting around it. */
   abs: number;
 }
 

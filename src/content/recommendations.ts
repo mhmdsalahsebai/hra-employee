@@ -85,7 +85,7 @@ export function buildContentRecommendations({
   const reason = allDimensionsComplete
     ? "مختار بناءً على نتائج أبعاد رفاهيتك التسعة، مرتّب من الأكثر احتياجًا للدعم"
     : completed.length > 0
-      ? `مختار من نتائج ${completed.length.toLocaleString("ar-EG")} أبعاد مكتملة، ويزداد دقة مع إكمال التقييم`
+      ? `مختار من نتائج ${completed.length.toLocaleString("en-US")} أبعاد مكتملة، ويزداد دقة مع إكمال التقييم`
       : started
         ? "اقتراحات متنوعة الآن، وتزداد دقتها مع اكتمال أبعادك"
         : "بداية متوازنة من موضوعات رفاهية مختلفة";

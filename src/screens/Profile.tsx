@@ -27,7 +27,7 @@ interface Row {
 }
 
 const rows: Row[] = [
-  { icon: FileText, label: "تقييماتي السابقة", fg: "#176b91", soft: "#e6f1f6", to: "/report", hint: "٣ تقييمات" },
+  { icon: FileText, label: "تقييماتي السابقة", fg: "#176b91", soft: "#e6f1f6", to: "/report", hint: "3 تقييمات" },
   { icon: Bell, label: "الإشعارات والتذكيرات", fg: "#ac7a2e", soft: "#f3ecdc" },
   { icon: ShieldCheck, label: "الخصوصية والبيانات", fg: "#2f8a66", soft: "#e4efe9" },
   { icon: CircleHelp, label: "المساعدة والدعم", fg: "#486784", soft: "#e9eef3" },
@@ -123,7 +123,7 @@ export function Profile() {
           <LogOut className="h-5 w-5" strokeWidth={2} />
           تسجيل الخروج
         </button>
-        <p className="nums pt-4 text-center text-xs font-semibold text-ink-300">cura · الإصدار ١٫٠</p>
+        <p className="nums pt-4 text-center text-xs font-semibold text-ink-300">cura · الإصدار 1.0</p>
       </section>
     </div>
   );

@@ -40,7 +40,7 @@ const goals = {
 };
 const litersPerCup = goals.waterLiters / goals.waterCups;
 
-const ar = (n: number) => n.toLocaleString("ar-EG");
+const ar = (n: number) => n.toLocaleString("en-US");
 const pct = (cur: number, goal: number) => Math.min(100, Math.round((cur / goal) * 100));
 /** Soft pastel fill from a solid accent — the modern colour-blocked card look. */
 const pastel = (hex: string, p = 12) => `color-mix(in srgb, ${hex} ${p}%, white)`;

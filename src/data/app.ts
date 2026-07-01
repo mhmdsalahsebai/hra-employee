@@ -21,7 +21,7 @@ export const currentUser: User = {
   role: "أخصائية موارد بشرية",
   overallScore: 72,
   assessmentCompleted: true,
-  lastAssessment: "قبل ٦ أيام",
+  lastAssessment: "قبل 6 أيام",
 };
 
 /* ── Deliverable 3: the personalized plan / journey ───────────────────────── */
@@ -48,7 +48,7 @@ export const todayTasks: PlanTask[] = [
   },
   {
     id: "t2",
-    title: "مشي خفيف لمدة ١٠ دقائق",
+    title: "مشي خفيف لمدة 10 دقائق",
     dimension: "physical",
     kind: "exercise",
     durationMin: 10,
@@ -80,10 +80,10 @@ export interface PlanWeek {
 }
 
 export const journeyWeeks: PlanWeek[] = [
-  { label: "الأسبوع ١", focus: "psycho", done: 6, total: 6 },
-  { label: "الأسبوع ٢", focus: "professional", done: 4, total: 6 },
-  { label: "الأسبوع ٣", focus: "physical", done: 1, total: 6 },
-  { label: "الأسبوع ٤", focus: "financial", done: 0, total: 6 },
+  { label: "الأسبوع 1", focus: "psycho", done: 6, total: 6 },
+  { label: "الأسبوع 2", focus: "professional", done: 4, total: 6 },
+  { label: "الأسبوع 3", focus: "physical", done: 1, total: 6 },
+  { label: "الأسبوع 4", focus: "financial", done: 0, total: 6 },
 ];
 
 export const streakDays = 6;
@@ -121,6 +121,8 @@ export interface Expert {
   rating: number;
   sessions: number;
   nextSlots: string[];
+  /** Headshot for the avatar — makes the consultation feel human and inviting. */
+  avatar: string;
 }
 
 export const experts: Expert[] = [
@@ -131,7 +133,8 @@ export const experts: Expert[] = [
     specialty: "psycho",
     rating: 4.9,
     sessions: 320,
-    nextSlots: ["اليوم ٥:٠٠ م", "اليوم ٧:٣٠ م", "غدًا ١٠:٠٠ ص"],
+    nextSlots: ["اليوم 5:00 م", "اليوم 7:30 م", "غدًا 10:00 ص"],
+    avatar: "https://images.unsplash.com/photo-1594824476967-48c8b964273f?q=80&w=256&h=256&fit=crop&crop=faces",
   },
   {
     id: "e2",
@@ -140,6 +143,31 @@ export const experts: Expert[] = [
     specialty: "professional",
     rating: 4.8,
     sessions: 210,
-    nextSlots: ["غدًا ١٢:٠٠ م", "غدًا ٤:٠٠ م", "الأحد ٩:٠٠ ص"],
+    nextSlots: ["غدًا 12:00 م", "غدًا 4:00 م", "الأحد 9:00 ص"],
+    avatar: "https://images.unsplash.com/photo-1622253692010-333f2da6031d?q=80&w=256&h=256&fit=crop&crop=faces",
+  },
+  {
+    id: "e3",
+    name: "د. نورة الزهراني",
+    title: "استشارية تغذية علاجية",
+    specialty: "physical",
+    rating: 5.0,
+    sessions: 268,
+    nextSlots: ["اليوم 6:15 م", "غدًا 11:00 ص", "غدًا 3:30 م"],
+    avatar: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?q=80&w=256&h=256&fit=crop&crop=faces",
+  },
+  {
+    id: "e4",
+    name: "د. سعود المطيري",
+    title: "مستشار مالي معتمد",
+    specialty: "financial",
+    rating: 4.7,
+    sessions: 184,
+    nextSlots: ["غدًا 1:00 م", "الأحد 10:30 ص", "الأحد 5:00 م"],
+    avatar: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?q=80&w=256&h=256&fit=crop&crop=faces",
   },
 ];
+
+/** A stable doctor headshot for consultations scoped to a program's own expert. */
+export const fallbackExpertAvatar =
+  "https://images.unsplash.com/photo-1537368910025-700350fe46c7?q=80&w=256&h=256&fit=crop&crop=faces";

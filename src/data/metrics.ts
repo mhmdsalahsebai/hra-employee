@@ -206,7 +206,7 @@ const METRIC_DEFS: MetricDef[] = [
     id: "sleep", dimension: "physical", label: "جودة النوم", slugs: ["SleepDuration"],
     read: {
       good: "ساعات نومك كافية لتعافٍ جيد وتركيز ومناعة أقوى.",
-      moderate: "نومك أقل قليلًا من الموصى به — استهدف ٧–٨ ساعات.",
+      moderate: "نومك أقل قليلًا من الموصى به — استهدف 7–8 ساعات.",
       attention: "نوم غير كافٍ يرفع التوتر والوزن ويضعف التركيز.",
     },
   },
@@ -395,7 +395,7 @@ function position(a: Answers, slugs: string[]): { f: number; answered: number } 
 }
 
 const ar1 = (n: number) =>
-  n.toLocaleString("ar-EG", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  n.toLocaleString("en-US", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 
 /** BMI is its own metric: best in the normal range, worse either side. */
 function bmiMetric(pi: PersonalInfoAnswers): Metric | null {

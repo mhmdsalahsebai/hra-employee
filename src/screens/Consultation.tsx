@@ -14,10 +14,11 @@ import {
   X,
 } from "lucide-react";
 import { Avatar, Badge, Button } from "../components/ui";
+import { ExpertAvatarStack } from "../components/ExpertAvatarStack";
 import { Illustration } from "../illustrations/Illustration";
 import { PageHeader } from "../components/PageHeader";
 import { cn } from "../lib/cn";
-import { experts, type Expert } from "../data/app";
+import { experts, fallbackExpertAvatar, type Expert } from "../data/app";
 import { dimensionsById } from "../data/dimensions";
 import { programsById } from "../data/programs";
 
@@ -26,13 +27,10 @@ import { programsById } from "../data/programs";
  *  drop them into a simulated video call. */
 type Phase = "idle" | "matching" | "connecting" | "in-call" | "ended";
 
-/** Western → Arabic-Indic digits, so the call timer matches the RTL UI. */
-const toArabic = (s: string) => s.replace(/\d/g, (d) => "٠١٢٣٤٥٦٧٨٩"[Number(d)]);
-
 function formatDuration(total: number) {
   const m = Math.floor(total / 60);
   const s = total % 60;
-  return toArabic(`${m}:${String(s).padStart(2, "0")}`);
+  return `${m}:${String(s).padStart(2, "0")}`;
 }
 
 const MATCHING_MESSAGES = [
@@ -61,6 +59,7 @@ export function Consultation() {
             rating: 5,
             sessions: 0,
             nextSlots: [],
+            avatar: fallbackExpertAvatar,
           }
         : null,
     [program],
@@ -153,7 +152,7 @@ export function Consultation() {
         <div className="relative grid place-items-center">
           <span className="absolute h-40 w-40 animate-ping rounded-full bg-brand-400/15" />
           <span className="absolute h-32 w-32 animate-pulse rounded-full bg-white/5" />
-          <Avatar name={expert.name} size={112} className="relative ring-4 ring-white/15" />
+          <Avatar name={expert.name} src={expert.avatar} size={112} className="relative ring-4 ring-white/15" />
         </div>
 
         <p className="mt-9 flex items-center gap-2 text-sm font-bold text-brand-100">
@@ -196,7 +195,7 @@ export function Consultation() {
 
           <div className="relative grid h-full place-items-center">
             <div className="flex flex-col items-center">
-              <Avatar name={expert.name} size={132} className="ring-4 ring-white/10" />
+              <Avatar name={expert.name} src={expert.avatar} size={132} className="ring-4 ring-white/10" />
               <p className="mt-4 text-sm font-semibold text-white/45">الكاميرا قيد التشغيل…</p>
             </div>
           </div>
@@ -264,7 +263,7 @@ export function Consultation() {
           </p>
 
           <div className="mt-7 flex w-full items-center gap-3.5 rounded-card border border-ink-100 bg-surface p-4 shadow-soft">
-            <Avatar name={expert.name} size={48} />
+            <Avatar name={expert.name} src={expert.avatar} size={48} />
             <div className="flex-1 text-right">
               <p className="text-sm font-bold text-ink-900">{expert.name}</p>
               <p className="text-xs font-semibold text-ink-400">{expert.title}</p>
@@ -312,7 +311,7 @@ export function Consultation() {
               {program.title}
             </p>
             <div className="mt-3.5 flex items-center gap-3.5">
-              <Avatar name={scopedExpert.name} size={48} />
+              <Avatar name={scopedExpert.name} src={scopedExpert.avatar} size={48} />
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-bold text-ink-900">{scopedExpert.name}</p>
                 <p className="text-xs font-semibold text-ink-400">{scopedExpert.title}</p>
@@ -340,11 +339,7 @@ export function Consultation() {
       {/* Availability */}
       <section className="px-5 pt-6">
         <div className="flex items-center gap-3.5 rounded-card border border-ink-100 bg-surface p-4 shadow-soft">
-          <div className="flex -space-x-3 rtl:space-x-reverse">
-            {experts.map((e) => (
-              <Avatar key={e.id} name={e.name} size={40} className="ring-2 ring-surface" />
-            ))}
-          </div>
+          <ExpertAvatarStack size={40} />
           <div className="flex-1">
             <p className="flex items-center gap-1.5 text-sm font-bold text-ink-900">
               <span className="h-2 w-2 rounded-full bg-good" />
@@ -360,17 +355,17 @@ export function Consultation() {
         <h2 className="mb-3.5 text-[1.0625rem] font-bold text-ink-900">كيف تعمل؟</h2>
         <div className="space-y-3">
           <HowStep
-            n="١"
+            n="1"
             title="اضغط ابدأ"
             desc="استشارة فيديو فورية بضغطة واحدة — دون حجز موعد."
           />
           <HowStep
-            n="٢"
+            n="2"
             title="نختار لك مختصًا متاحًا"
             desc="نطابقك تلقائيًا مع أنسب مختص متاح في هذه اللحظة."
           />
           <HowStep
-            n="٣"
+            n="3"
             title="ادخل المكالمة مباشرة"
             desc="تنضمّ إلى مكالمة فيديو خاصة ومشفّرة على الفور."
           />

@@ -6,7 +6,11 @@
       "Bash(node -e \"require\\('puppeteer-core'\\); console.log\\('puppeteer-core ok'\\)\")",
       "Bash(node -e ' *)",
       "Bash(node ./_shot.mjs)",
-      "Bash(pkill -f \"vite\")"
+      "Bash(pkill -f \"vite\")",
+      "Bash(cd /home/mhmdsalah/Desktop/work/hra-employee *)",
+      "Read(//opt/google/chrome/**)",
+      "Bash(echo \"started, pid $!\")",
+      "Bash(cp __TRACKED_VAR__/shot.mjs ./_shot.mjs)"
     ]
   }
 }

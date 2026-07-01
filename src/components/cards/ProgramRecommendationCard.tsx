@@ -37,7 +37,7 @@ export function ProgramRecommendationCard({
         <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] font-bold text-ink-500">
           <span className="inline-flex items-center gap-1">
             <Video className="h-3.5 w-3.5 text-brand-500" strokeWidth={2.2} />
-            <span className="nums">{program.sessions.length.toLocaleString("ar-EG")}</span> جلسات
+            <span className="nums">{program.sessions.length.toLocaleString("en-US")}</span> جلسات
           </span>
           <span className="truncate text-ink-400">
             يعالج: {matches.map((match) => match.title.replace(/\(.*?\)/g, "").trim()).join("، ")}
