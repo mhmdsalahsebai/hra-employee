@@ -65,6 +65,19 @@ export function AssessmentProvider({ children }: { children: ReactNode }) {
     persist(next);
   }, []);
 
+  // Dev-only: complete just the first `count` dimensions, leaving the rest
+  // unanswered — the partial state that exercises the report preview / ladder.
+  const fillDimensions = useCallback((count: number) => {
+    const next: Record<string, number> = {};
+    for (const { id } of dimensions.slice(0, count)) {
+      for (const q of hraBySlug[id].questions) {
+        next[q.slug] = q.answers[Math.floor(Math.random() * q.answers.length)].value;
+      }
+    }
+    setAnswers(next);
+    persist(next);
+  }, []);
+
   const value = useMemo<AssessmentValue>(() => {
     const results: DimensionResult[] = dimensions.map(({ id }) => {
       const d = hraBySlug[id];
@@ -96,6 +109,7 @@ export function AssessmentProvider({ children }: { children: ReactNode }) {
       answers,
       setAnswer,
       fillRandomAnswers,
+      fillDimensions,
       resetAnswers,
       results,
       resultBySlug,
@@ -114,7 +128,7 @@ export function AssessmentProvider({ children }: { children: ReactNode }) {
       totalQuestions,
       progressPct: totalQuestions ? Math.round((answeredQuestions / totalQuestions) * 100) : 0,
     };
-  }, [answers, setAnswer, fillRandomAnswers, resetAnswers]);
+  }, [answers, setAnswer, fillRandomAnswers, fillDimensions, resetAnswers]);
 
   return <AssessmentContext.Provider value={value}>{children}</AssessmentContext.Provider>;
 }

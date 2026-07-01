@@ -26,6 +26,7 @@ import { useInsights } from "../assessment/useInsights";
 import { currentUser } from "../data/app";
 import { dimensions, type Dimension } from "../data/dimensions";
 import { recommendPrograms } from "../data/programs";
+import { MIN_DIMS_FOR_PREVIEW } from "../data/report";
 import { useContentRecommendations } from "../content/useContentRecommendations";
 
 /** Soft pastel fill from a solid accent — the modern colour-blocked card look. */
@@ -47,6 +48,8 @@ export function Home() {
   const nextIndex = results.findIndex((r) => !r.complete);
   const nextDim = nextIndex === -1 ? null : dimensions[nextIndex];
   const journeyPct = Math.round((completedCount / totalDimensions) * 100);
+  // The report opens as a preliminary preview once enough dimensions are in.
+  const reportReady = hasResults || completedCount >= MIN_DIMS_FOR_PREVIEW;
   const meta = scoreMeta(overallScore);
   const recommendations = useContentRecommendations(results);
   const recommendedPrograms = hasResults
@@ -242,10 +245,16 @@ export function Home() {
           <DeliverableTile
             icon={ScrollText}
             title="تقريرك"
-            desc={hasResults ? "تحليل مفصّل لإجاباتك" : "يُفتح بعد التقييم"}
-            cta="اعرض التقرير"
+            desc={
+              hasResults
+                ? "تحليل مفصّل لإجاباتك"
+                : reportReady
+                  ? "تقرير مبدئي جاهز · يزداد دقّة"
+                  : `يُفتح بعد ${MIN_DIMS_FOR_PREVIEW} أبعاد`
+            }
+            cta={reportReady && !hasResults ? "اعرض المبدئي" : "اعرض التقرير"}
             tint="#7c6ee6"
-            unlocked={hasResults}
+            unlocked={reportReady}
             onClick={() => navigate("/report")}
           />
           <DeliverableTile

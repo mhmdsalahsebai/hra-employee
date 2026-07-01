@@ -24,8 +24,10 @@ import {
 import { cn } from "../lib/cn";
 import { Illustration } from "../illustrations/Illustration";
 import { useAssessment } from "../assessment/useAssessment";
+import type { DimensionResult } from "../assessment/useAssessment";
 import { dimensions, dimensionsById, type Dimension, type DimensionId } from "../data/dimensions";
 import { hraBySlug, higherIsBetter } from "../data/hra";
+import { LEVEL_CLASS, LEVEL_HEX } from "../lib/score";
 import { getQuestionArt } from "../data/questionArt";
 import { getQuestionInsight, type QuestionInsight as QuestionInsightData } from "../data/questionInsights";
 
@@ -60,7 +62,7 @@ const deliverables: Deliverable[] = [
 
 export function Assessment() {
   const navigate = useNavigate();
-  const { answers, setAnswer, started, hasResults } = useAssessment();
+  const { answers, setAnswer, started, hasResults, resultBySlug } = useAssessment();
 
   // Freeze the resume point: the first dimension with an unanswered question.
   const [resume] = useState(() => {
@@ -315,6 +317,7 @@ export function Assessment() {
         <Milestone
           dim={dim}
           index={dimIndex}
+          result={resultBySlug[chapter.slug]}
           onContinue={() => openChapter(dimIndex + 1, 0)}
         />
       )}
@@ -490,17 +493,22 @@ function Chapter({
   );
 }
 
-/** A small celebration after each dimension — turns 9 areas into 9 small wins. */
+/** A small celebration after each dimension — turns 9 areas into 9 small wins.
+ *  Now also pays out a *real* first result for the dimension just finished, so
+ *  value arrives every ~15 questions instead of only after all 140. */
 function Milestone({
   dim,
   index,
+  result,
   onContinue,
 }: {
   dim: Dimension;
   index: number;
+  result?: DimensionResult;
   onContinue: () => void;
 }) {
   const remaining = TOTAL_DIMS - index - 1;
+  const glimpse = result?.complete ? result : undefined;
   return (
     <div className="animate-rise flex flex-1 flex-col items-center justify-center px-6 pb-[max(1.25rem,env(safe-area-inset-bottom))] text-center">
       <div className="relative grid h-24 w-24 place-items-center">
@@ -517,9 +525,14 @@ function Milestone({
         {index + 1} من {TOTAL_DIMS} أبعاد
       </p>
       <h1 className="mt-2 text-2xl font-extrabold text-ink-900">أنهيت بُعد {dim.title}</h1>
-      <p className="mt-3 max-w-xs text-[15px] leading-relaxed text-ink-500">
+
+      {glimpse && <ResultGlimpse dim={dim} result={glimpse} />}
+
+      <p className="mt-4 max-w-xs text-[15px] leading-relaxed text-ink-500">
         {remaining > 0
-          ? `أحسنت — تقدّمك يُبني صورتك. تبقّى ${remaining} ${remaining > 10 ? "بُعدًا" : "أبعاد"} فقط.`
+          ? glimpse
+            ? `دي أول إشارة من بُعد واحد — الصورة وتوصياتك بتوضح أكتر مع كل بُعد. تبقّى ${remaining} ${remaining > 10 ? "بُعدًا" : "أبعاد"} فقط.`
+            : `أحسنت — تقدّمك يُبني صورتك. تبقّى ${remaining} ${remaining > 10 ? "بُعدًا" : "أبعاد"} فقط.`
           : "أنهيت كل الأبعاد، خطوة أخيرة لعرض نتائجك."}
       </p>
 
@@ -539,6 +552,41 @@ function Milestone({
           <ChevronLeft className="h-5 w-5" strokeWidth={2.4} />
         </Button>
       </div>
+    </div>
+  );
+}
+
+/** The first real payout: the finished dimension's score, status and honest
+ *  signal — the same verdict language the full report speaks, shown early so
+ *  the remaining questions feel like sharpening a picture, not a blind cost. */
+function ResultGlimpse({ dim, result }: { dim: Dimension; result: DimensionResult }) {
+  const meta = LEVEL_CLASS[result.level];
+  const hex = LEVEL_HEX[result.level];
+  return (
+    <div
+      className="mt-5 w-full max-w-xs rounded-lg border bg-surface p-4 text-right shadow-soft"
+      style={{ borderColor: `${hex}33` }}
+    >
+      <div className="flex items-center gap-1.5" style={{ color: dim.accent.fg }}>
+        <Sparkles className="h-3.5 w-3.5" strokeWidth={2.4} />
+        <span className="text-[11px] font-bold">لمحة أولى من نتيجتك</span>
+      </div>
+
+      <div className="mt-3 flex items-center justify-between gap-3">
+        <span
+          className={cn("inline-flex items-center rounded-pill px-3 py-1 text-xs font-bold", meta.soft)}
+        >
+          {meta.label}
+        </span>
+        <span dir="ltr" className="nums shrink-0 text-2xl font-extrabold" style={{ color: hex }}>
+          {result.score}
+          <span className="text-sm font-bold text-ink-300"> / 100</span>
+        </span>
+      </div>
+
+      {result.band.alert && (
+        <p className="mt-3 text-[13px] leading-relaxed text-ink-700">{result.band.alert}</p>
+      )}
     </div>
   );
 }

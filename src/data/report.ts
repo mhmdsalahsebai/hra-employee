@@ -17,6 +17,12 @@ export const percentile = 64;
 /** Total questions in the assessment — proof of depth. */
 export const answeredQuestions = totalQuestions;
 
+/** How many of the nine dimensions must be complete before the report opens as
+ *  a *preliminary* preview. Below this, there isn't enough signal to be honest;
+ *  at or above it we show a partial report whose accuracy visibly climbs toward
+ *  the full picture — turning the 140 questions from a gate into a ladder. */
+export const MIN_DIMS_FOR_PREVIEW = 3;
+
 /** Past wellbeing scores, oldest → newest. The live "now" point is appended by
  *  the report from the real overall score. */
 export interface HistoryPoint {

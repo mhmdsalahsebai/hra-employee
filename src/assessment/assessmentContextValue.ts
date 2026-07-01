@@ -21,6 +21,8 @@ export interface AssessmentValue {
   answers: Record<string, number>;
   setAnswer: (slug: string, value: number) => void;
   fillRandomAnswers: () => void;
+  /** Dev-only: complete only the first N dimensions (partial state). */
+  fillDimensions: (count: number) => void;
   resetAnswers: () => void;
   /** Results in dimension order. */
   results: DimensionResult[];

@@ -1,15 +1,19 @@
 import { useEffect, useRef, useState } from "react";
-import { Check, Dices, Trash2 } from "lucide-react";
+import { Check, Dices, LayoutList, Trash2 } from "lucide-react";
 import { useAssessment } from "../assessment/useAssessment";
 import { useOnboarding } from "../onboarding/useOnboarding";
 import { haptic } from "../motion/haptics";
 import { CELEBRATED_KEY } from "./AchievementModal";
 
-type Feedback = "filled" | "cleared" | null;
+/** How many dimensions the "partial" shortcut completes — enough to trip the
+ *  report preview / accuracy ladder without finishing all nine. */
+const PARTIAL_DIMS = 3;
+
+type Feedback = "filled" | "partial" | "cleared" | null;
 
 /** Viewport-anchored local tools for exercising assessment-dependent screens. */
 export function DevAssessmentToolbar() {
-  const { fillRandomAnswers, resetAnswers, totalQuestions } = useAssessment();
+  const { fillRandomAnswers, fillDimensions, resetAnswers, totalQuestions } = useAssessment();
   const { isComplete } = useOnboarding();
   const [feedback, setFeedback] = useState<Feedback>(null);
   const resetTimer = useRef<number | null>(null);
@@ -33,6 +37,13 @@ export function DevAssessmentToolbar() {
     fillRandomAnswers();
     haptic("select");
     showFeedback("filled");
+  };
+
+  const handlePartial = () => {
+    fillDimensions(PARTIAL_DIMS);
+    localStorage.removeItem(CELEBRATED_KEY);
+    haptic("select");
+    showFeedback("partial");
   };
 
   const handleClear = () => {
@@ -68,6 +79,16 @@ export function DevAssessmentToolbar() {
 
         <button
           type="button"
+          onClick={handlePartial}
+          title={`إكمال ${PARTIAL_DIMS} أبعاد فقط — لمعاينة التقرير المبدئي`}
+          className="flex h-10 w-full items-center gap-2 rounded-md border border-brand-200 bg-brand-50 px-3 text-xs font-bold text-brand-700 transition hover:bg-brand-100 active:scale-[0.98]"
+        >
+          <LayoutList className="h-4 w-4 shrink-0" strokeWidth={2.3} />
+          <span>ملء {PARTIAL_DIMS} أبعاد</span>
+        </button>
+
+        <button
+          type="button"
           onClick={handleClear}
           title="مسح جميع إجابات التقييم"
           className="flex h-10 w-full items-center gap-2 rounded-md border border-alert/20 bg-alert-soft px-3 text-xs font-bold text-alert transition hover:border-alert/35 hover:bg-alert/15 active:scale-[0.98]"
@@ -81,6 +102,11 @@ export function DevAssessmentToolbar() {
         {feedback === "filled" && (
           <span className="inline-flex items-center gap-1 text-good">
             <Check className="h-3 w-3" /> تم ملء {totalQuestions} سؤالًا
+          </span>
+        )}
+        {feedback === "partial" && (
+          <span className="inline-flex items-center gap-1 text-brand-700">
+            <Check className="h-3 w-3" /> تم إكمال {PARTIAL_DIMS} أبعاد
           </span>
         )}
         {feedback === "cleared" && "تم مسح جميع الإجابات"}

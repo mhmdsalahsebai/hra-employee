@@ -31,6 +31,7 @@ import { dimensionsById, tileStyle } from "../data/dimensions";
 import {
   answeredQuestions,
   delta,
+  MIN_DIMS_FOR_PREVIEW,
   pastHistory,
   patterns,
   percentile,
@@ -64,7 +65,14 @@ export function Report() {
     hasResults,
     started,
     progressPct,
+    completedCount,
+    totalDimensions,
   } = useAssessment();
+
+  // A preliminary preview once "enough" dimensions are in: the report opens
+  // early, and finishing the rest is framed as sharpening it — not unlocking it.
+  const preview = !hasResults && completedCount >= MIN_DIMS_FOR_PREVIEW;
+  const remainingDims = totalDimensions - completedCount;
 
   const meta = scoreMeta(overallScore);
   const overallDelta = delta(overallScore, prevOverall);
@@ -77,21 +85,21 @@ export function Report() {
     color: LEVEL_HEX[r.level],
   }));
 
-  if (!hasResults) {
+  if (!preview && !hasResults) {
     return (
       <div className="animate-rise">
         <header className="px-5 pt-[max(1.5rem,env(safe-area-inset-top))]">
           <h1 className="text-2xl font-extrabold text-ink-900">تقريرك</h1>
         </header>
         <LockedState
-          title={started ? "تقريرك قيد الإعداد" : "لا يوجد تقرير بعد"}
+          title={started ? "تقريرك بدأ يتشكّل" : "لا يوجد تقرير بعد"}
           subtitle={
             started
-              ? "أكمل بقية الأبعاد لنعرض لك تحليلك الكامل عبر الأبعاد التسعة."
+              ? `أكمل ${MIN_DIMS_FOR_PREVIEW} أبعاد لفتح تقريرك المبدئي (أكملت ${completedCount})، ثم تزيد دقّته مع كل بُعد.`
               : "أكمل تقييم الرفاهية لأول مرة لتحصل على تقرير مفصّل بتحليل إجاباتك عبر تسعة أبعاد."
           }
           ctaLabel={started ? "أكمل التقييم" : "ابدأ التقييم"}
-          onCta={() => navigate("/")}
+          onCta={() => navigate(started ? "/assessment" : "/")}
           progress={started ? progressPct : undefined}
         />
       </div>
@@ -104,7 +112,16 @@ export function Report() {
         <div>
           <h1 className="text-2xl font-extrabold text-ink-900">تقريرك</h1>
           <p className="text-[0.8125rem] font-semibold text-ink-400">
-            آخر تقييم قبل 6 أيام · <span className="nums">{answeredQuestions}</span> سؤال
+            {preview ? (
+              <>
+                تقرير مبدئي · <span className="nums">{completedCount}</span> من{" "}
+                <span className="nums">{totalDimensions}</span> أبعاد
+              </>
+            ) : (
+              <>
+                آخر تقييم قبل 6 أيام · <span className="nums">{answeredQuestions}</span> سؤال
+              </>
+            )}
           </p>
         </div>
         <button
@@ -114,6 +131,45 @@ export function Report() {
           <Share2 className="h-5 w-5" strokeWidth={2} />
         </button>
       </header>
+
+      {/* ── Accuracy ladder — preview only: the report is open, and finishing
+             the rest visibly sharpens it rather than unlocking it. ────────── */}
+      {preview && (
+        <section className="px-5 pt-4">
+          <div className="rounded-xl border border-brand-200 bg-brand-soft/60 p-4">
+            <div className="flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <p className="flex items-center gap-1.5 text-[11px] font-bold text-brand-700">
+                  <Sparkles className="h-3.5 w-3.5" strokeWidth={2.4} />
+                  تقرير مبدئي
+                </p>
+                <h2 className="mt-0.5 text-[15px] font-extrabold text-ink-900">
+                  دقّته تزيد مع كل بُعد تكمّله
+                </h2>
+              </div>
+              <span dir="ltr" className="nums shrink-0 text-2xl font-extrabold text-brand-700">
+                {completedCount}
+                <span className="text-sm font-bold text-ink-300"> / {totalDimensions}</span>
+              </span>
+            </div>
+            <div className="mt-3">
+              <ProgressBar value={Math.round((completedCount / totalDimensions) * 100)} barClassName="bg-brand-500" />
+            </div>
+            <p className="mt-3 text-[0.8125rem] leading-relaxed text-ink-600">
+              الصورة الكاملة — توازن أبعادك، مقارنتك بزملائك، والأنماط بينها — تكتمل لمّا تخلّص الأبعاد
+              الباقية.
+            </p>
+            <button
+              onClick={() => navigate("/assessment")}
+              className="mt-3.5 flex w-full items-center justify-center gap-1.5 rounded-pill bg-brand-600 py-3 text-[0.8125rem] font-bold text-white transition hover:bg-brand-700 active:scale-[0.99]"
+            >
+              أكمل التقييم · تبقّى <span dir="ltr" className="nums">{remainingDims}</span>{" "}
+              {remainingDims > 10 ? "بُعدًا" : remainingDims === 1 ? "بُعد" : "أبعاد"}
+              <ChevronLeft className="h-4 w-4" strokeWidth={2.4} />
+            </button>
+          </div>
+        </section>
+      )}
 
       {/* ── Verdict ──────────────────────────────────────────────────────── */}
       <section className="px-5 pt-5">
@@ -132,24 +188,35 @@ export function Report() {
               </div>
             </ScoreRing>
             <div className="min-w-0 flex-1">
-              <p className="text-[0.8125rem] font-semibold text-brand-200">رفاهيتك العامة</p>
+              <p className="text-[0.8125rem] font-semibold text-brand-200">
+                {preview ? "رفاهيتك العامة (مبدئية)" : "رفاهيتك العامة"}
+              </p>
               <p className="mt-0.5 text-2xl font-extrabold">{meta.label}</p>
-              <div className="mt-2 flex flex-wrap items-center gap-1.5">
-                <DeltaPill diff={overallDelta.diff} onDark />
-                <span className="text-[11px] font-semibold text-white/55">منذ آخر تقييم</span>
-              </div>
+              {preview ? (
+                <p className="mt-2 text-[11px] font-semibold text-white/55">
+                  محسوبة على <span className="nums">{completedCount}</span> أبعاد حتى الآن
+                </p>
+              ) : (
+                <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                  <DeltaPill diff={overallDelta.diff} onDark />
+                  <span className="text-[11px] font-semibold text-white/55">منذ آخر تقييم</span>
+                </div>
+              )}
             </div>
           </div>
-          <div className="flex items-center gap-2 border-t border-white/10 px-5 py-3 text-[0.8125rem] font-semibold text-brand-100">
-            <Users className="h-4 w-4 shrink-0" strokeWidth={2.2} />
-            <span>
-              نتيجتك أفضل من <span className="nums font-bold text-white">{percentile}%</span> من زملائك في القطاع
-            </span>
-          </div>
+          {!preview && (
+            <div className="flex items-center gap-2 border-t border-white/10 px-5 py-3 text-[0.8125rem] font-semibold text-brand-100">
+              <Users className="h-4 w-4 shrink-0" strokeWidth={2.2} />
+              <span>
+                نتيجتك أفضل من <span className="nums font-bold text-white">{percentile}%</span> من زملائك في القطاع
+              </span>
+            </div>
+          )}
         </Spotlight>
       </section>
 
       {/* ── Featured narrative — the headline reading of the whole report ── */}
+      {!preview && (
       <section className="px-5 pt-4">
         <div className="relative overflow-hidden rounded-xl border border-brand-200 bg-gradient-to-br from-brand-soft via-surface to-surface p-5 shadow-card">
           <span
@@ -174,8 +241,10 @@ export function Report() {
           </div>
         </div>
       </section>
+      )}
 
       {/* ── Trend over time ──────────────────────────────────────────────── */}
+      {!preview && (
       <section className="px-5 pt-4">
         <div className="rounded-xl border border-ink-100 bg-surface p-5 shadow-card">
           <div className="mb-3 flex items-center justify-between">
@@ -195,8 +264,10 @@ export function Report() {
           </div>
         </div>
       </section>
+      )}
 
       {/* ── Wellbeing balance (radar) ────────────────────────────────────── */}
+      {!preview && (
       <section className="px-5 pt-4">
         <div className="rounded-xl border border-ink-100 bg-surface p-5 shadow-card">
           <div className="mb-1 flex items-center justify-between">
@@ -215,12 +286,13 @@ export function Report() {
           <Radar data={radarPoints} />
         </div>
       </section>
+      )}
 
       {/* ── Detailed health insights — derived live from every answer ────── */}
-      <DetailedInsights summary={insights} />
+      {!preview && <DetailedInsights summary={insights} />}
 
       {/* ── Full metrics breakdown — every sub-scale, scored 0–100 ────────── */}
-      <MetricsBreakdown groups={metricGroups} />
+      {!preview && <MetricsBreakdown groups={metricGroups} />}
 
       {/* ── Strengths ────────────────────────────────────────────────────── */}
       <section className="px-5 pt-6">
@@ -292,17 +364,19 @@ export function Report() {
             );
           })}
         </div>
-        <button
-          onClick={() => navigate("/plan")}
-          className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-pill border border-ink-200 bg-surface py-3 text-[0.8125rem] font-bold text-ink-700 transition hover:border-ink-300 active:scale-[0.99]"
-        >
-          ابدأ خطة عملية لهذه الأبعاد
-          <ChevronLeft className="h-4 w-4" strokeWidth={2.4} />
-        </button>
+        {!preview && (
+          <button
+            onClick={() => navigate("/plan")}
+            className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-pill border border-ink-200 bg-surface py-3 text-[0.8125rem] font-bold text-ink-700 transition hover:border-ink-300 active:scale-[0.99]"
+          >
+            ابدأ خطة عملية لهذه الأبعاد
+            <ChevronLeft className="h-4 w-4" strokeWidth={2.4} />
+          </button>
+        )}
       </section>
 
       {/* ── Your journey's impact (plan → report loop) ───────────────────── */}
-      {plan.activeDimensions.length > 0 && (
+      {!preview && plan.activeDimensions.length > 0 && (
         <section className="px-5 pt-6">
           <h2 className="mb-1 flex items-center gap-2 text-[1.0625rem] font-bold text-ink-900">
             <CalendarHeart className="h-[1.15rem] w-[1.15rem] text-brand-600" strokeWidth={2.4} />
@@ -360,6 +434,7 @@ export function Report() {
       )}
 
       {/* ── Patterns we noticed ──────────────────────────────────────────── */}
+      {!preview && (
       <section className="px-5 pt-6">
         <h2 className="mb-1 text-[1.0625rem] font-bold text-ink-900">أنماط لاحظناها</h2>
         <p className="mb-3.5 text-xs font-semibold text-ink-400">
@@ -392,12 +467,17 @@ export function Report() {
           })}
         </div>
       </section>
+      )}
 
       {/* ── Full breakdown — every dimension, tap to open ────────────────── */}
       <section className="px-5 pt-6">
-        <h2 className="mb-1 text-[1.0625rem] font-bold text-ink-900">تفاصيل الأبعاد</h2>
+        <h2 className="mb-1 text-[1.0625rem] font-bold text-ink-900">
+          {preview ? "أبعادك المكتملة" : "تفاصيل الأبعاد"}
+        </h2>
         <p className="mb-3.5 text-xs font-semibold text-ink-400">
-          درجتك مقابل زملائك، قراءة حالتك، وأهم التوصيات في كل بُعد — مرتّبة من الأكثر حاجة للانتباه
+          {preview
+            ? "قراءة حالتك وأهم التوصيات في كل بُعد أكملته — والباقي يظهر هنا فور إكماله"
+            : "درجتك مقابل زملائك، قراءة حالتك، وأهم التوصيات في كل بُعد — مرتّبة من الأكثر حاجة للانتباه"}
         </p>
         <div className="space-y-3">
           {focus.map((r) => (
@@ -410,7 +490,30 @@ export function Report() {
         </div>
       </section>
 
+      {/* ── Next step — preview: a clear terminal incentive to finish. ───── */}
+      {preview && (
+        <section className="px-5 pt-6">
+          <div className="rounded-xl border border-brand-200 bg-brand-soft/60 p-5">
+            <h2 className="text-[1.0625rem] font-extrabold text-ink-900">
+              يفصلك <span className="nums">{remainingDims}</span>{" "}
+              {remainingDims > 10 ? "بُعدًا" : remainingDims === 1 ? "بُعد" : "أبعاد"} عن تقريرك الكامل
+            </h2>
+            <p className="mt-1.5 text-[0.8125rem] leading-relaxed text-ink-600">
+              بإكمالها يُفتح توازن أبعادك، مقارنتك بزملائك، الأنماط بينها، والاستشارة المجانية مع خبير.
+            </p>
+            <button
+              onClick={() => navigate("/assessment")}
+              className="mt-4 flex w-full items-center justify-center gap-1.5 rounded-pill bg-brand-600 py-3 text-[15px] font-bold text-white transition hover:bg-brand-700 active:scale-[0.98]"
+            >
+              أكمل التقييم
+              <ChevronLeft className="h-4 w-4" strokeWidth={2.4} />
+            </button>
+          </div>
+        </section>
+      )}
+
       {/* ── Next step ────────────────────────────────────────────────────── */}
+      {!preview && (
       <section className="px-5 pt-6">
         <Spotlight className="p-5 text-white">
           <div className="flex items-center justify-between gap-3">
@@ -444,6 +547,7 @@ export function Report() {
           </button>
         </Spotlight>
       </section>
+      )}
     </div>
   );
 }
