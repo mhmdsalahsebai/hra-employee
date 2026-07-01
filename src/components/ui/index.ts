@@ -6,5 +6,7 @@ export { ProgressBar, ScoreRing } from "./Progress";
 export { Avatar } from "./Avatar";
 export { SectionHeader } from "./SectionHeader";
 export { OptionCard } from "./OptionCard";
+export { ScaleSelect } from "./ScaleSelect";
 export { QuestionCardDeck } from "./QuestionCardDeck";
 export type { QuestionCardDeckHandle } from "./QuestionCardDeck";
+export { QuestionInsight } from "./QuestionInsight";

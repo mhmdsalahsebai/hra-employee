@@ -14,6 +14,31 @@ import wellDone from "./assets/well-done.svg?raw";
 import personalGoals from "./assets/personal-goals.svg?raw";
 import journey from "./assets/journey.svg?raw";
 import healthyHabit from "./assets/healthy-habit.svg?raw";
+// Per-topic art for the assessment questions (see data/questionArt.ts).
+import workout from "./assets/workout.svg?raw";
+import walkingOutside from "./assets/walking-outside.svg?raw";
+import intoTheNight from "./assets/into-the-night.svg?raw";
+import healthyOptions from "./assets/healthy-options.svg?raw";
+import diet from "./assets/diet.svg?raw";
+import doctor from "./assets/doctor.svg?raw";
+import medicine from "./assets/medicine.svg?raw";
+import fitnessTracker from "./assets/fitness-tracker.svg?raw";
+import finance from "./assets/finance.svg?raw";
+import savings from "./assets/savings.svg?raw";
+import investment from "./assets/investment.svg?raw";
+import teamwork from "./assets/teamwork.svg?raw";
+import celebrating from "./assets/celebrating.svg?raw";
+import careerProgress from "./assets/career-progress.svg?raw";
+import friends from "./assets/friends.svg?raw";
+import coffeeWithFriends from "./assets/coffee-with-friends.svg?raw";
+import ideas from "./assets/ideas.svg?raw";
+import questions from "./assets/questions.svg?raw";
+import checklist from "./assets/checklist.svg?raw";
+import regainFocus from "./assets/regain-focus.svg?raw";
+import coffeeBreak from "./assets/coffee-break.svg?raw";
+import spreadLove from "./assets/spread-love.svg?raw";
+import yoga from "./assets/yoga.svg?raw";
+import runningWild from "./assets/running-wild.svg?raw";
 
 const REGISTRY = {
   mindfulness,
@@ -26,6 +51,30 @@ const REGISTRY = {
   "personal-goals": personalGoals,
   journey,
   "healthy-habit": healthyHabit,
+  workout,
+  "walking-outside": walkingOutside,
+  "into-the-night": intoTheNight,
+  "healthy-options": healthyOptions,
+  diet,
+  doctor,
+  medicine,
+  "fitness-tracker": fitnessTracker,
+  finance,
+  savings,
+  investment,
+  teamwork,
+  celebrating,
+  "career-progress": careerProgress,
+  friends,
+  "coffee-with-friends": coffeeWithFriends,
+  ideas,
+  questions,
+  checklist,
+  "regain-focus": regainFocus,
+  "coffee-break": coffeeBreak,
+  "spread-love": spreadLove,
+  yoga,
+  "running-wild": runningWild,
 } as const;
 
 export type IllustrationName = keyof typeof REGISTRY;

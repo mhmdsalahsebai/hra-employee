@@ -2,7 +2,7 @@ import { hraData, type HraDimensionData, type HraInsightBand } from "./hra.gener
 import type { DimensionId } from "./dimensions";
 import type { ScoreLevel } from "../lib/score";
 
-export type { HraDimensionData, HraInsightBand, HraQuestion } from "./hra.generated";
+export type { HraDimensionData, HraInsightBand, HraQuestion, HraAnswerOption } from "./hra.generated";
 export { hraData };
 
 export const hraBySlug = Object.fromEntries(hraData.map((d) => [d.slug, d])) as Record<
@@ -16,6 +16,10 @@ export const totalQuestions = hraData.reduce((n, d) => n + d.questions.length, 0
 /** Dimensions where a LOWER raw score is the healthier state (problem scales:
  *  burnout, emotional reactivity). Everything else: higher raw = better. */
 const LOWER_IS_BETTER = new Set<DimensionId>(["professional", "psycho"]);
+
+/** True when a HIGHER answer value is the healthier/positive end for this
+ *  dimension. Used to orient the answer scale's faces (positive → smiling). */
+export const higherIsBetter = (slug: DimensionId) => !LOWER_IS_BETTER.has(slug);
 
 export const maxRaw = (d: HraDimensionData) =>
   d.questions.reduce((n, q) => n + Math.max(...q.answers.map((a) => a.value)), 0);

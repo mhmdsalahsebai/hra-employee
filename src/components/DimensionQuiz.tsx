@@ -1,10 +1,18 @@
 import { useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { Check, ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
-import { Button, OptionCard, QuestionCardDeck, type QuestionCardDeckHandle } from "./ui";
-import { cn } from "../lib/cn";
+import { Check, ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  Button,
+  QuestionCardDeck,
+  QuestionInsight,
+  ScaleSelect,
+  type QuestionCardDeckHandle,
+} from "./ui";
+import { Illustration } from "../illustrations/Illustration";
 import { dimensionsById, type DimensionId } from "../data/dimensions";
-import { hraBySlug } from "../data/hra";
+import { hraBySlug, higherIsBetter } from "../data/hra";
+import { getQuestionArt } from "../data/questionArt";
+import { getQuestionInsight, type QuestionInsight as QuestionInsightData } from "../data/questionInsights";
 import { useAssessment } from "../assessment/useAssessment";
 
 /**
@@ -30,20 +38,41 @@ export function DimensionQuiz({ dimId, onClose }: { dimId: DimensionId; onClose:
   });
   const [index, setIndex] = useState(initialIndex);
   const [done, setDone] = useState(false);
+  // A carried insight pauses auto-advance until the person reads and continues.
+  const [pending, setPending] = useState<{
+    insight: QuestionInsightData;
+    advance: () => void;
+    last: boolean;
+  } | null>(null);
   const deckRef = useRef<QuestionCardDeckHandle>(null);
 
   const q = questions[index];
   const value = answers[q.slug];
   const answeredNow = questions.filter((qq) => answers[qq.slug] !== undefined).length;
   const progress = done ? 100 : Math.round((answeredNow / total) * 100);
-  const isLast = index + 1 >= total;
 
-  function next() {
-    if (value === undefined) return;
-    if (isLast) setDone(true);
-    else deckRef.current?.next();
+  const advanceRef = useRef(0);
+
+  /** Answer + auto-advance: a short beat to confirm the choice, then move on.
+   *  When the question carries an insight, hold instead and surface it — the
+   *  person continues at their own pace from the note. */
+  function choose(slug: string, qIndex: number, optionValue: number) {
+    setAnswer(slug, optionValue);
+    const last = qIndex + 1 >= total;
+    const advance = () => {
+      if (last) setDone(true);
+      else deckRef.current?.next();
+    };
+    window.clearTimeout(advanceRef.current);
+    const insight = getQuestionInsight(slug);
+    if (insight) {
+      setPending({ insight, advance, last });
+      return;
+    }
+    advanceRef.current = window.setTimeout(advance, 260);
   }
   function back() {
+    window.clearTimeout(advanceRef.current);
     deckRef.current?.previous();
   }
 
@@ -71,7 +100,16 @@ export function DimensionQuiz({ dimId, onClose }: { dimId: DimensionId; onClose:
                 style={{ width: `${progress}%`, background: dim.accent.solid }}
               />
             </div>
-            <div className="relative mt-3 flex h-7 items-center justify-center">
+            <div className="relative mt-3 flex h-10 items-center justify-center">
+              {index > 0 && (
+                <button
+                  onClick={back}
+                  aria-label="السؤال السابق"
+                  className="absolute start-0 top-1/2 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full border border-ink-200 bg-surface text-ink-700 transition hover:border-ink-300 active:scale-95"
+                >
+                  <ChevronRight className="h-5 w-5" strokeWidth={2.2} />
+                </button>
+              )}
               <span dir="ltr" className="nums text-[0.8125rem] font-bold text-ink-500">
                 {index + 1}
                 <span className="text-ink-300"> / {total}</span>
@@ -100,18 +138,12 @@ export function DimensionQuiz({ dimId, onClose }: { dimId: DimensionId; onClose:
             >
               {questions.map((question, questionIndex) => {
                 const slideValue = answers[question.slug];
-                const slideAnswered = slideValue !== undefined;
-                const slideIsLast = questionIndex + 1 >= total;
-                const denseAnswers = question.answers.length > 5;
 
                 return (
                   <div
                     key={question.slug}
                     data-quiz-card
-                    className={cn(
-                      "flex h-full min-h-0 flex-col rounded-[24px] border border-ink-100 bg-surface",
-                      denseAnswers ? "p-5" : "p-6",
-                    )}
+                    className="flex h-full min-h-0 flex-col rounded-[24px] border border-ink-100 bg-surface p-6"
                   >
                     <span
                       className="inline-flex w-fit items-center gap-1.5 rounded-pill px-3 py-1 text-[11px] font-bold"
@@ -121,7 +153,25 @@ export function DimensionQuiz({ dimId, onClose }: { dimId: DimensionId; onClose:
                       بُعد {dim.title}
                     </span>
 
-                    <div className="mt-4 flex gap-3">
+                    {/* Topic art on a soft accent stage, recolored to the
+                        dimension accent. Takes the flexible middle space and
+                        shrinks first on short screens. */}
+                    <div className="flex min-h-0 flex-1 items-center justify-center py-3">
+                      <div className="relative grid place-items-center">
+                        <span
+                          aria-hidden
+                          className="absolute h-44 w-44 rounded-full opacity-60 blur-xl"
+                          style={{ background: dim.accent.soft }}
+                        />
+                        <Illustration
+                          name={getQuestionArt(question.slug, dimId)}
+                          tone={dim.accent.solid}
+                          className="relative w-36 max-w-[48%]"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex shrink-0 gap-3">
                       <span
                         className="mt-[9px] h-2.5 w-2.5 shrink-0 rounded-full"
                         style={{
@@ -129,72 +179,20 @@ export function DimensionQuiz({ dimId, onClose }: { dimId: DimensionId; onClose:
                           boxShadow: `0 0 10px ${dim.accent.solid}`,
                         }}
                       />
-                      <h1 className="text-balance text-[1.35rem] font-extrabold leading-[1.4] text-ink-900">
+                      <h1 className="text-balance text-[1.3rem] font-extrabold leading-[1.4] text-ink-900">
                         {question.title}
                       </h1>
                     </div>
-                    <p className="mt-2 text-[0.8125rem] font-semibold text-ink-400">
-                      اختر الإجابة الأقرب لحالك
-                    </p>
 
-                    <div
-                      className={cn(
-                        "stagger -mx-1 mt-5 px-1 pb-1",
-                        denseAnswers
-                          ? "grid grid-cols-2 items-stretch gap-2"
-                          : "flex min-h-0 flex-1 flex-col gap-2.5",
-                      )}
-                    >
-                      {question.answers.map((option) => (
-                        <OptionCard
-                          key={option.value}
-                          label={option.title}
-                          selected={slideValue === option.value}
-                          onClick={() => setAnswer(question.slug, option.value)}
-                          accent={dim.accent}
-                          compact={denseAnswers}
-                        />
-                      ))}
-                    </div>
-
-                    <div className="mt-auto flex shrink-0 items-center gap-3 pt-5">
-                      {questionIndex > 0 && (
-                        <button
-                          data-no-swipe
-                          onClick={back}
-                          aria-label="السؤال السابق"
-                          className="inline-flex h-14 items-center gap-1.5 rounded-[16px] px-4 text-[15px] font-bold text-ink-500 transition hover:text-ink-900 active:scale-[0.98]"
-                        >
-                          <ChevronRight className="h-5 w-5" strokeWidth={2.4} />
-                          السابق
-                        </button>
-                      )}
-                      <button
-                        data-no-swipe
-                        onClick={next}
-                        disabled={!slideAnswered}
-                        className={cn(
-                          "inline-flex h-14 flex-1 items-center justify-center gap-2 rounded-[16px] text-base font-bold transition-all duration-200 active:scale-[0.98]",
-                          !slideAnswered
-                            ? "cursor-not-allowed bg-ink-100 text-ink-400"
-                            : "text-white",
-                        )}
-                        style={
-                          slideAnswered
-                            ? {
-                                background: dim.accent.solid,
-                                boxShadow: `0 16px 34px -18px ${dim.accent.solid}`,
-                              }
-                            : undefined
-                        }
-                      >
-                        {slideIsLast ? "إنهاء التقييم" : "التالي"}
-                        {slideIsLast ? (
-                          <Sparkles className="h-5 w-5" strokeWidth={2.2} />
-                        ) : (
-                          <ChevronLeft className="h-5 w-5" strokeWidth={2.4} />
-                        )}
-                      </button>
+                    {/* The answer spectrum — one tap, no scroll. */}
+                    <div className="shrink-0 pt-6">
+                      <ScaleSelect
+                        answers={question.answers}
+                        value={slideValue}
+                        onSelect={(v) => choose(question.slug, questionIndex, v)}
+                        accent={dim.accent}
+                        positiveHigh={higherIsBetter(dimId)}
+                      />
                     </div>
                   </div>
                 );
@@ -202,6 +200,18 @@ export function DimensionQuiz({ dimId, onClose }: { dimId: DimensionId; onClose:
             </QuestionCardDeck>
           </div>
         </>
+      )}
+
+      {pending && (
+        <QuestionInsight
+          insight={pending.insight}
+          accent={dim.accent}
+          continueLabel={pending.last ? "أنهِ البُعد" : "السؤال التالي"}
+          onContinue={() => {
+            pending.advance();
+            setPending(null);
+          }}
+        />
       )}
     </div>,
     document.body,
