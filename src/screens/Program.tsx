@@ -115,9 +115,9 @@ export function Program() {
             ما الذي تكسبه
           </h3>
           <ul className="space-y-1.5 text-[0.8125rem] font-semibold leading-relaxed text-ink-600">
-            <li>• خطة شخصية يضعها معك خبير مختص في هذا المجال</li>
-            <li>• متابعة عبر خمس جلسات حتى تلمس نتيجة ملموسة</li>
-            <li>• أدوات عملية تكمل مهامك اليومية في الخطة</li>
+            {program.outcomes.map((outcome) => (
+              <li key={outcome}>• {outcome}</li>
+            ))}
           </ul>
         </div>
       </section>

@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   BookOpen,
@@ -57,6 +58,38 @@ export function Plan() {
 
   const allTodayDone = tasks.length > 0 && done === tasks.length;
   const hasRecommendations = plan.actions.length > 0 || tasks.length > 0;
+
+  /* The plan reads as a connected journey. Each step below is conditional, so we
+     compute the live sequence once — used for numbering, the overview preview,
+     and knowing which step ends the rail. */
+  const stepDefs = [
+    {
+      key: "consult",
+      icon: Stethoscope,
+      title: "استشارة مجانية مع خبير",
+      desc: "يراجع نتائجك ويساعدك على ترتيب أولوياتك",
+      present: true,
+    },
+    {
+      key: "programs",
+      icon: GraduationCap,
+      title: "برامج مختصة موصى بها",
+      desc: "جلسات متدرّجة مع خبير لكل تحدٍّ كبير",
+      present: recommendedPrograms.length > 0,
+    },
+    {
+      key: "recos",
+      icon: ClipboardList,
+      title: "توصيات تطبّقها بنفسك",
+      desc: "خطوات عملية صغيرة لكل ملاحظة في تقريرك",
+      present: hasRecommendations,
+    },
+  ];
+  const steps = stepDefs.filter((s) => s.present);
+  const stepNo = (key: string) => steps.findIndex((s) => s.key === key) + 1;
+  const lastKey = steps[steps.length - 1]?.key;
+  const stepCountLabel =
+    steps.length === 1 ? "خطوة واحدة" : steps.length === 2 ? "خطوتين" : "ثلاث خطوات";
 
   if (!hasResults) {
     return (
@@ -120,35 +153,36 @@ export function Plan() {
             </div>
           )}
 
-          {/* What the plan is made of — sets up the three sections below */}
-          <div className="mt-4 space-y-2.5 border-t border-ink-100 pt-4">
-            <p className="text-[11px] font-bold text-ink-500">تتكوّن خطتك من ثلاث خطوات:</p>
-            <PlanStep
-              n={1}
-              icon={Stethoscope}
-              title="استشارة مجانية مع خبير"
-              desc="يراجع نتائجك ويساعدك على ترتيب أولوياتك"
-            />
-            <PlanStep
-              n={2}
-              icon={GraduationCap}
-              title="برامج مختصة موصى بها"
-              desc="جلسات متدرّجة مع خبير لكل تحدٍّ كبير"
-            />
-            <PlanStep
-              n={3}
-              icon={ClipboardList}
-              title="توصيات تطبّقها بنفسك"
-              desc="خطوات عملية صغيرة لكل ملاحظة في تقريرك"
-            />
+          {/* What the plan is made of — a mini stepper previewing the sections below */}
+          <div className="mt-4 border-t border-ink-100 pt-4">
+            <p className="mb-3 text-[11px] font-bold text-ink-500">
+              تتكوّن خطتك من {stepCountLabel} — نطبّقها معًا خطوة بخطوة:
+            </p>
+            <div className="relative space-y-3">
+              {/* rail connecting the numbered nodes */}
+              <span
+                aria-hidden
+                className="absolute bottom-4 top-4 start-[0.9375rem] w-0.5 rounded-full bg-gradient-to-b from-brand-200 to-ink-100"
+              />
+              {steps.map((step) => (
+                <PlanStep
+                  key={step.key}
+                  n={stepNo(step.key)}
+                  icon={step.icon}
+                  title={step.title}
+                  desc={step.desc}
+                />
+              ))}
+            </div>
           </div>
         </div>
       </section>
 
+      {/* ── The plan as a connected journey — one rail through every step ──── */}
+      <div className="pt-4">
       {/* ── Step 1 — Free expert consultation ─────────────────────────────── */}
-      <section className="px-5 pt-7">
-        <StepHeader
-          n={1}
+      <StepRow n={stepNo("consult")} last={lastKey === "consult"}>
+        <StepTitle
           title="ابدأ باستشارتك المجانية"
           subtitle={
             plan.priority.length > 0
@@ -199,19 +233,18 @@ export function Plan() {
             <ChevronLeft className="h-4 w-4" strokeWidth={2.4} />
           </button>
         </Spotlight>
-      </section>
+      </StepRow>
 
       {/* ── Step 2 — Recommended specialist programs ──────────────────────── */}
       {recommendedPrograms.length > 0 && (
-        <section className="px-5 pt-7">
-          <StepHeader
-            n={2}
+        <StepRow n={stepNo("programs")} last={lastKey === "programs"}>
+          <StepTitle
             title="برامج موصى بها لك"
-            subtitle="برامج علاجية من 5 جلسات مع خبير مختص — مختارة حسب ما أظهره تقريرك"
+            subtitle="برامج علاجية من 5 جلسات مع خبير مختص — كل برنامج مختار لما أظهره تقريرك، مع القيمة التي يعيدها لك"
             icon={GraduationCap}
             tone="text-brand-600"
           />
-          <div className="space-y-2.5">
+          <div className="space-y-3">
             {recommendedPrograms.map((rec) => (
               <ProgramRecommendationCard
                 key={rec.program.id}
@@ -220,14 +253,13 @@ export function Plan() {
               />
             ))}
           </div>
-        </section>
+        </StepRow>
       )}
 
       {/* ── Step 3 — Self-applied recommendations & daily habits ───────────── */}
       {hasRecommendations && (
-        <section className="px-5 pt-7">
-          <StepHeader
-            n={3}
+        <StepRow n={stepNo("recos")} last={lastKey === "recos"}>
+          <StepTitle
             title="توصياتك وإرشاداتك"
             subtitle="خطوات تطبّقها بنفسك — ابدأ بمهام اليوم، ثم توصية واضحة لكل ملاحظة"
             icon={ClipboardList}
@@ -316,7 +348,10 @@ export function Plan() {
           {/* Per-finding recommendations — each report finding paired with a step */}
           {plan.actions.length > 0 && (
             <div>
-              <h3 className="mb-3 text-sm font-bold text-ink-700">توصية لكل ملاحظة في تقريرك</h3>
+              <h3 className="text-sm font-bold text-ink-700">توصية لكل ملاحظة في تقريرك</h3>
+              <p className="mb-3.5 mt-0.5 text-[11px] font-semibold leading-relaxed text-ink-400">
+                لكل ملاحظة: ما تعنيه، وخطوة تبدأ بها اليوم، ورابط يفتح تفاصيلها
+              </p>
               <div className="space-y-5">
                 {plan.actionGroups.map((group) => {
                   const Icon = group.area.icon;
@@ -346,7 +381,7 @@ export function Plan() {
                           <ActionCard
                             key={item.insight.id}
                             item={item}
-                            onOpen={() => navigate(`/dimension/${item.dimension.id}`)}
+                            onOpen={() => navigate(`/focus/${item.dimension.id}`)}
                           />
                         ))}
                       </div>
@@ -356,8 +391,9 @@ export function Plan() {
               </div>
             </div>
           )}
-        </section>
+        </StepRow>
       )}
+      </div>
 
       {/* ── Wins to keep — positive findings worth protecting ────────────── */}
       {plan.wins.length > 0 && (
@@ -393,35 +429,60 @@ export function Plan() {
 
 /* ── Small building blocks ──────────────────────────────────────────────── */
 
-/** A numbered eyebrow + title + subtitle, used to head each of the three steps. */
-function StepHeader({
+/** One stop on the plan's journey: a numbered node on a vertical rail, with the
+ *  step's header and body flowing beside it. The rail connects to the next step
+ *  unless this is the last one — giving the page a clear step-by-step spine. */
+function StepRow({
   n,
+  last,
+  children,
+}: {
+  n: number;
+  last: boolean;
+  children: ReactNode;
+}) {
+  return (
+    <div className="flex gap-3.5 px-5">
+      {/* node + connecting rail */}
+      <div className="relative flex flex-col items-center">
+        <span className="nums z-10 grid h-9 w-9 shrink-0 place-items-center rounded-full bg-brand-600 text-sm font-extrabold text-white shadow-soft ring-4 ring-canvas">
+          {n}
+        </span>
+        {!last && (
+          <span className="mt-1 w-0.5 flex-1 rounded-full bg-gradient-to-b from-brand-200 via-ink-100 to-ink-100" />
+        )}
+      </div>
+      {/* step content */}
+      <div className="min-w-0 flex-1 pb-9">{children}</div>
+    </div>
+  );
+}
+
+/** Title + subtitle heading the body of a step (the number lives on the rail). */
+function StepTitle({
   title,
   subtitle,
   icon: Icon,
   tone,
 }: {
-  n: number;
   title: string;
   subtitle: string;
   icon: LucideIcon;
   tone: string;
 }) {
   return (
-    <div className="mb-3.5">
-      <span className="mb-1.5 inline-flex items-center gap-1 rounded-pill bg-brand-soft px-2.5 py-0.5 text-[10px] font-bold text-brand-700">
-        الخطوة <span className="nums">{n}</span>
-      </span>
+    <div className="mb-3.5 pt-0.5">
       <h2 className="flex items-center gap-2 text-[1.0625rem] font-bold text-ink-900">
         <Icon className={cn("h-[1.15rem] w-[1.15rem]", tone)} strokeWidth={2.3} />
         {title}
       </h2>
-      <p className="mt-1 text-xs font-semibold text-ink-400">{subtitle}</p>
+      <p className="mt-1 text-xs font-semibold leading-relaxed text-ink-400">{subtitle}</p>
     </div>
   );
 }
 
-/** A single line in the overview's "what your plan is made of" list. */
+/** A single node in the overview's mini stepper — a numbered circle sitting on
+ *  the rail, with a tinted feature icon beside it. */
 function PlanStep({
   n,
   icon: Icon,
@@ -434,12 +495,12 @@ function PlanStep({
   desc: string;
 }) {
   return (
-    <div className="flex items-center gap-3">
-      <span className="relative grid h-9 w-9 shrink-0 place-items-center rounded-[0.7rem] bg-brand-soft text-brand-600">
-        <Icon className="h-[1.05rem] w-[1.05rem]" strokeWidth={2.1} />
-        <span className="nums absolute -end-1 -top-1 grid h-4 w-4 place-items-center rounded-full bg-brand-600 text-[9px] font-extrabold text-white">
-          {n}
-        </span>
+    <div className="relative flex items-center gap-3">
+      <span className="nums relative z-10 grid h-8 w-8 shrink-0 place-items-center rounded-full bg-brand-600 text-[13px] font-extrabold text-white shadow-soft ring-4 ring-surface">
+        {n}
+      </span>
+      <span className="grid h-8 w-8 shrink-0 place-items-center rounded-[0.6rem] bg-brand-soft text-brand-600">
+        <Icon className="h-[1rem] w-[1rem]" strokeWidth={2.1} />
       </span>
       <div className="min-w-0 flex-1">
         <p className="text-[0.8125rem] font-bold text-ink-900">{title}</p>
@@ -481,34 +542,49 @@ function PriorityCard({ item }: { item: PlanFocusItem }) {
 
 function ActionCard({ item, onOpen }: { item: PlanFocusItem; onOpen: () => void }) {
   const sev = SEV[item.insight.severity];
+  const { insight } = item;
   return (
     <div className="rounded-card border border-ink-100 bg-surface p-4 shadow-soft">
-      <div className="flex items-start gap-3">
-        <span className={cn("mt-1.5 h-2 w-2 shrink-0 rounded-full", sev.dot)} />
-        <div className="min-w-0 flex-1">
-          <div className="flex items-start justify-between gap-3">
-            <h4 className="text-[0.9375rem] font-bold leading-snug text-ink-900">
-              {item.insight.title}
-            </h4>
-            <span
-              className={cn("shrink-0 rounded-pill px-2 py-0.5 text-[10px] font-bold", sev.chip)}
-            >
-              {sev.label}
-            </span>
-          </div>
-          <div className="mt-2.5 flex items-start gap-2 rounded-md bg-sand/70 p-2.5">
-            <Lightbulb className="mt-0.5 h-3.5 w-3.5 shrink-0 text-brand-600" strokeWidth={2.4} />
-            <p className="text-[0.8125rem] font-semibold leading-relaxed text-ink-700">{item.step}</p>
-          </div>
-          <button
-            onClick={onOpen}
-            className="mt-2.5 flex items-center gap-1 text-[0.8125rem] font-bold text-brand-600 transition hover:text-brand-700"
-          >
-            افتح بُعد {item.dimension.title}
-            <ChevronLeft className="h-4 w-4" strokeWidth={2.4} />
-          </button>
+      {/* Finding — severity, title, and headline figure if there is one */}
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex min-w-0 items-start gap-2">
+          <span className={cn("mt-1.5 h-2 w-2 shrink-0 rounded-full", sev.dot)} />
+          <h4 className="text-[0.9375rem] font-bold leading-snug text-ink-900">{insight.title}</h4>
+        </div>
+        <span className={cn("shrink-0 rounded-pill px-2 py-0.5 text-[10px] font-bold", sev.chip)}>
+          {sev.label}
+        </span>
+      </div>
+
+      {insight.metric && (
+        <div className="mt-2 inline-flex items-baseline gap-1.5 rounded-md bg-sand/70 px-2.5 py-1">
+          <span className="nums text-sm font-extrabold text-ink-900">{insight.metric}</span>
+          {insight.metricLabel && (
+            <span className="text-[10px] font-bold text-ink-400">{insight.metricLabel}</span>
+          )}
+        </div>
+      )}
+
+      {/* The insight — what this means, grounded in the employee's own answers */}
+      <p className="mt-2 text-[0.8125rem] leading-relaxed text-ink-500">{insight.detail}</p>
+
+      {/* The step — the one concrete thing to do about it */}
+      <div className="mt-2.5 flex items-start gap-2 rounded-md bg-brand-soft/60 p-2.5">
+        <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-brand-600" strokeWidth={2.4} />
+        <div className="min-w-0">
+          <p className="mb-0.5 text-[10px] font-bold text-brand-700">خطوتك الأولى</p>
+          <p className="text-[0.8125rem] font-semibold leading-relaxed text-ink-700">{item.step}</p>
         </div>
       </div>
+
+      {/* Call to action — go deeper in the dimension it belongs to */}
+      <button
+        onClick={onOpen}
+        className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-pill border border-brand-200 bg-brand-soft/40 py-2.5 text-[0.8125rem] font-bold text-brand-700 transition hover:bg-brand-soft active:scale-[0.98]"
+      >
+        ابدأ العمل على {item.dimension.title}
+        <ChevronLeft className="h-4 w-4" strokeWidth={2.4} />
+      </button>
     </div>
   );
 }

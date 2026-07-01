@@ -14,7 +14,7 @@ interface NavItem {
 const items: NavItem[] = [
   { to: "/", label: "الرئيسية", icon: House },
   { to: "/report", label: "تقريري", icon: ScrollText },
-  { to: "/plan", label: "رحلتي", icon: RouteIcon },
+  { to: "/plan", label: "خطتي", icon: RouteIcon },
   { to: "/content", label: "المحتوى", icon: BookOpen },
   { to: "/profile", label: "حسابي", icon: User },
 ];

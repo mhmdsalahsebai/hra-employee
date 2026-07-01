@@ -1,4 +1,5 @@
 import { BottomNav } from "./BottomNav";
+import { AchievementModal } from "./AchievementModal";
 import { RouteTransition } from "../motion/RouteTransition";
 
 /** The mobile "phone frame": a centered max-width column the whole app lives
@@ -18,6 +19,7 @@ export function AppLayout() {
         <RouteTransition />
       </main>
       <BottomNav />
+      <AchievementModal />
     </div>
   );
 }

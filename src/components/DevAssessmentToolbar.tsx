@@ -3,6 +3,7 @@ import { Check, Dices, Trash2 } from "lucide-react";
 import { useAssessment } from "../assessment/useAssessment";
 import { useOnboarding } from "../onboarding/useOnboarding";
 import { haptic } from "../motion/haptics";
+import { CELEBRATED_KEY } from "./AchievementModal";
 
 type Feedback = "filled" | "cleared" | null;
 
@@ -36,6 +37,8 @@ export function DevAssessmentToolbar() {
 
   const handleClear = () => {
     resetAnswers();
+    // Let the completion celebration fire again on the next full run.
+    localStorage.removeItem(CELEBRATED_KEY);
     haptic("select");
     showFeedback("cleared");
   };

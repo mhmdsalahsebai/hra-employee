@@ -146,32 +146,38 @@ export function Home() {
             </div>
           </div>
 
-          <button
-            onClick={() =>
-              hasResults
-                ? navigate("/consultation")
-                : nextDim
-                  ? navigate(`/dimension/${nextDim.id}`)
-                  : navigate("/report")
-            }
-            className="relative mt-5 flex w-full items-center justify-center gap-2 rounded-pill bg-brand-600 py-3.5 text-[0.875rem] font-bold text-white shadow-soft transition hover:bg-brand-700 active:scale-[0.99]"
-          >
-            {hasResults ? (
-              <>
+          {hasResults ? (
+            <div className="relative mt-5 flex items-center gap-2.5">
+              <button
+                onClick={() => navigate("/consultation")}
+                className="flex flex-[1.4] items-center justify-center gap-2 rounded-pill bg-brand-600 py-3.5 text-[0.875rem] font-bold text-white shadow-soft transition hover:bg-brand-700 active:scale-[0.99]"
+              >
                 <Video className="h-4 w-4" strokeWidth={2.2} />
-                ابدأ استشارة فورية الآن
-              </>
-            ) : (
-              <>
-                {started && nextDim
-                  ? `تابع: بُعد ${nextDim.title}`
-                  : nextDim
-                    ? `ابدأ ببُعد ${nextDim.title}`
-                    : "اعرض تقريرك"}
-                <ChevronLeft className="h-4 w-4" strokeWidth={2.4} />
-              </>
-            )}
-          </button>
+                استشارة فورية الآن
+              </button>
+              <button
+                onClick={() => navigate("/report")}
+                className="flex flex-1 items-center justify-center gap-1.5 rounded-pill bg-white/80 py-3.5 text-[0.875rem] font-bold text-brand-700 shadow-soft ring-1 ring-inset ring-brand-500/15 backdrop-blur transition hover:bg-white active:scale-[0.99]"
+              >
+                <ScrollText className="h-4 w-4" strokeWidth={2.2} />
+                التقرير
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() =>
+                nextDim ? navigate(`/dimension/${nextDim.id}`) : navigate("/report")
+              }
+              className="relative mt-5 flex w-full items-center justify-center gap-2 rounded-pill bg-brand-600 py-3.5 text-[0.875rem] font-bold text-white shadow-soft transition hover:bg-brand-700 active:scale-[0.99]"
+            >
+              {started && nextDim
+                ? `تابع: بُعد ${nextDim.title}`
+                : nextDim
+                  ? `ابدأ ببُعد ${nextDim.title}`
+                  : "اعرض تقريرك"}
+              <ChevronLeft className="h-4 w-4" strokeWidth={2.4} />
+            </button>
+          )}
         </div>
       </section>
 

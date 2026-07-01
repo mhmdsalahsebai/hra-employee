@@ -10,7 +10,9 @@
       "Bash(cd /home/mhmdsalah/Desktop/work/hra-employee *)",
       "Read(//opt/google/chrome/**)",
       "Bash(echo \"started, pid $!\")",
-      "Bash(cp __TRACKED_VAR__/shot.mjs ./_shot.mjs)"
+      "Bash(cp __TRACKED_VAR__/shot.mjs ./_shot.mjs)",
+      "Bash(echo \"exit $?\")",
+      "Bash(echo \"EXIT: $?\")"
     ]
   }
 }

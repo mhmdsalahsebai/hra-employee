@@ -62,6 +62,9 @@ export interface Program {
   expert: ProgramExpert;
   /** Exactly five sessions, in order. */
   sessions: ProgramSession[];
+  /** The tangible gains the employee walks away with — the "why join" value,
+   *  shown as a benefit list on the recommendation card. Keep to 2–3, concrete. */
+  outcomes: string[];
   /** Insight ids (from insights.ts) this program is designed to address. */
   treats: string[];
 }
@@ -84,6 +87,11 @@ export const programs: Program[] = [
       { order: 4, title: "محفّزات الأكل العاطفي", focus: "التعرّف على الجوع العاطفي وكسر دورة الأكل تحت الضغط أو الملل.", durationMin: 45 },
       { order: 5, title: "تثبيت العادة ومنع الانتكاس", focus: "خطة المحافظة على الوزن، والتعامل مع المناسبات والهفوات دون استسلام.", durationMin: 40 },
     ],
+    outcomes: [
+      "خسارة تدريجية وآمنة للوزن دون حرمان",
+      "طاقة أعلى ومؤشرات ضغط وسكر أفضل",
+      "عادات أكل تدوم معك بعد البرنامج",
+    ],
     treats: ["bmi", "waist"],
   },
   {
@@ -102,6 +110,11 @@ export const programs: Program[] = [
       { order: 3, title: "إدارة الحالة المزمنة", focus: "الالتزام بالعلاج والقياسات المنزلية وعلامات الإنذار التي تستدعي الطبيب.", durationMin: 45 },
       { order: 4, title: "الترطيب والحركة اليومية", focus: "بناء عادة شرب الماء وكسر الجلوس المطوّل خلال يوم العمل.", durationMin: 35 },
       { order: 5, title: "خطة المتابعة السنوية", focus: "تقويم فحوصات شخصي وعادات وقائية مستدامة تحافظ على مكاسبك.", durationMin: 35 },
+    ],
+    outcomes: [
+      "فحوصاتك الوقائية مكتملة ومجدولة",
+      "خطر أمراض القلب والسكري أقل",
+      "روتين غذائي وحركي يحمي استقلابك",
     ],
     treats: ["nutrition", "chronic-condition", "chronic-pain", "screening-gap", "screening-single", "bp-never"],
   },
@@ -122,6 +135,11 @@ export const programs: Program[] = [
       { order: 4, title: "مواجهة المخاوف تدريجيًا", focus: "التعرّض المتدرّج للمواقف المتجنَّبة لكسر دائرة القلق.", durationMin: 45 },
       { order: 5, title: "خطة الوقاية من الانتكاس", focus: "عُدّة أدوات يومية وعلامات إنذار مبكر للحفاظ على الهدوء.", durationMin: 40 },
     ],
+    outcomes: [
+      "نوبات قلق أقل تكرارًا وأخفّ حدّة",
+      "أدوات فورية تهدّئ توترك وقت الحاجة",
+      "نوم وتركيز يعودان إلى طبيعتهما",
+    ],
     treats: ["anxiety", "stress"],
   },
   {
@@ -140,6 +158,11 @@ export const programs: Program[] = [
       { order: 3, title: "تفكيك الأفكار السلبية", focus: "التعرّف على نمط التفكير المكتئب واستبداله بنظرة أكثر توازنًا.", durationMin: 45 },
       { order: 4, title: "الروتين والنوم والدعم", focus: "بناء روتين يومي مستقر وشبكة دعم تسندك.", durationMin: 40 },
       { order: 5, title: "الحفاظ على التقدّم", focus: "رصد علامات الانتكاس مبكرًا وخطة لمواصلة التعافي.", durationMin: 40 },
+    ],
+    outcomes: [
+      "طاقة ودافع يعودان خطوة بخطوة",
+      "نظرة أكثر توازنًا نحو نفسك ويومك",
+      "روتين وشبكة دعم تسندك",
     ],
     treats: ["depression", "emotional-regulation"],
   },
@@ -160,6 +183,11 @@ export const programs: Program[] = [
       { order: 4, title: "إدارة الطاقة لا الوقت", focus: "فواصل التعافي القصيرة وطقوس بداية ونهاية اليوم.", durationMin: 40 },
       { order: 5, title: "خطة الاستدامة", focus: "نظام إنذار مبكر يمنع عودة الاحتراق ومحادثة واضحة مع مديرك.", durationMin: 40 },
     ],
+    outcomes: [
+      "طاقتك واتزانك يعودان تدريجيًا",
+      "حدود صحية بين العمل وبقية حياتك",
+      "علاقة أهدأ وأصحّ مع عملك",
+    ],
     treats: ["burnout", "burnout-ee", "burnout-mild"],
   },
   {
@@ -178,6 +206,11 @@ export const programs: Program[] = [
       { order: 3, title: "تهدئة العقل ليلًا", focus: "تقنيات استرخاء وتفريغ ذهني توقف اجترار الأفكار.", durationMin: 40 },
       { order: 4, title: "ضبط الساعة البيولوجية", focus: "تثبيت وقت الاستيقاظ والتعرّض للضوء لإعادة ضبط إيقاعك.", durationMin: 35 },
       { order: 5, title: "نوم مستدام", focus: "خطة للتعامل مع الليالي الصعبة دون العودة للأرق.", durationMin: 35 },
+    ],
+    outcomes: [
+      "نوم أعمق وأقلّ تقطّعًا",
+      "استيقاظ بنشاط وتركيز أوضح",
+      "توتر أقل يرافقك خلال يومك",
     ],
     treats: ["sleep"],
   },
@@ -198,6 +231,11 @@ export const programs: Program[] = [
       { order: 4, title: "كسر الارتباطات", focus: "تغيير الروتين المرتبط بالتدخين وبناء بدائل صحية.", durationMin: 35 },
       { order: 5, title: "البقاء غير مدخّن", focus: "خطة منع الانتكاس والتعامل مع الهفوة إن حدثت.", durationMin: 35 },
     ],
+    outcomes: [
+      "فرص إقلاعك تتضاعف بدعم مختص",
+      "تحكّم في الاشتياق وأعراض الانسحاب",
+      "نفَس وقلب ومال في حال أفضل",
+    ],
     treats: ["smoking"],
   },
   {
@@ -216,6 +254,11 @@ export const programs: Program[] = [
       { order: 3, title: "بناء التحمّل", focus: "خطة مشي/كارديو متدرّجة نحو 150 دقيقة أسبوعيًا.", durationMin: 40 },
       { order: 4, title: "تمارين المقاومة الآمنة", focus: "تمارين قوة منزلية بسيطة لحماية العضلات والمفاصل.", durationMin: 40 },
       { order: 5, title: "اجعلها عادة", focus: "جدولة النشاط ومتابعته بما يضمن الاستمرارية.", durationMin: 35 },
+    ],
+    outcomes: [
+      "لياقة وطاقة ترتفع أسبوعًا بعد أسبوع",
+      "خطة حركة تناسب وقتك دون نادٍ",
+      "مزاج أفضل وجلوس مطوّل أقل",
     ],
     treats: ["inactivity", "sitting"],
   },
@@ -236,6 +279,11 @@ export const programs: Program[] = [
       { order: 4, title: "معالجة الديون", focus: "ترتيب سداد الديون وتخفيف عبئها على الميزانية الشهرية.", durationMin: 40 },
       { order: 5, title: "التخطيط للمستقبل", focus: "أهداف طويلة الأجل وبداية ادخار التقاعد ولو 5٪ شهريًا.", durationMin: 40 },
     ],
+    outcomes: [
+      "ميزانية واضحة تحت سيطرتك",
+      "صندوق طوارئ ينمو تلقائيًا",
+      "ضغط مالي أقل وشعور أكبر بالأمان",
+    ],
     treats: ["financial-stress", "financial-cushion", "financial-obligations", "retirement", "financial-planning"],
   },
   {
@@ -254,6 +302,11 @@ export const programs: Program[] = [
       { order: 3, title: "مسار النمو", focus: "خطة تطوّر فردية وخطوة مهنية تالية واضحة.", durationMin: 40 },
       { order: 4, title: "الانتماء والأمان النفسي", focus: "بناء روابط صادقة في الفريق والتعبير عن الرأي بأمان.", durationMin: 40 },
       { order: 5, title: "قرار واعٍ", focus: "تقييم السبب الجذري قبل أي قرار بالبقاء أو المغادرة، ومحادثة مع مديرك.", durationMin: 45 },
+    ],
+    outcomes: [
+      "شغف ومعنى يعودان إلى عملك",
+      "مسار نمو وخطوة مهنية تالية واضحة",
+      "انتماء وأمان نفسي أكبر في فريقك",
     ],
     treats: ["engagement-low", "engagement-meaning", "engagement-growth", "engagement-belonging", "turnover", "recognition", "psych-safety"],
   },
