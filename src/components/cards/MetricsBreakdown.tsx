@@ -1,8 +1,14 @@
-import { Gauge } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { ChevronLeft, Gauge, GraduationCap, ShieldCheck, Sparkles } from "lucide-react";
 import { cn } from "../../lib/cn";
 import { LEVEL_CLASS, LEVEL_HEX } from "../../lib/score";
 import { dimensionsById, tileStyle, type DimensionId } from "../../data/dimensions";
 import type { DimensionMetrics, Metric } from "../../data/metrics";
+import {
+  consultationHref,
+  contentForDimension,
+  programForMetric,
+} from "../../data/recommendationLinks";
 import { IconTile } from "../ui/Card";
 import { ProgressBar } from "../ui";
 
@@ -12,6 +18,7 @@ import { ProgressBar } from "../ui";
    derived live from the employee's own answers. */
 
 function MetricRow({ metric }: { metric: Metric }) {
+  const navigate = useNavigate();
   const m = LEVEL_CLASS[metric.level];
   return (
     <div className="py-3 first:pt-0 last:pb-0">
@@ -33,6 +40,65 @@ function MetricRow({ metric }: { metric: Metric }) {
       </div>
       <ProgressBar value={metric.score} barStyle={{ background: LEVEL_HEX[metric.level] }} />
       <p className="mt-1.5 text-[0.8125rem] leading-relaxed text-ink-600">{metric.reading}</p>
+      <MetricAction metric={metric} navigate={navigate} />
+    </div>
+  );
+}
+
+/** Turns each metric's status into a concrete next step: a guided program /
+ *  consultation when it needs work, or a "keep it up" nudge when it's strong. */
+function MetricAction({
+  metric,
+  navigate,
+}: {
+  metric: Metric;
+  navigate: ReturnType<typeof useNavigate>;
+}) {
+  const program = programForMetric(metric);
+
+  // Strong metric → a light, non-alarming "protect this win" link.
+  if (metric.level === "good") {
+    const item = contentForDimension(metric.dimension);
+    return (
+      <button
+        onClick={() => navigate(item ? `/content?item=${item.id}` : `/dimension/${metric.dimension}`)}
+        className="mt-2 inline-flex items-center gap-1.5 rounded-pill bg-good-soft px-2.5 py-1.5 text-[11px] font-bold text-good transition hover:brightness-95 active:scale-[0.98]"
+      >
+        <ShieldCheck className="h-3.5 w-3.5" strokeWidth={2.4} />
+        حافظ عليه
+      </button>
+    );
+  }
+
+  // Needs work → route to the best help. Program if we have one, else the plan.
+  return (
+    <div className="mt-2.5 flex flex-wrap items-center gap-2">
+      {program ? (
+        <>
+          <button
+            onClick={() => navigate(`/program/${program.id}`)}
+            className="inline-flex items-center gap-1.5 rounded-pill bg-brand-600 px-3 py-1.5 text-[11px] font-bold text-white shadow-soft transition hover:bg-brand-700 active:scale-[0.98]"
+          >
+            <GraduationCap className="h-3.5 w-3.5" strokeWidth={2.3} />
+            ابدأ برنامج {program.tag}
+          </button>
+          <button
+            onClick={() => navigate(consultationHref(program))}
+            className="text-[11px] font-bold text-brand-600 transition hover:text-brand-700"
+          >
+            أو استشارة
+          </button>
+        </>
+      ) : (
+        <button
+          onClick={() => navigate(`/dimension/${metric.dimension}`)}
+          className="inline-flex items-center gap-1 rounded-pill border border-ink-200 bg-surface px-3 py-1.5 text-[11px] font-bold text-ink-700 transition hover:border-brand-300 hover:text-brand-700 active:scale-[0.98]"
+        >
+          <Sparkles className="h-3.5 w-3.5" strokeWidth={2.3} />
+          خطوات لتحسين هذا المؤشر
+          <ChevronLeft className="h-3.5 w-3.5" strokeWidth={2.4} />
+        </button>
+      )}
     </div>
   );
 }

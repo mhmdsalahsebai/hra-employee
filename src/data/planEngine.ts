@@ -19,7 +19,7 @@ import { dimensionsById, type Dimension, type DimensionId } from "./dimensions";
 
 /** Which wellbeing dimension each insight area belongs to — so a finding keeps
  *  the same accent and can deep-link into its dimension screen. */
-const CATEGORY_DIMENSION: Record<InsightCategory, DimensionId> = {
+export const CATEGORY_DIMENSION: Record<InsightCategory, DimensionId> = {
   body: "physical",
   chronic: "physical",
   screening: "physical",

@@ -1,4 +1,5 @@
-import { Lightbulb } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { CalendarClock, ChevronLeft, GraduationCap, Lightbulb, PlayCircle } from "lucide-react";
 import { cn } from "../../lib/cn";
 import {
   CATEGORY_META,
@@ -7,6 +8,12 @@ import {
   type InsightSeverity,
   type InsightSummary,
 } from "../../data/insights";
+import {
+  consultationHref,
+  contentForDimension,
+  dimensionForInsight,
+  programForInsight,
+} from "../../data/recommendationLinks";
 
 /* The detailed-insight section of the report: every specific finding the engine
    derived from the individual answers (BMI, chronic conditions, missed
@@ -53,7 +60,17 @@ const ORDER: InsightCategory[] = [
 ];
 
 function InsightCard({ insight }: { insight: Insight }) {
+  const navigate = useNavigate();
   const s = SEVERITY[insight.severity];
+  const isPositive = insight.severity === "positive";
+
+  // Link the finding to the three Cura deliverables: a topic-specific expert
+  // consultation + guided program (the "Cura solution"), a habit in the plan,
+  // and matched content. Positive findings get no push-to-act, just content.
+  const program = programForInsight(insight.id);
+  const dimension = dimensionForInsight(insight);
+  const relatedContent = contentForDimension(dimension);
+
   return (
     <div className={cn("rounded-card border p-4 shadow-soft", s.card)}>
       <div className="flex items-start gap-3">
@@ -82,9 +99,74 @@ function InsightCard({ insight }: { insight: Insight }) {
               </p>
             </div>
           )}
+
+          {/* ── Actions: consultation (topic + expert) · program · plan · content ── */}
+          {!isPositive && program && (
+            <button
+              onClick={() => navigate(consultationHref(program))}
+              className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-pill bg-brand-600 py-2.5 text-[0.8125rem] font-bold text-white shadow-soft transition hover:bg-brand-700 active:scale-[0.99]"
+            >
+              احجز استشارة عن {program.tag} مع {program.expert.name}
+              <ChevronLeft className="h-4 w-4" strokeWidth={2.4} />
+            </button>
+          )}
+          {!isPositive && !program && (insight.severity === "critical" || insight.severity === "warning") && (
+            <button
+              onClick={() => navigate("/consultation")}
+              className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-pill bg-brand-600 py-2.5 text-[0.8125rem] font-bold text-white shadow-soft transition hover:bg-brand-700 active:scale-[0.99]"
+            >
+              احجز استشارة مجانية مع خبير
+              <ChevronLeft className="h-4 w-4" strokeWidth={2.4} />
+            </button>
+          )}
+
+          <div className="mt-2 flex flex-wrap gap-2">
+            {program && (
+              <ActionChip
+                icon={GraduationCap}
+                label={`برنامج ${program.tag} · ٥ جلسات`}
+                onClick={() => navigate(`/program/${program.id}`)}
+              />
+            )}
+            {!isPositive && (
+              <ActionChip
+                icon={CalendarClock}
+                label="أضِف إلى خطتك"
+                onClick={() => navigate("/plan")}
+              />
+            )}
+            {relatedContent && (
+              <ActionChip
+                icon={PlayCircle}
+                label="محتوى مرتبط"
+                onClick={() => navigate(`/content?item=${relatedContent.id}`)}
+              />
+            )}
+          </div>
         </div>
       </div>
     </div>
+  );
+}
+
+/** A compact secondary action pill used under a health note. */
+function ActionChip({
+  icon: Icon,
+  label,
+  onClick,
+}: {
+  icon: typeof Lightbulb;
+  label: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className="inline-flex items-center gap-1.5 rounded-pill border border-ink-200 bg-surface px-2.5 py-1.5 text-[11px] font-bold text-ink-700 transition hover:border-brand-300 hover:text-brand-700 active:scale-[0.98]"
+    >
+      <Icon className="h-3.5 w-3.5" strokeWidth={2.2} />
+      {label}
+    </button>
   );
 }
 

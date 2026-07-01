@@ -61,17 +61,21 @@ export interface Dimension {
   trend: number;
 }
 
+/* Order matters: this array drives the answering order in the assessment, the
+   Home journey path, the radar and the metrics list. It's deliberately arranged
+   so the employee starts with dimensions about *themselves* (health, mind,
+   money) and the company-related dimensions (المهني / بيئة العمل) come last. */
 export const dimensions: Dimension[] = [
   {
-    id: "professional",
-    title: "المهني",
-    tagline: "الإجهاد والاحتراق الوظيفي",
+    id: "physical",
+    title: "البدني",
+    tagline: "النشاط واللياقة",
     description:
-      "يقيس مستوى الإجهاد النفسي والعاطفي في بيئة عملك، وتأثيره على أدائك وطاقتك وعلاقتك بزملائك.",
-    icon: Briefcase,
-    accent: { fg: "#2563a8", soft: "rgba(37,99,168,0.1)", solid: "#2f7dcc" },
-    benchmark: 55,
-    trend: 6,
+      "يقيس مستوى نشاطك البدني والمؤشرات الوقائية وحالتك الصحية ونمط حياتك الغذائي.",
+    icon: Activity,
+    accent: { fg: "#5c861d", soft: "rgba(92,134,29,0.12)", solid: "#7cad2e" },
+    benchmark: 50,
+    trend: -3,
   },
   {
     id: "psycho",
@@ -82,6 +86,17 @@ export const dimensions: Dimension[] = [
     icon: Brain,
     accent: { fg: "#b24572", soft: "rgba(178,69,114,0.1)", solid: "#d25d8c" },
     benchmark: 58,
+    trend: 4,
+  },
+  {
+    id: "financial",
+    title: "المالي",
+    tagline: "الاستقرار المالي",
+    description:
+      "يقيس مستوى الضغط المالي ورضاك عن وضعك المالي واستعدادك للطوارئ وعاداتك في التخطيط والادخار.",
+    icon: Wallet,
+    accent: { fg: "#177e93", soft: "rgba(23,126,147,0.1)", solid: "#1c9bb4" },
+    benchmark: 56,
     trend: 4,
   },
   {
@@ -128,27 +143,17 @@ export const dimensions: Dimension[] = [
     benchmark: 67,
     trend: 3,
   },
+  /* ── Company-related dimensions come last ──────────────────────────────── */
   {
-    id: "physical",
-    title: "البدني",
-    tagline: "النشاط واللياقة",
+    id: "professional",
+    title: "المهني",
+    tagline: "الإجهاد والاحتراق الوظيفي",
     description:
-      "يقيس مستوى نشاطك البدني والمؤشرات الوقائية وحالتك الصحية ونمط حياتك الغذائي.",
-    icon: Activity,
-    accent: { fg: "#5c861d", soft: "rgba(92,134,29,0.12)", solid: "#7cad2e" },
-    benchmark: 50,
-    trend: -3,
-  },
-  {
-    id: "financial",
-    title: "المالي",
-    tagline: "الاستقرار المالي",
-    description:
-      "يقيس مستوى الضغط المالي ورضاك عن وضعك المالي واستعدادك للطوارئ وعاداتك في التخطيط والادخار.",
-    icon: Wallet,
-    accent: { fg: "#177e93", soft: "rgba(23,126,147,0.1)", solid: "#1c9bb4" },
-    benchmark: 56,
-    trend: 4,
+      "يقيس مستوى الإجهاد النفسي والعاطفي في بيئة عملك، وتأثيره على أدائك وطاقتك وعلاقتك بزملائك.",
+    icon: Briefcase,
+    accent: { fg: "#2563a8", soft: "rgba(37,99,168,0.1)", solid: "#2f7dcc" },
+    benchmark: 55,
+    trend: 6,
   },
   {
     id: "workplace",

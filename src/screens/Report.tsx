@@ -148,6 +148,32 @@ export function Report() {
         </Spotlight>
       </section>
 
+      {/* ── Featured narrative — the headline reading of the whole report ── */}
+      <section className="px-5 pt-4">
+        <div className="relative overflow-hidden rounded-xl border border-brand-200 bg-gradient-to-br from-brand-soft via-surface to-surface p-5 shadow-card">
+          <span
+            aria-hidden
+            className="pointer-events-none absolute -left-8 -top-10 h-32 w-32 rounded-full bg-brand-100/50 blur-2xl"
+          />
+          <div className="relative">
+            <div className="mb-2.5 flex items-center gap-2.5">
+              <span className="grid h-10 w-10 shrink-0 place-items-center rounded-[0.7rem] bg-brand-600 text-white shadow-soft">
+                <Quote className="h-5 w-5" strokeWidth={2.2} />
+              </span>
+              <div>
+                <p className="text-[11px] font-bold uppercase tracking-wide text-brand-600">
+                  ملخّص مخصّص لك
+                </p>
+                <h2 className="text-[1.15rem] font-extrabold text-ink-900">خلاصة نتائجك</h2>
+              </div>
+            </div>
+            <p className="text-[0.9375rem] font-medium leading-[1.9] text-ink-700">
+              {insights.narrative}
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* ── Trend over time ──────────────────────────────────────────────── */}
       <section className="px-5 pt-4">
         <div className="rounded-xl border border-ink-100 bg-surface p-5 shadow-card">
@@ -166,19 +192,6 @@ export function Report() {
               </span>
             ))}
           </div>
-        </div>
-      </section>
-
-      {/* ── Narrative reading ────────────────────────────────────────────── */}
-      <section className="px-5 pt-4">
-        <div className="relative rounded-xl border border-ink-100 bg-surface p-5 shadow-soft">
-          <div className="mb-2.5 flex items-center gap-2">
-            <span className="grid h-8 w-8 place-items-center rounded-[0.6rem] bg-brand-soft text-brand-600">
-              <Quote className="h-4 w-4" strokeWidth={2.2} />
-            </span>
-            <h2 className="text-[1.0625rem] font-bold text-ink-900">قراءة في نتائجك</h2>
-          </div>
-          <p className="text-[0.875rem] leading-[1.85] text-ink-700">{insights.narrative}</p>
         </div>
       </section>
 

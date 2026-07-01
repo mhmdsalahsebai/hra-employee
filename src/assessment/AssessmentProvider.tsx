@@ -1,12 +1,12 @@
 import { useCallback, useMemo, useState, type ReactNode } from "react";
-import type { DimensionId } from "../data/dimensions";
+import { dimensions, type DimensionId } from "../data/dimensions";
 import {
   answeredCount,
   bandLevel,
   dimensionRaw,
   displayScore,
   findBand,
-  hraData,
+  hraBySlug,
 } from "../data/hra";
 import {
   AssessmentContext,
@@ -59,7 +59,8 @@ export function AssessmentProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const value = useMemo<AssessmentValue>(() => {
-    const results: DimensionResult[] = hraData.map((d) => {
+    const results: DimensionResult[] = dimensions.map(({ id }) => {
+      const d = hraBySlug[id];
       const raw = dimensionRaw(d, answers);
       const band = findBand(d, raw);
       const answered = answeredCount(d, answers);

@@ -24,15 +24,17 @@ import {
 import { cn } from "../lib/cn";
 import { Illustration } from "../illustrations/Illustration";
 import { useAssessment } from "../assessment/useAssessment";
-import { dimensionsById, type Dimension, type DimensionId } from "../data/dimensions";
-import { hraData, higherIsBetter } from "../data/hra";
+import { dimensions, dimensionsById, type Dimension, type DimensionId } from "../data/dimensions";
+import { hraBySlug, higherIsBetter } from "../data/hra";
 import { getQuestionArt } from "../data/questionArt";
 import { getQuestionInsight, type QuestionInsight as QuestionInsightData } from "../data/questionInsights";
 
-/** The nine dimensions as ordered "chapters", each owning its own questions. */
-const chapters = hraData.map((d) => ({
-  slug: d.slug as DimensionId,
-  questions: d.questions,
+/** The nine dimensions as ordered "chapters", each owning its own questions.
+ *  Order follows the canonical `dimensions` array (personal dimensions first,
+ *  company-related ones last), not the generated data's order. */
+const chapters = dimensions.map((d) => ({
+  slug: d.id as DimensionId,
+  questions: hraBySlug[d.id].questions,
 }));
 const TOTAL_DIMS = chapters.length;
 const TOTAL_QUESTIONS = chapters.reduce((n, c) => n + c.questions.length, 0);

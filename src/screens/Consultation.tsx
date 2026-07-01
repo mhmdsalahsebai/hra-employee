@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   Clock,
   Gift,
@@ -19,6 +19,7 @@ import { PageHeader } from "../components/PageHeader";
 import { cn } from "../lib/cn";
 import { experts, type Expert } from "../data/app";
 import { dimensionsById } from "../data/dimensions";
+import { programsById } from "../data/programs";
 
 /** The instant consultation is a small state machine: the employee taps once,
  *  we pretend to match them with an available specialist, ring through, then
@@ -42,8 +43,28 @@ const MATCHING_MESSAGES = [
 
 export function Consultation() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [phase, setPhase] = useState<Phase>("idle");
   const [expert, setExpert] = useState<Expert | null>(null);
+
+  // When arriving from a report finding (`?program=id`), pre-scope the session
+  // to that topic and its dedicated specialist instead of matching at random.
+  const program = programsById[searchParams.get("program") ?? ""];
+  const scopedExpert = useMemo<Expert | null>(
+    () =>
+      program
+        ? {
+            id: program.id,
+            name: program.expert.name,
+            title: program.expert.title,
+            specialty: program.dimension,
+            rating: 5,
+            sessions: 0,
+            nextSlots: [],
+          }
+        : null,
+    [program],
+  );
   const [seconds, setSeconds] = useState(0);
   const [muted, setMuted] = useState(false);
   const [cameraOff, setCameraOff] = useState(false);
@@ -57,14 +78,14 @@ export function Consultation() {
       1100,
     );
     const handoff = setTimeout(() => {
-      setExpert(experts[Math.floor(Math.random() * experts.length)]);
+      setExpert(scopedExpert ?? experts[Math.floor(Math.random() * experts.length)]);
       setPhase("connecting");
     }, 3000);
     return () => {
       clearInterval(cycle);
       clearTimeout(handoff);
     };
-  }, [phase]);
+  }, [phase, scopedExpert]);
 
   // Connecting → the specialist "picks up" and the call begins.
   useEffect(() => {
@@ -270,7 +291,10 @@ export function Consultation() {
   /* ── Idle (intro) ──────────────────────────────────────────────────────── */
   return (
     <div className="animate-rise">
-      <PageHeader title="استشارة فورية" subtitle="مع خبراء معتمدين" />
+      <PageHeader
+        title="استشارة فورية"
+        subtitle={program ? `عن ${program.tag}` : "مع خبراء معتمدين"}
+      />
 
       {/* Calm hero — sets a warm, human tone before the data-heavy steps */}
       <section className="px-5 pt-2">
@@ -278,6 +302,25 @@ export function Consultation() {
           <Illustration name="medical-care" className="mx-auto w-56 max-w-[72%]" />
         </div>
       </section>
+
+      {/* Topic-scoped expert — when the employee arrives from a report finding */}
+      {program && scopedExpert && (
+        <section className="px-5 pt-5">
+          <div className="rounded-xl border border-brand-200 bg-brand-soft/60 p-5 shadow-soft">
+            <p className="text-[11px] font-bold text-brand-600">استشارة مخصّصة لنتيجتك</p>
+            <p className="mt-1 text-[1.0625rem] font-extrabold leading-snug text-ink-900">
+              {program.title}
+            </p>
+            <div className="mt-3.5 flex items-center gap-3.5">
+              <Avatar name={scopedExpert.name} size={48} />
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-bold text-ink-900">{scopedExpert.name}</p>
+                <p className="text-xs font-semibold text-ink-400">{scopedExpert.title}</p>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Free banner */}
       <section className="px-5 pt-5">
@@ -338,7 +381,7 @@ export function Consultation() {
       <div className="sticky bottom-0 mt-8 bg-gradient-to-t from-canvas via-canvas to-transparent px-5 pb-2 pt-5">
         <Button fullWidth size="lg" onClick={start}>
           <Sparkles className="h-5 w-5" strokeWidth={2} />
-          ابدأ استشارة فورية
+          {program ? `ابدأ استشارة عن ${program.tag}` : "ابدأ استشارة فورية"}
         </Button>
       </div>
     </div>
