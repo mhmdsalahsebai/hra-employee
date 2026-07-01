@@ -7,6 +7,7 @@ import {
   displayScore,
   findBand,
   hraBySlug,
+  randomAssessmentAnswers,
 } from "../data/hra";
 import {
   AssessmentContext,
@@ -58,6 +59,12 @@ export function AssessmentProvider({ children }: { children: ReactNode }) {
     persist({});
   }, []);
 
+  const fillRandomAnswers = useCallback(() => {
+    const next = randomAssessmentAnswers();
+    setAnswers(next);
+    persist(next);
+  }, []);
+
   const value = useMemo<AssessmentValue>(() => {
     const results: DimensionResult[] = dimensions.map(({ id }) => {
       const d = hraBySlug[id];
@@ -88,6 +95,7 @@ export function AssessmentProvider({ children }: { children: ReactNode }) {
     return {
       answers,
       setAnswer,
+      fillRandomAnswers,
       resetAnswers,
       results,
       resultBySlug,
@@ -106,7 +114,7 @@ export function AssessmentProvider({ children }: { children: ReactNode }) {
       totalQuestions,
       progressPct: totalQuestions ? Math.round((answeredQuestions / totalQuestions) * 100) : 0,
     };
-  }, [answers, setAnswer, resetAnswers]);
+  }, [answers, setAnswer, fillRandomAnswers, resetAnswers]);
 
   return <AssessmentContext.Provider value={value}>{children}</AssessmentContext.Provider>;
 }

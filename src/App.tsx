@@ -17,6 +17,7 @@ import { Consultation } from "./screens/Consultation";
 import { Profile } from "./screens/Profile";
 import { ExperienceFlow } from "./experience/ExperienceFlow";
 import { type OnboardingStep, useOnboarding } from "./onboarding/useOnboarding";
+import { DevAssessmentToolbar } from "./components/DevAssessmentToolbar";
 
 const onboardingPaths: Record<Exclude<OnboardingStep, "complete">, string> = {
   welcome: "/welcome",
@@ -53,7 +54,9 @@ function OnboardingStepRoute({
 
 export default function App() {
   return (
-    <Routes>
+    <>
+      <DevAssessmentToolbar />
+      <Routes>
         {/* Premium wellbeing experience — welcome → login → survey → completion.
             The default entry for new visitors; hands off to the dashboard. */}
         <Route path="/experience" element={<ExperienceFlow />} />
@@ -121,7 +124,8 @@ export default function App() {
           <Route path="/profile" element={<Profile />} />
         </Route>
 
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </>
   );
 }

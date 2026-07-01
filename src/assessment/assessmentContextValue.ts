@@ -20,6 +20,7 @@ export interface DimensionResult {
 export interface AssessmentValue {
   answers: Record<string, number>;
   setAnswer: (slug: string, value: number) => void;
+  fillRandomAnswers: () => void;
   resetAnswers: () => void;
   /** Results in dimension order. */
   results: DimensionResult[];

@@ -93,3 +93,18 @@ export function seedAnswers(): Record<string, number> {
   }
   return answers;
 }
+
+/** Pick a valid answer for every HRA question. Used only by the local testing
+ * shortcut so reports and plans can be exercised without 140 manual taps. */
+export function randomAssessmentAnswers(): Record<string, number> {
+  const answers: Record<string, number> = {};
+
+  for (const dimension of hraData) {
+    for (const question of dimension.questions) {
+      const option = question.answers[Math.floor(Math.random() * question.answers.length)];
+      answers[question.slug] = option.value;
+    }
+  }
+
+  return answers;
+}
