@@ -32,10 +32,11 @@ function pathForStep(step: OnboardingStep) {
 }
 
 function RequireOnboarding({ children }: { children: ReactNode }) {
-  const { isComplete } = useOnboarding();
+  const { isComplete, step } = useOnboarding();
   if (!isComplete) {
-    // New visitors funnel through the premium wellbeing experience.
-    return <Navigate to="/experience" replace />;
+    // New visitors start on the onboarding feature tour, then continue through
+    // whichever step they last reached.
+    return <Navigate to={pathForStep(step)} replace />;
   }
   return children;
 }
