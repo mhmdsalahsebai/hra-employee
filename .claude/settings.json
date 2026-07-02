@@ -15,7 +15,8 @@
       "Bash(echo \"EXIT: $?\")",
       "Bash(node -e \"const l=require\\('lucide-react'\\); ['ClipboardCheck','FileChartColumn','MessageCircleHeart','Target','ShieldCheck'].forEach\\(n=>console.log\\(n, !!l[n]\\)\\)\")",
       "Bash(npx vite *)",
-      "Bash(echo \"exit: $?\")"
+      "Bash(echo \"exit: $?\")",
+      "Bash(echo \"=== EXIT: $? ===\")"
     ]
   }
 }

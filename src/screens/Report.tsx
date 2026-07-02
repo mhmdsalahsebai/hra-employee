@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   ArrowUpRight,
@@ -49,6 +50,53 @@ function ImpactStat({ value, label }: { value: number; label: string }) {
   );
 }
 
+// The full report is split into three intent-based views rather than one long
+// scroll: a state glance, the per-dimension detail, and the cross-dimension
+// analysis. This keeps the report's synthesis intact while making each view a
+// digestible screen. Per-dimension deep detail still lives at /dimension/:slug.
+type ReportTab = "overview" | "dimensions" | "insights";
+
+const REPORT_TABS: { id: ReportTab; label: string }[] = [
+  { id: "overview", label: "نظرة عامة" },
+  { id: "dimensions", label: "الأبعاد" },
+  { id: "insights", label: "رؤى وأثر" },
+];
+
+function SegmentedTabs({
+  value,
+  onChange,
+}: {
+  value: ReportTab;
+  onChange: (id: ReportTab) => void;
+}) {
+  return (
+    <div className="sticky top-0 z-20 bg-canvas/85 px-5 pb-3 pt-3 backdrop-blur">
+      <div
+        role="tablist"
+        className="flex gap-1 rounded-pill border border-ink-100 bg-sand/70 p-1"
+      >
+        {REPORT_TABS.map((t) => {
+          const active = value === t.id;
+          return (
+            <button
+              key={t.id}
+              role="tab"
+              aria-selected={active}
+              onClick={() => onChange(t.id)}
+              className={cn(
+                "flex-1 rounded-pill py-2 text-[0.8125rem] font-bold transition active:scale-[0.98]",
+                active ? "bg-surface text-brand-700 shadow-soft" : "text-ink-500",
+              )}
+            >
+              {t.label}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 export function Report() {
   const navigate = useNavigate();
   const plan = usePlan();
@@ -73,6 +121,12 @@ export function Report() {
   // early, and finishing the rest is framed as sharpening it — not unlocking it.
   const preview = !hasResults && completedCount >= MIN_DIMS_FOR_PREVIEW;
   const remainingDims = totalDimensions - completedCount;
+
+  const [tab, setTab] = useState<ReportTab>("overview");
+  const changeTab = (id: ReportTab) => {
+    setTab(id);
+    window.scrollTo({ top: 0 });
+  };
 
   const meta = scoreMeta(overallScore);
   const overallDelta = delta(overallScore, prevOverall);
@@ -132,6 +186,8 @@ export function Report() {
         </button>
       </header>
 
+      {!preview && <SegmentedTabs value={tab} onChange={changeTab} />}
+
       {/* ── Accuracy ladder — preview only: the report is open, and finishing
              the rest visibly sharpens it rather than unlocking it. ────────── */}
       {preview && (
@@ -171,7 +227,8 @@ export function Report() {
         </section>
       )}
 
-      {/* ── Verdict ──────────────────────────────────────────────────────── */}
+      {/* ── Verdict — preview linear flow + the overview tab ─────────────── */}
+      {(preview || tab === "overview") && (
       <section className="px-5 pt-5">
         <Spotlight>
           <div className="flex items-center gap-5 p-5 text-white">
@@ -214,9 +271,10 @@ export function Report() {
           )}
         </Spotlight>
       </section>
+      )}
 
       {/* ── Featured narrative — the headline reading of the whole report ── */}
-      {!preview && (
+      {!preview && tab === "overview" && (
       <section className="px-5 pt-4">
         <div className="relative overflow-hidden rounded-xl border border-brand-200 bg-gradient-to-br from-brand-soft via-surface to-surface p-5 shadow-card">
           <span
@@ -244,7 +302,7 @@ export function Report() {
       )}
 
       {/* ── Trend over time ──────────────────────────────────────────────── */}
-      {!preview && (
+      {!preview && tab === "overview" && (
       <section className="px-5 pt-4">
         <div className="rounded-xl border border-ink-100 bg-surface p-5 shadow-card">
           <div className="mb-3 flex items-center justify-between">
@@ -267,7 +325,7 @@ export function Report() {
       )}
 
       {/* ── Wellbeing balance (radar) ────────────────────────────────────── */}
-      {!preview && (
+      {!preview && tab === "overview" && (
       <section className="px-5 pt-4">
         <div className="rounded-xl border border-ink-100 bg-surface p-5 shadow-card">
           <div className="mb-1 flex items-center justify-between">
@@ -289,12 +347,13 @@ export function Report() {
       )}
 
       {/* ── Detailed health insights — derived live from every answer ────── */}
-      {!preview && <DetailedInsights summary={insights} />}
+      {!preview && tab === "insights" && <DetailedInsights summary={insights} />}
 
       {/* ── Full metrics breakdown — every sub-scale, scored 0–100 ────────── */}
-      {!preview && <MetricsBreakdown groups={metricGroups} />}
+      {!preview && tab === "dimensions" && <MetricsBreakdown groups={metricGroups} />}
 
-      {/* ── Strengths ────────────────────────────────────────────────────── */}
+      {/* ── Strengths — preview linear flow + the overview tab ───────────── */}
+      {(preview || tab === "overview") && (
       <section className="px-5 pt-6">
         <h2 className="mb-3.5 flex items-center gap-2 text-[1.0625rem] font-bold text-ink-900">
           <Sparkles className="h-[1.15rem] w-[1.15rem] text-good" strokeWidth={2.4} />
@@ -322,8 +381,10 @@ export function Report() {
           })}
         </div>
       </section>
+      )}
 
-      {/* ── Focus areas ──────────────────────────────────────────────────── */}
+      {/* ── Focus areas — preview linear flow + the overview tab ─────────── */}
+      {(preview || tab === "overview") && (
       <section className="px-5 pt-6">
         <h2 className="mb-3.5 flex items-center gap-2 text-[1.0625rem] font-bold text-ink-900">
           <TrendingDown className="h-[1.15rem] w-[1.15rem] text-alert" strokeWidth={2.4} />
@@ -374,9 +435,10 @@ export function Report() {
           </button>
         )}
       </section>
+      )}
 
       {/* ── Your journey's impact (plan → report loop) ───────────────────── */}
-      {!preview && plan.activeDimensions.length > 0 && (
+      {!preview && tab === "insights" && plan.activeDimensions.length > 0 && (
         <section className="px-5 pt-6">
           <h2 className="mb-1 flex items-center gap-2 text-[1.0625rem] font-bold text-ink-900">
             <CalendarHeart className="h-[1.15rem] w-[1.15rem] text-brand-600" strokeWidth={2.4} />
@@ -434,7 +496,7 @@ export function Report() {
       )}
 
       {/* ── Patterns we noticed ──────────────────────────────────────────── */}
-      {!preview && (
+      {!preview && tab === "insights" && (
       <section className="px-5 pt-6">
         <h2 className="mb-1 text-[1.0625rem] font-bold text-ink-900">أنماط لاحظناها</h2>
         <p className="mb-3.5 text-xs font-semibold text-ink-400">
@@ -469,7 +531,8 @@ export function Report() {
       </section>
       )}
 
-      {/* ── Full breakdown — every dimension, tap to open ────────────────── */}
+      {/* ── Full breakdown — preview linear flow + the dimensions tab ────── */}
+      {(preview || tab === "dimensions") && (
       <section className="px-5 pt-6">
         <h2 className="mb-1 text-[1.0625rem] font-bold text-ink-900">
           {preview ? "أبعادك المكتملة" : "تفاصيل الأبعاد"}
@@ -489,6 +552,7 @@ export function Report() {
           ))}
         </div>
       </section>
+      )}
 
       {/* ── Next step — preview: a clear terminal incentive to finish. ───── */}
       {preview && (
@@ -512,8 +576,8 @@ export function Report() {
         </section>
       )}
 
-      {/* ── Next step ────────────────────────────────────────────────────── */}
-      {!preview && (
+      {/* ── Next step — consultation CTA, overview tab ───────────────────── */}
+      {!preview && tab === "overview" && (
       <section className="px-5 pt-6">
         <Spotlight className="p-5 text-white">
           <div className="flex items-center justify-between gap-3">
