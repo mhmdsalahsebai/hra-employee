@@ -1,4 +1,3 @@
-import { useLayoutEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Bell,
@@ -8,6 +7,7 @@ import {
   GraduationCap,
   ListChecks,
   Lock,
+  Map as MapIcon,
   MessageCircleHeart,
   RefreshCw,
   ScrollText,
@@ -23,8 +23,9 @@ import { RecommendedContentSwiper } from "../components/cards/RecommendedContent
 import { ProgramRecommendationCard } from "../components/cards/ProgramRecommendationCard";
 import { WellbeingTrackers } from "../components/cards/WellbeingTrackers";
 import { JournalSection } from "../components/cards/JournalSection";
+import { TrailMap, dimensionStation, type TrailStation } from "../components/TrailMap";
 import { cn } from "../lib/cn";
-import { scoreMeta, LEVEL_HEX } from "../lib/score";
+import { scoreMeta } from "../lib/score";
 import { useAssessment, type DimensionResult } from "../assessment/useAssessment";
 import { useInsights } from "../assessment/useInsights";
 import { currentUser } from "../data/app";
@@ -360,6 +361,17 @@ export function Home() {
           onOpenDimension={(id) => navigate(`/dimension/${id}`)}
           onOpenGift={() => navigate("/consultation")}
         />
+
+        {/* The full journey page — the extended road with every reward, plus
+            the points, levels, and badges layer. */}
+        <button
+          onClick={() => navigate("/journey")}
+          className="mt-2 flex w-full items-center justify-center gap-2 rounded-pill border border-brand-200 bg-brand-soft/60 py-3 text-[13px] font-bold text-brand-700 transition hover:bg-brand-100 active:scale-[0.99]"
+        >
+          <MapIcon className="h-4 w-4" strokeWidth={2.2} />
+          خريطة رحلتك كاملة — نقاطك ومكافآتك
+          <ChevronLeft className="h-4 w-4" strokeWidth={2.4} />
+        </button>
       </section>
 
       {/* ── Your deliverables — report + free consultation, as colourful cards ── */}
@@ -651,17 +663,8 @@ function NextDimensionSpotlight({
 }
 
 /* ── The journey trail — nine stations on a winding dotted path, in answering
-   order, ending at the gift the company already paid for. Completed stations
-   fill with their accent, the next one pulses, and every station stays
-   tappable (dimensions are never locked). ─────────────────────────────────── */
-
-/** Horizontal station positions (% of trail width), cycling right → centre →
- *  left → centre so the path winds like a map rather than stacking in a line. */
-const TRAIL_X = [76, 47, 20, 47];
-/** Vertical pitch between stations, px. */
-const TRAIL_STEP = 96;
-/** First station's centre y, px. */
-const TRAIL_TOP = 44;
+   order, ending at the gift the company already paid for. Rendered by the
+   shared TrailMap; the dedicated /journey page shows the extended road. ────── */
 
 function JourneyTrail({
   results,
@@ -678,157 +681,40 @@ function JourneyTrail({
   onOpenDimension: (id: Dimension["id"]) => void;
   onOpenGift: () => void;
 }) {
-  // The curved path needs real pixel coordinates, so measure the container.
-  const ref = useRef<HTMLDivElement>(null);
-  const [width, setWidth] = useState(0);
-  useLayoutEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const observer = new ResizeObserver(() => setWidth(el.clientWidth));
-    observer.observe(el);
-    setWidth(el.clientWidth);
-    return () => observer.disconnect();
-  }, []);
-
-  const stations = [...dimensions.map((_, i) => i), -1]; // -1 = the gift finale
-  const pointOf = (order: number) => ({
-    x: (TRAIL_X[order % TRAIL_X.length] / 100) * width,
-    y: TRAIL_TOP + order * TRAIL_STEP,
-  });
-  const giftPoint = pointOf(dimensions.length);
-  const height = giftPoint.y + 92;
-
-  return (
-    <div ref={ref} className={cn("relative", className)} style={{ height }}>
-      {width > 0 && (
-        <svg className="absolute inset-0" width={width} height={height} aria-hidden>
-          {stations.slice(0, -1).map((_, i) => {
-            const from = pointOf(i);
-            const to = pointOf(i + 1);
-            const walked = results[i].complete;
-            return (
-              <path
-                key={i}
-                d={`M ${from.x} ${from.y} C ${from.x} ${from.y + TRAIL_STEP / 2}, ${to.x} ${to.y - TRAIL_STEP / 2}, ${to.x} ${to.y}`}
-                fill="none"
-                stroke={walked ? dimensions[i].accent.solid : "var(--color-ink-200)"}
-                strokeWidth={walked ? 3.5 : 3}
-                strokeLinecap="round"
-                strokeDasharray={walked ? undefined : "0.5 9"}
-                opacity={walked ? 0.8 : 1}
-              />
-            );
-          })}
-        </svg>
-      )}
-
-      {dimensions.map((dimension, i) => {
-        const { x, y } = pointOf(i);
-        const result = results[i];
-        const done = result.complete;
-        const isNext = i === nextIndex;
-        const accent = dimension.accent;
-        return (
-          <button
-            key={dimension.id}
-            onClick={() => onOpenDimension(dimension.id)}
-            className="absolute z-10 flex w-28 -translate-x-1/2 flex-col items-center"
-            style={{ left: x, top: y - 27 }}
-          >
-            <span
-              className={cn(
-                "relative grid h-[54px] w-[54px] place-items-center rounded-full shadow-soft transition duration-200 hover:-translate-y-0.5",
-                isNext && "bg-white",
-                done && "text-white",
-              )}
-              style={
-                done
-                  ? { background: accent.solid }
-                  : isNext
-                    ? { color: accent.fg, boxShadow: `0 0 0 3px ${accent.solid}` }
-                    : { background: pastel(accent.solid, 16), color: accent.fg }
-              }
-            >
-              {isNext && (
-                <span
-                  className="absolute inset-0 animate-ping rounded-full [animation-duration:2.4s]"
-                  style={{ background: accent.solid, opacity: 0.2 }}
-                />
-              )}
-              <dimension.icon className="relative h-6 w-6" strokeWidth={2} />
-              {done ? (
-                <span className="absolute -bottom-0.5 -left-0.5 grid h-5 w-5 place-items-center rounded-full bg-good text-white shadow-soft ring-2 ring-white">
-                  <Check className="h-3 w-3" strokeWidth={3.5} />
-                </span>
-              ) : (
-                <span
-                  className="nums absolute -right-1 -top-1 grid h-5 w-5 place-items-center rounded-full bg-white text-[10px] font-extrabold shadow-soft"
-                  style={{ color: accent.fg }}
-                >
-                  {i + 1}
-                </span>
-              )}
-            </span>
-            <span className="mt-1.5 text-[11.5px] font-extrabold leading-tight text-ink-900">
-              {dimension.title}
-            </span>
-            {done ? (
-              <span
-                className="nums text-[11px] font-extrabold leading-tight"
-                style={{ color: LEVEL_HEX[result.level] }}
-              >
-                {result.score}
-              </span>
-            ) : isNext ? (
-              <span className="text-[10px] font-extrabold leading-tight" style={{ color: accent.fg }}>
-                {result.answered > 0 ? "أكمل الآن" : "ابدأ الآن"}
-              </span>
-            ) : (
-              <span className="line-clamp-1 w-full text-center text-[10px] font-semibold leading-tight text-ink-400">
-                {dimension.tagline}
-              </span>
-            )}
-          </button>
-        );
-      })}
-
-      {/* The finale — the employer-paid gift, visible from step one. */}
-      <button
-        onClick={hasResults ? onOpenGift : undefined}
-        disabled={!hasResults}
-        className={cn(
-          "absolute z-10 flex w-36 -translate-x-1/2 flex-col items-center",
-          !hasResults && "cursor-not-allowed",
-        )}
-        style={{ left: giftPoint.x, top: giftPoint.y - 29 }}
-      >
-        <span
-          className={cn(
-            "relative grid h-[58px] w-[58px] place-items-center rounded-full transition duration-200",
-            hasResults
-              ? "bg-coral-500 text-white shadow-pop hover:-translate-y-0.5"
-              : "border-2 border-dashed border-coral-300 bg-white/80 text-coral-400",
-          )}
-        >
-          <Gift className="h-6 w-6" strokeWidth={2.1} />
-          {hasResults && (
-            <span className="absolute -bottom-0.5 -left-0.5 grid h-5 w-5 place-items-center rounded-full bg-good text-white shadow-soft ring-2 ring-white">
-              <Check className="h-3 w-3" strokeWidth={3.5} />
-            </span>
-          )}
-        </span>
-        <span
-          className={cn(
-            "mt-1.5 text-[11.5px] font-extrabold leading-tight",
-            hasResults ? "text-coral-600" : "text-ink-600",
-          )}
-        >
-          {hasResults ? "احجز استشارتك المجانية" : "هديتك في النهاية"}
-        </span>
-        <span className="text-[10px] font-semibold leading-tight text-ink-400">
-          {hasResults ? "خبيرك بانتظارك الآن" : "استشارة مجانية + تقريرك الكامل"}
-        </span>
-      </button>
-    </div>
+  const stations: TrailStation[] = dimensions.map((dimension, i) =>
+    dimensionStation({
+      dimension,
+      result: results[i],
+      isNext: i === nextIndex,
+      step: i + 1,
+      onClick: () => onOpenDimension(dimension.id),
+    }),
   );
+
+  // The finale — the employer-paid gift, visible from step one.
+  stations.push({
+    key: "gift",
+    icon: <Gift className="h-6 w-6" strokeWidth={2.1} />,
+    size: 58,
+    labelWidth: "w-36",
+    circleClassName: hasResults
+      ? "bg-coral-500 text-white shadow-pop"
+      : "border-2 border-dashed border-coral-300 bg-white/80 text-coral-400",
+    badge: hasResults ? (
+      <span className="absolute -bottom-0.5 -left-0.5 grid h-5 w-5 place-items-center rounded-full bg-good text-white shadow-soft ring-2 ring-white">
+        <Check className="h-3 w-3" strokeWidth={3.5} />
+      </span>
+    ) : undefined,
+    title: hasResults ? "احجز استشارتك المجانية" : "هديتك في النهاية",
+    titleClassName: hasResults ? "text-coral-600" : "text-ink-600",
+    caption: (
+      <span className="text-[10px] font-semibold leading-tight text-ink-400">
+        {hasResults ? "خبيرك بانتظارك الآن" : "استشارة مجانية + تقريرك الكامل"}
+      </span>
+    ),
+    disabled: !hasResults,
+    onClick: hasResults ? onOpenGift : undefined,
+  });
+
+  return <TrailMap stations={stations} className={className} />;
 }

@@ -7,6 +7,7 @@ import { Login } from "./screens/Login";
 import { Invitation } from "./screens/Invitation";
 import { PersonalInfo } from "./screens/PersonalInfo";
 import { Home } from "./screens/Home";
+import { Journey } from "./screens/Journey";
 import { Assessment } from "./screens/Assessment";
 import { Report } from "./screens/Report";
 import { Dimension } from "./screens/Dimension";
@@ -117,6 +118,7 @@ export default function App() {
           }
         >
           <Route path="/" element={<Home />} />
+          <Route path="/journey" element={<Journey />} />
           <Route path="/report" element={<Report />} />
           <Route path="/dimension/:slug" element={<Dimension />} />
           <Route path="/focus/:slug" element={<Focus />} />
