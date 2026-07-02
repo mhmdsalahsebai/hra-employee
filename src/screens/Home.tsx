@@ -1,18 +1,22 @@
+import { useLayoutEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Bell,
   Check,
   ChevronLeft,
+  Gift,
   GraduationCap,
+  ListChecks,
   Lock,
   MessageCircleHeart,
   RefreshCw,
   ScrollText,
   Sparkles,
+  Timer,
   Video,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-import { Avatar, ScoreRing, SectionHeader } from "../components/ui";
+import { Avatar, ProgressBar, ScoreRing, SectionHeader } from "../components/ui";
 import { Illustration } from "../illustrations/Illustration";
 import { ExpertAvatarStack } from "../components/ExpertAvatarStack";
 import { RecommendedContentSwiper } from "../components/cards/RecommendedContentSwiper";
@@ -20,11 +24,12 @@ import { ProgramRecommendationCard } from "../components/cards/ProgramRecommenda
 import { WellbeingTrackers } from "../components/cards/WellbeingTrackers";
 import { JournalSection } from "../components/cards/JournalSection";
 import { cn } from "../lib/cn";
-import { scoreMeta, LEVEL_HEX, LEVEL_CLASS } from "../lib/score";
+import { scoreMeta, LEVEL_HEX } from "../lib/score";
 import { useAssessment, type DimensionResult } from "../assessment/useAssessment";
 import { useInsights } from "../assessment/useInsights";
 import { currentUser } from "../data/app";
 import { dimensions, type Dimension } from "../data/dimensions";
+import { DIMENSION_ART } from "../data/questionArt";
 import { recommendPrograms } from "../data/programs";
 import { MIN_DIMS_FOR_PREVIEW } from "../data/report";
 import { useContentRecommendations } from "../content/useContentRecommendations";
@@ -34,6 +39,19 @@ const pastel = (hex: string, pct = 12) => `color-mix(in srgb, ${hex} ${pct}%, wh
 
 /** Arabic count phrase for dimensions: بُعد واحد / بُعدان / N أبعاد. */
 const dimsPhrase = (n: number) => (n === 1 ? "بُعدًا واحدًا" : n === 2 ? "بُعدين" : `${n} أبعاد`);
+
+/** Arabic count phrase for questions (3–10 → أسئلة, 11+ → سؤالًا). */
+const questionsPhrase = (n: number) => (n <= 10 ? `${n} أسئلة` : `${n} سؤالًا`);
+
+/** "البُعد البدني" for adjective titles, "بُعد بيئة العمل" for noun phrases. */
+const dimName = (title: string) => (title.startsWith("ال") ? `البُعد ${title}` : `بُعد ${title}`);
+
+/** Today, in Arabic with Western digits (the app-wide numeral convention). */
+const todayLabel = new Intl.DateTimeFormat("ar-u-nu-latn", {
+  weekday: "long",
+  day: "numeric",
+  month: "long",
+}).format(new Date());
 
 export function Home() {
   const navigate = useNavigate();
@@ -61,46 +79,58 @@ export function Home() {
 
   return (
     <div className="animate-rise pb-4">
-      {/* ── Friendly greeting — light, airy, personal ── */}
-      <section className="px-5 pt-[max(1.25rem,env(safe-area-inset-top))]">
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex min-w-0 items-center gap-3">
-            <Avatar name={currentUser.name} size={50} className="shadow-soft ring-2 ring-white" />
-            <div className="min-w-0 leading-tight">
-              <p className="text-[13px] font-semibold text-ink-500">{greeting} 👋</p>
-              <h1 className="truncate text-[1.6rem] font-extrabold text-ink-900">
-                {currentUser.firstName}
-              </h1>
-            </div>
-          </div>
-          <button
-            aria-label="الإشعارات"
-            className="relative grid h-12 w-12 shrink-0 place-items-center rounded-full bg-surface text-ink-700 shadow-soft transition hover:-translate-y-0.5 active:scale-95"
-          >
-            <Bell className="h-[1.2rem] w-[1.2rem]" strokeWidth={2} />
-            <span className="absolute right-3 top-3 h-2.5 w-2.5 rounded-full bg-coral-500 ring-2 ring-surface" />
-          </button>
-        </div>
-      </section>
+      {/* ── Sky header — a soft full-bleed gradient scene the hero card floats on ── */}
+      <div
+        className="relative overflow-hidden rounded-b-[2.75rem]"
+        style={{ background: "linear-gradient(168deg, #cfe4fb 0%, #dfdaf9 55%, #d4edfa 100%)" }}
+      >
+        <span
+          className="pointer-events-none absolute -left-14 -top-16 h-56 w-56 rounded-full"
+          style={{ background: "radial-gradient(circle, rgba(255,255,255,0.75), transparent 68%)" }}
+        />
+        <span
+          className="pointer-events-none absolute -right-10 top-6 h-40 w-40 rounded-full"
+          style={{ background: "radial-gradient(circle, rgba(46,128,210,0.25), transparent 70%)" }}
+        />
+        <span
+          className="pointer-events-none absolute -bottom-10 left-16 h-36 w-36 rounded-full"
+          style={{ background: "radial-gradient(circle, rgba(124,110,230,0.22), transparent 70%)" }}
+        />
+        <span className="dot-cluster pointer-events-none absolute left-6 top-7 h-10 w-14 text-white/70" />
 
-      {/* ── Adaptive wellbeing hero — a soft pastel card, not a clinical slab.
+        <section className="relative px-5 pb-[5.75rem] pt-[max(1.5rem,env(safe-area-inset-top))]">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex min-w-0 items-center gap-3">
+              <Avatar name={currentUser.name} size={52} className="shadow-soft ring-2 ring-white/80" />
+              <div className="min-w-0 leading-tight">
+                <p className="text-xs font-bold text-ink-500">{todayLabel}</p>
+                <h1 className="mt-0.5 truncate text-[1.45rem] font-extrabold text-ink-900">
+                  {greeting}، {currentUser.firstName} 👋
+                </h1>
+              </div>
+            </div>
+            <button
+              aria-label="الإشعارات"
+              className="relative grid h-12 w-12 shrink-0 place-items-center rounded-full bg-white/65 text-ink-700 shadow-soft ring-1 ring-white/70 backdrop-blur transition hover:-translate-y-0.5 active:scale-95"
+            >
+              <Bell className="h-[1.2rem] w-[1.2rem]" strokeWidth={2} />
+              <span className="absolute right-3 top-3 h-2.5 w-2.5 rounded-full bg-coral-500 ring-2 ring-white" />
+            </button>
+          </div>
+        </section>
+      </div>
+
+      {/* ── Adaptive wellbeing hero — a white card floating over the sky's curve.
           Shows the overall score once complete, journey progress before that. ── */}
-      <section className="px-5 pt-5">
-        <div
-          className="relative overflow-hidden rounded-[1.75rem] p-5 shadow-soft"
-          style={{ background: "linear-gradient(140deg, #e3f0fd 0%, #eae9fb 54%, #e6f5fb 100%)" }}
-        >
+      <section className="relative -mt-[4.25rem] px-5">
+        <div className="relative overflow-hidden rounded-[1.75rem] bg-surface p-5 shadow-card ring-1 ring-ink-900/[0.03]">
           <span
-            className="pointer-events-none absolute -right-10 -top-12 h-44 w-44 rounded-full"
-            style={{ background: "radial-gradient(circle, rgba(46,128,210,0.30), transparent 70%)" }}
-          />
-          <span
-            className="pointer-events-none absolute -bottom-14 -left-10 h-40 w-40 rounded-full"
-            style={{ background: "radial-gradient(circle, rgba(124,110,230,0.22), transparent 70%)" }}
+            className="pointer-events-none absolute -left-8 -bottom-10 h-32 w-32 rounded-full"
+            style={{ background: "radial-gradient(circle, rgba(46,128,210,0.10), transparent 70%)" }}
           />
 
           <div className="relative flex items-center gap-4">
-            <span className="grid place-items-center rounded-full bg-white/70 p-1.5 shadow-soft backdrop-blur">
+            <span className="grid place-items-center rounded-full bg-brand-50 p-1.5">
               <ScoreRing
                 value={hasResults ? overallScore : journeyPct}
                 size={84}
@@ -128,7 +158,7 @@ export function Home() {
             <div className="min-w-0 flex-1">
               {hasResults ? (
                 <>
-                  <span className="inline-flex items-center gap-1 rounded-pill bg-white/70 px-2.5 py-1 text-[11px] font-bold text-brand-700">
+                  <span className="inline-flex items-center gap-1 rounded-pill bg-good-soft px-2.5 py-1 text-[11px] font-bold text-good">
                     <Check className="h-3 w-3" strokeWidth={3} />
                     اكتمل تقييمك
                   </span>
@@ -168,7 +198,7 @@ export function Home() {
               </button>
               <button
                 onClick={() => navigate("/report")}
-                className="flex flex-1 items-center justify-center gap-1.5 rounded-pill bg-white/80 py-3.5 text-[0.875rem] font-bold text-brand-700 shadow-soft ring-1 ring-inset ring-brand-500/15 backdrop-blur transition hover:bg-white active:scale-[0.99]"
+                className="flex flex-1 items-center justify-center gap-1.5 rounded-pill bg-brand-soft py-3.5 text-[0.875rem] font-bold text-brand-700 ring-1 ring-inset ring-brand-500/15 transition hover:bg-brand-100 active:scale-[0.99]"
               >
                 <ScrollText className="h-4 w-4" strokeWidth={2.2} />
                 التقرير
@@ -182,9 +212,9 @@ export function Home() {
               className="relative mt-5 flex w-full items-center justify-center gap-2 rounded-pill bg-brand-600 py-3.5 text-[0.875rem] font-bold text-white shadow-soft transition hover:bg-brand-700 active:scale-[0.99]"
             >
               {started && nextDim
-                ? `تابع: بُعد ${nextDim.title}`
+                ? `تابع: ${dimName(nextDim.title)}`
                 : nextDim
-                  ? `ابدأ ببُعد ${nextDim.title}`
+                  ? `ابدأ ${dimName(nextDim.title)}`
                   : "اعرض تقريرك"}
               <ChevronLeft className="h-4 w-4" strokeWidth={2.4} />
             </button>
@@ -235,7 +265,7 @@ export function Home() {
                   {
                     at: totalDimensions,
                     title: "استشارة مجانية مع مختص + تقريرك الكامل",
-                    desc: "جلسة خاصة وسرّية تدفع عنها شركتك، مع خطة مصمّمة لك",
+                    desc: `جلسة خاصة وسرّية تدفع عنها ${currentUser.org}، مع خطة مصمّمة لك`,
                   },
                 ].map((step) => {
                   const reached = completedCount >= step.at;
@@ -264,35 +294,62 @@ export function Home() {
         </section>
       )}
 
-      {/* ── Wellbeing dimensions — soft pastel colour-blocked cards ── */}
+      {/* ── Wellbeing dimensions — an illustrated "next stop" spotlight, then the
+          nine stations as a winding trail that ends at the real reward. ── */}
       <section className="px-5 pt-7">
-        <div className="mb-4 flex items-end justify-between gap-3">
+        <div className="mb-3 flex items-end justify-between gap-3">
           <div>
             <h2 className="text-[1.15rem] font-extrabold text-ink-900">أبعاد رفاهيتك</h2>
             <p className="mt-0.5 text-xs font-semibold text-ink-400">
-              {hasResults ? "اكتمل تقييمك عبر الأبعاد التسعة" : "أجب لتكشف صورتك الكاملة"}
+              {hasResults
+                ? "اكتمل تقييمك عبر الأبعاد التسعة"
+                : "رحلة من 9 محطات — تنتهي بهدية حقيقية"}
             </p>
           </div>
-          <span className="nums shrink-0 rounded-pill bg-brand-600 px-3 py-1.5 text-[12px] font-bold text-white shadow-soft">
+          <span dir="ltr" className="nums shrink-0 pb-0.5 text-[13px] font-bold text-ink-500">
             {completedCount}/{totalDimensions}
           </span>
         </div>
 
-        <div className="stagger space-y-3">
+        {/* Journey strip — one segment per dimension, lit in its own accent. */}
+        <div className="mb-4 flex gap-1" aria-hidden>
           {dimensions.map((d, i) => (
-            <DimensionCard
+            <span
               key={d.id}
-              dimension={d}
-              result={results[i]}
-              isNext={i === nextIndex}
-              onClick={() => navigate(`/dimension/${d.id}`)}
+              className="h-1.5 flex-1 rounded-pill transition-colors duration-500"
+              style={{
+                background: results[i].complete
+                  ? d.accent.solid
+                  : i === nextIndex
+                    ? pastel(d.accent.solid, 45)
+                    : "var(--color-ink-100)",
+              }}
             />
           ))}
         </div>
+
+        {nextDim && (
+          <NextDimensionSpotlight
+            dimension={nextDim}
+            result={results[nextIndex]}
+            step={nextIndex + 1}
+            total={totalDimensions}
+            onClick={() => navigate(`/dimension/${nextDim.id}`)}
+          />
+        )}
+
+        <JourneyTrail
+          results={results}
+          nextIndex={nextIndex}
+          hasResults={hasResults}
+          className={nextDim ? "mt-2" : undefined}
+          onOpenDimension={(id) => navigate(`/dimension/${id}`)}
+          onOpenGift={() => navigate("/consultation")}
+        />
       </section>
 
       {/* ── Your deliverables — report + free consultation, as colourful cards ── */}
-      <section className="px-5 pt-5">
+      <section className="px-5 pt-7">
         <div className="grid grid-cols-2 gap-3">
           <DeliverableTile
             icon={ScrollText}
@@ -461,90 +518,302 @@ function DeliverableTile({
   );
 }
 
-/* ── One wellbeing dimension — a soft, colour-blocked card in its own accent ── */
+/* ── The next stop on the journey — one big, illustrated, accent-washed card ── */
 
-function DimensionCard({
+function NextDimensionSpotlight({
   dimension,
   result,
-  isNext,
+  step,
+  total,
   onClick,
 }: {
   dimension: Dimension;
   result: DimensionResult;
-  isNext: boolean;
+  step: number;
+  total: number;
   onClick: () => void;
 }) {
-  const done = result.complete;
-  const meta = LEVEL_CLASS[result.level];
+  const accent = dimension.accent;
+  const resume = result.answered > 0;
+  const isPhysical = dimension.id === "physical";
   return (
     <button
       onClick={onClick}
-      style={{
-        background: pastel(dimension.accent.solid, 12),
-        boxShadow: isNext && !done ? `0 0 0 2px ${dimension.accent.solid}` : undefined,
-      }}
-      className="flex w-full items-center gap-3.5 rounded-[1.4rem] p-3.5 text-right shadow-soft transition duration-200 hover:-translate-y-0.5 active:translate-y-0"
+      className="relative block w-full overflow-hidden rounded-[1.75rem] p-5 text-right shadow-soft transition duration-200 hover:-translate-y-0.5 active:translate-y-0"
+      style={{ background: pastel(accent.solid, 16) }}
     >
-      {/* icon tile */}
       <span
-        className="relative grid h-[3.25rem] w-[3.25rem] shrink-0 place-items-center rounded-[1.05rem] shadow-soft"
-        style={
-          done
-            ? { background: dimension.accent.solid, color: "#fff" }
-            : { background: "#fff", color: dimension.accent.fg }
-        }
-      >
-        <dimension.icon className="h-6 w-6" strokeWidth={2} />
-        {done && (
-          <span className="absolute -bottom-1 -left-1 grid h-5 w-5 place-items-center rounded-full bg-surface text-good shadow-soft ring-2 ring-surface">
-            <Check className="h-3 w-3" strokeWidth={3.5} />
-          </span>
-        )}
-      </span>
+        className="pointer-events-none absolute -left-10 -top-12 h-36 w-36 rounded-full"
+        style={{ background: `radial-gradient(circle, ${pastel(accent.solid, 45)}, transparent 70%)` }}
+      />
+      <span
+        className="dot-cluster pointer-events-none absolute bottom-20 left-5 h-10 w-14"
+        style={{ color: accent.solid, opacity: 0.3 }}
+      />
 
-      <div className="min-w-0 flex-1">
-        <h3 className="text-[15px] font-extrabold text-ink-900">{dimension.title}</h3>
-        <div className="mt-1 flex items-center gap-1.5">
-          <span
-            className="h-1.5 w-1.5 shrink-0 rounded-full"
-            style={{ background: done ? LEVEL_HEX[result.level] : dimension.accent.solid }}
-          />
+      <div className={cn("relative flex items-center", isPhysical ? "gap-0" : "gap-3")}>
+        <div className="min-w-0 flex-1">
           <span
             className={cn(
-              "line-clamp-1 text-xs font-semibold",
-              done ? meta.text : "text-ink-500",
+              "inline-flex items-center gap-1.5 rounded-pill bg-white/80 font-extrabold",
+              isPhysical ? "px-2 py-0.5 text-[10px]" : "px-2.5 py-1 text-[11px]",
+            )}
+            style={{ color: accent.fg }}
+          >
+            <Sparkles className="h-3 w-3" strokeWidth={2.4} />
+            محطتك التالية · {step} من {total}
+          </span>
+          <h3
+            className={cn(
+              "font-extrabold leading-snug text-ink-900",
+              isPhysical ? "mt-2 text-[1.15rem]" : "mt-2.5 text-[1.35rem]",
             )}
           >
-            {done ? result.band.title : isNext ? "ابدأ الآن — لم تُجب بعد" : dimension.tagline}
-          </span>
+            {dimName(dimension.title)}
+          </h3>
+          <p
+            className={cn(
+              "mt-1 font-semibold leading-relaxed text-ink-600",
+              isPhysical ? "text-[11px]" : "text-xs",
+            )}
+          >
+            {dimension.tagline}
+          </p>
+          <div
+            className={cn(
+              "flex flex-wrap items-center gap-y-1.5 font-bold text-ink-500",
+              isPhysical ? "mt-2 gap-x-2 text-[10px]" : "mt-3 gap-x-3 text-[11px]",
+            )}
+          >
+            <span className="inline-flex items-center gap-1">
+              <ListChecks className="h-3.5 w-3.5" strokeWidth={2.2} />
+              {questionsPhrase(result.total)}
+            </span>
+            <span className="inline-flex items-center gap-1">
+              <Timer className="h-3.5 w-3.5" strokeWidth={2.2} />
+              دقيقة إلى دقيقتين
+            </span>
+          </div>
         </div>
+        {isPhysical ? (
+          <img
+            src="/images/physical.png"
+            alt=""
+            aria-hidden
+            className="w-[9.5rem] max-w-[44%] shrink-0 object-contain"
+          />
+        ) : (
+          <Illustration
+            name={DIMENSION_ART[dimension.id]}
+            tone={accent.solid}
+            className="w-[7.5rem] max-w-[36%] shrink-0"
+          />
+        )}
       </div>
 
-      {done ? (
-        <div className="shrink-0 text-left leading-none">
-          <span
-            className="nums text-[1.4rem] font-extrabold"
-            style={{ color: LEVEL_HEX[result.level] }}
-          >
-            {result.score}
-          </span>
-          <span className="mt-0.5 block text-[10px] font-bold text-ink-400">من 100</span>
+      {resume && (
+        <div className="relative mt-4">
+          <ProgressBar
+            value={(result.answered / result.total) * 100}
+            barStyle={{ background: accent.solid }}
+            trackClassName="bg-white/75"
+          />
+          <p dir="ltr" className="nums mt-1.5 text-left text-[10px] font-bold text-ink-500">
+            {result.answered}/{result.total}
+          </p>
         </div>
-      ) : isNext ? (
-        <span
-          className="shrink-0 rounded-pill px-3.5 py-1.5 text-[11px] font-bold text-white shadow-soft"
-          style={{ background: dimension.accent.solid }}
-        >
-          ابدأ
-        </span>
-      ) : (
-        <span
-          className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-white/70"
-          style={{ color: dimension.accent.fg }}
-        >
-          <ChevronLeft className="h-4 w-4" strokeWidth={2.4} />
-        </span>
       )}
+
+      <span
+        className="relative mt-4 flex w-full items-center justify-center gap-2 rounded-pill py-3.5 text-[0.875rem] font-bold text-white shadow-soft"
+        style={{ background: accent.solid }}
+      >
+        {resume ? "أكمل من حيث توقفت" : "ابدأ الآن"}
+        <ChevronLeft className="h-4 w-4" strokeWidth={2.4} />
+      </span>
     </button>
+  );
+}
+
+/* ── The journey trail — nine stations on a winding dotted path, in answering
+   order, ending at the gift the company already paid for. Completed stations
+   fill with their accent, the next one pulses, and every station stays
+   tappable (dimensions are never locked). ─────────────────────────────────── */
+
+/** Horizontal station positions (% of trail width), cycling right → centre →
+ *  left → centre so the path winds like a map rather than stacking in a line. */
+const TRAIL_X = [76, 47, 20, 47];
+/** Vertical pitch between stations, px. */
+const TRAIL_STEP = 96;
+/** First station's centre y, px. */
+const TRAIL_TOP = 44;
+
+function JourneyTrail({
+  results,
+  nextIndex,
+  hasResults,
+  className,
+  onOpenDimension,
+  onOpenGift,
+}: {
+  results: DimensionResult[];
+  nextIndex: number;
+  hasResults: boolean;
+  className?: string;
+  onOpenDimension: (id: Dimension["id"]) => void;
+  onOpenGift: () => void;
+}) {
+  // The curved path needs real pixel coordinates, so measure the container.
+  const ref = useRef<HTMLDivElement>(null);
+  const [width, setWidth] = useState(0);
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new ResizeObserver(() => setWidth(el.clientWidth));
+    observer.observe(el);
+    setWidth(el.clientWidth);
+    return () => observer.disconnect();
+  }, []);
+
+  const stations = [...dimensions.map((_, i) => i), -1]; // -1 = the gift finale
+  const pointOf = (order: number) => ({
+    x: (TRAIL_X[order % TRAIL_X.length] / 100) * width,
+    y: TRAIL_TOP + order * TRAIL_STEP,
+  });
+  const giftPoint = pointOf(dimensions.length);
+  const height = giftPoint.y + 92;
+
+  return (
+    <div ref={ref} className={cn("relative", className)} style={{ height }}>
+      {width > 0 && (
+        <svg className="absolute inset-0" width={width} height={height} aria-hidden>
+          {stations.slice(0, -1).map((_, i) => {
+            const from = pointOf(i);
+            const to = pointOf(i + 1);
+            const walked = results[i].complete;
+            return (
+              <path
+                key={i}
+                d={`M ${from.x} ${from.y} C ${from.x} ${from.y + TRAIL_STEP / 2}, ${to.x} ${to.y - TRAIL_STEP / 2}, ${to.x} ${to.y}`}
+                fill="none"
+                stroke={walked ? dimensions[i].accent.solid : "var(--color-ink-200)"}
+                strokeWidth={walked ? 3.5 : 3}
+                strokeLinecap="round"
+                strokeDasharray={walked ? undefined : "0.5 9"}
+                opacity={walked ? 0.8 : 1}
+              />
+            );
+          })}
+        </svg>
+      )}
+
+      {dimensions.map((dimension, i) => {
+        const { x, y } = pointOf(i);
+        const result = results[i];
+        const done = result.complete;
+        const isNext = i === nextIndex;
+        const accent = dimension.accent;
+        return (
+          <button
+            key={dimension.id}
+            onClick={() => onOpenDimension(dimension.id)}
+            className="absolute z-10 flex w-28 -translate-x-1/2 flex-col items-center"
+            style={{ left: x, top: y - 27 }}
+          >
+            <span
+              className={cn(
+                "relative grid h-[54px] w-[54px] place-items-center rounded-full shadow-soft transition duration-200 hover:-translate-y-0.5",
+                isNext && "bg-white",
+                done && "text-white",
+              )}
+              style={
+                done
+                  ? { background: accent.solid }
+                  : isNext
+                    ? { color: accent.fg, boxShadow: `0 0 0 3px ${accent.solid}` }
+                    : { background: pastel(accent.solid, 16), color: accent.fg }
+              }
+            >
+              {isNext && (
+                <span
+                  className="absolute inset-0 animate-ping rounded-full [animation-duration:2.4s]"
+                  style={{ background: accent.solid, opacity: 0.2 }}
+                />
+              )}
+              <dimension.icon className="relative h-6 w-6" strokeWidth={2} />
+              {done ? (
+                <span className="absolute -bottom-0.5 -left-0.5 grid h-5 w-5 place-items-center rounded-full bg-good text-white shadow-soft ring-2 ring-white">
+                  <Check className="h-3 w-3" strokeWidth={3.5} />
+                </span>
+              ) : (
+                <span
+                  className="nums absolute -right-1 -top-1 grid h-5 w-5 place-items-center rounded-full bg-white text-[10px] font-extrabold shadow-soft"
+                  style={{ color: accent.fg }}
+                >
+                  {i + 1}
+                </span>
+              )}
+            </span>
+            <span className="mt-1.5 text-[11.5px] font-extrabold leading-tight text-ink-900">
+              {dimension.title}
+            </span>
+            {done ? (
+              <span
+                className="nums text-[11px] font-extrabold leading-tight"
+                style={{ color: LEVEL_HEX[result.level] }}
+              >
+                {result.score}
+              </span>
+            ) : isNext ? (
+              <span className="text-[10px] font-extrabold leading-tight" style={{ color: accent.fg }}>
+                {result.answered > 0 ? "أكمل الآن" : "ابدأ الآن"}
+              </span>
+            ) : (
+              <span className="line-clamp-1 w-full text-center text-[10px] font-semibold leading-tight text-ink-400">
+                {dimension.tagline}
+              </span>
+            )}
+          </button>
+        );
+      })}
+
+      {/* The finale — the employer-paid gift, visible from step one. */}
+      <button
+        onClick={hasResults ? onOpenGift : undefined}
+        disabled={!hasResults}
+        className={cn(
+          "absolute z-10 flex w-36 -translate-x-1/2 flex-col items-center",
+          !hasResults && "cursor-not-allowed",
+        )}
+        style={{ left: giftPoint.x, top: giftPoint.y - 29 }}
+      >
+        <span
+          className={cn(
+            "relative grid h-[58px] w-[58px] place-items-center rounded-full transition duration-200",
+            hasResults
+              ? "bg-coral-500 text-white shadow-pop hover:-translate-y-0.5"
+              : "border-2 border-dashed border-coral-300 bg-white/80 text-coral-400",
+          )}
+        >
+          <Gift className="h-6 w-6" strokeWidth={2.1} />
+          {hasResults && (
+            <span className="absolute -bottom-0.5 -left-0.5 grid h-5 w-5 place-items-center rounded-full bg-good text-white shadow-soft ring-2 ring-white">
+              <Check className="h-3 w-3" strokeWidth={3.5} />
+            </span>
+          )}
+        </span>
+        <span
+          className={cn(
+            "mt-1.5 text-[11.5px] font-extrabold leading-tight",
+            hasResults ? "text-coral-600" : "text-ink-600",
+          )}
+        >
+          {hasResults ? "احجز استشارتك المجانية" : "هديتك في النهاية"}
+        </span>
+        <span className="text-[10px] font-semibold leading-tight text-ink-400">
+          {hasResults ? "خبيرك بانتظارك الآن" : "استشارة مجانية + تقريرك الكامل"}
+        </span>
+      </button>
+    </div>
   );
 }

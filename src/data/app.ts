@@ -15,8 +15,8 @@ export interface User {
 }
 
 export const currentUser: User = {
-  name: "سلمى المالكي",
-  firstName: "سلمى",
+  name: "مالك محمد",
+  firstName: "مالك",
   org: "شركة نسيج",
   role: "أخصائية موارد بشرية",
   overallScore: 72,
@@ -26,7 +26,12 @@ export const currentUser: User = {
 
 /* ── Deliverable 3: the personalized plan / journey ───────────────────────── */
 
-export type TaskKind = "meditation" | "reading" | "exercise" | "reflection" | "session";
+export type TaskKind =
+  | "meditation"
+  | "reading"
+  | "exercise"
+  | "reflection"
+  | "session";
 
 export interface PlanTask {
   id: string;
@@ -100,7 +105,9 @@ export interface DimensionEffort {
 /** Roll the 4-week journey and today's live tasks into per-dimension effort, so
  *  the report can recognise the work an employee is already putting in. Only
  *  dimensions with planned activity appear. */
-export function computeEffort(tasks: PlanTask[]): Partial<Record<DimensionId, DimensionEffort>> {
+export function computeEffort(
+  tasks: PlanTask[],
+): Partial<Record<DimensionId, DimensionEffort>> {
   const acc: Partial<Record<DimensionId, DimensionEffort>> = {};
   const bump = (id: DimensionId, done: number, total: number) => {
     const cur = acc[id] ?? { done: 0, total: 0 };
@@ -134,7 +141,8 @@ export const experts: Expert[] = [
     rating: 4.9,
     sessions: 320,
     nextSlots: ["اليوم 5:00 م", "اليوم 7:30 م", "غدًا 10:00 ص"],
-    avatar: "https://images.unsplash.com/photo-1594824476967-48c8b964273f?q=80&w=256&h=256&fit=crop&crop=faces",
+    avatar:
+      "https://images.unsplash.com/photo-1594824476967-48c8b964273f?q=80&w=256&h=256&fit=crop&crop=faces",
   },
   {
     id: "e2",
@@ -144,7 +152,8 @@ export const experts: Expert[] = [
     rating: 4.8,
     sessions: 210,
     nextSlots: ["غدًا 12:00 م", "غدًا 4:00 م", "الأحد 9:00 ص"],
-    avatar: "https://images.unsplash.com/photo-1622253692010-333f2da6031d?q=80&w=256&h=256&fit=crop&crop=faces",
+    avatar:
+      "https://images.unsplash.com/photo-1622253692010-333f2da6031d?q=80&w=256&h=256&fit=crop&crop=faces",
   },
   {
     id: "e3",
@@ -154,7 +163,8 @@ export const experts: Expert[] = [
     rating: 5.0,
     sessions: 268,
     nextSlots: ["اليوم 6:15 م", "غدًا 11:00 ص", "غدًا 3:30 م"],
-    avatar: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?q=80&w=256&h=256&fit=crop&crop=faces",
+    avatar:
+      "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?q=80&w=256&h=256&fit=crop&crop=faces",
   },
   {
     id: "e4",
@@ -164,7 +174,8 @@ export const experts: Expert[] = [
     rating: 4.7,
     sessions: 184,
     nextSlots: ["غدًا 1:00 م", "الأحد 10:30 ص", "الأحد 5:00 م"],
-    avatar: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?q=80&w=256&h=256&fit=crop&crop=faces",
+    avatar:
+      "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?q=80&w=256&h=256&fit=crop&crop=faces",
   },
 ];
 

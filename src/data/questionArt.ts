@@ -17,7 +17,7 @@ import type { IllustrationName } from "../illustrations/Illustration";
 
 /** The illustration each dimension falls back to when a question has no
  *  more specific topic. Chosen to fit the dimension's overall subject. */
-const DIMENSION_ART: Record<DimensionId, IllustrationName> = {
+export const DIMENSION_ART: Record<DimensionId, IllustrationName> = {
   professional: "regain-focus", // burnout, energy, workload
   psycho: "mindfulness", // emotional balance, anxiety, stress
   intellectual: "ideas", // curiosity, openness, imagination

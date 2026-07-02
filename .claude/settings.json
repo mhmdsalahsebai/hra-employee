@@ -17,7 +17,12 @@
       "Bash(npx vite *)",
       "Bash(echo \"exit: $?\")",
       "Bash(echo \"=== EXIT: $? ===\")",
-      "Bash(npx eslint *)"
+      "Bash(npx eslint *)",
+      "Bash(node shot-home.mjs)",
+      "Bash(echo \"tsc-exit:$?\")",
+      "Bash(fuser -k 5174/tcp)",
+      "Bash(git -C /home/mhmdsalah/Desktop/work/hra-employee status --short)",
+      "Bash(git -C /home/mhmdsalah/Desktop/work/hra-employee diff src/data/app.ts)"
     ]
   }
 }
