@@ -36,8 +36,8 @@ export function Login() {
   return (
     <div className="mx-auto flex min-h-dvh w-full max-w-[480px] flex-col bg-canvas px-5 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-[max(1.5rem,env(safe-area-inset-top))]">
       <div className="flex items-center justify-center gap-2">
-        <img src="/cura.svg" alt="cura" className="h-7 w-auto" />
-        <span className="text-xl font-extrabold text-ink-900">cura</span>
+        <img src="/cura.svg" alt="كيورا" className="h-8 w-auto" />
+        <span className="text-xl font-extrabold tracking-tight text-ink-900">كيورا</span>
       </div>
 
       <main className="animate-rise flex flex-1 flex-col justify-center py-7">
@@ -94,7 +94,7 @@ export function Login() {
 
       <p className="flex items-center justify-center gap-1.5 text-center text-xs font-semibold text-ink-400">
         <ShieldCheck className="h-3.5 w-3.5" strokeWidth={2.2} />
-        دخول آمن وبياناتك لا تُشارك مع جهة عملك
+        دخول آمن ومشفّر لبياناتك
       </p>
     </div>
   );

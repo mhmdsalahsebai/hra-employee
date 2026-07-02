@@ -1,6 +1,5 @@
 import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ShieldCheck } from "lucide-react";
 import { A11y } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
 import type { Swiper as SwiperClass } from "swiper";
@@ -87,12 +86,12 @@ export function Onboarding() {
       {/* top bar: brand + skip */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <img src="/cura.svg" alt="cura" className="h-7 w-auto" />
-          <span className="text-xl font-extrabold text-ink-900">cura</span>
+          <img src="/cura.svg" alt="كيورا" className="h-8 w-auto" />
+          <span className="text-xl font-extrabold tracking-tight text-ink-900">كيورا</span>
         </div>
         <button
           onClick={goToLogin}
-          className="rounded-pill px-3 py-1.5 text-[0.8125rem] font-semibold text-ink-500 transition-colors hover:text-ink-800"
+          className="rounded-pill bg-ink-50 px-3.5 py-1.5 text-[0.8125rem] font-bold text-ink-500 transition-colors hover:bg-ink-100 hover:text-ink-800 active:scale-95"
         >
           تخطّي
         </button>
@@ -166,8 +165,10 @@ export function Onboarding() {
               <div className="animate-rise mt-8">
                 <span
                   className={cn(
-                    "text-[11px] font-bold tracking-wide",
-                    accent === "coral" ? "text-coral-600" : "text-brand-700",
+                    "inline-flex items-center rounded-pill px-3 py-1.5 text-[11px] font-bold shadow-soft",
+                    accent === "coral"
+                      ? "bg-coral-soft text-coral-600"
+                      : "bg-brand-soft text-brand-700",
                   )}
                 >
                   {eyebrow}
@@ -208,10 +209,6 @@ export function Onboarding() {
         >
           لديك حساب؟ <span className="font-bold text-brand-700">تسجيل الدخول</span>
         </button>
-        <p className="flex items-center justify-center gap-1.5 pt-1 text-center text-xs font-semibold text-ink-400">
-          <ShieldCheck className="h-3.5 w-3.5" strokeWidth={2.2} />
-          بياناتك سرية تمامًا ولا تُشارك مع جهة عملك
-        </p>
       </div>
     </div>
   );

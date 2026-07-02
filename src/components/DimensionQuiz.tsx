@@ -154,21 +154,20 @@ export function DimensionQuiz({ dimId, onClose }: { dimId: DimensionId; onClose:
                     </span>
 
                     {/* Topic art on a soft accent stage, recolored to the
-                        dimension accent. Takes the flexible middle space and
-                        shrinks first on short screens. */}
-                    <div className="flex min-h-0 flex-1 items-center justify-center py-3">
-                      <div className="relative grid place-items-center">
-                        <span
-                          aria-hidden
-                          className="absolute h-44 w-44 rounded-full opacity-60 blur-xl"
-                          style={{ background: dim.accent.soft }}
-                        />
-                        <Illustration
-                          name={getQuestionArt(question.slug, dimId)}
-                          tone={dim.accent.solid}
-                          className="relative w-36 max-w-[48%]"
-                        />
-                      </div>
+                        dimension accent. Fills the flexible middle space and
+                        scales to *contain* within it, so tall art never
+                        overflows onto the question title on short screens. */}
+                    <div className="relative flex min-h-0 flex-1 items-center justify-center py-3">
+                      <span
+                        aria-hidden
+                        className="absolute left-1/2 top-1/2 h-40 w-40 -translate-x-1/2 -translate-y-1/2 rounded-full opacity-60 blur-xl"
+                        style={{ background: dim.accent.soft }}
+                      />
+                      <Illustration
+                        name={getQuestionArt(question.slug, dimId)}
+                        tone={dim.accent.solid}
+                        className="is-contained relative h-full w-full max-w-[9.5rem]"
+                      />
                     </div>
 
                     <div className="flex shrink-0 gap-3">

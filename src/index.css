@@ -166,6 +166,15 @@
   width: 100%;
   height: auto;
 }
+/* When the art must fit inside a bounded box (e.g. a question card's flexible
+   middle), let the inline <svg> scale to *contain* within both width and height
+   — via its own preserveAspectRatio — instead of growing to its natural height
+   and overflowing onto the question title on short screens. */
+.cura-illustration.is-contained,
+.cura-illustration.is-contained svg {
+  width: 100%;
+  height: 100%;
+}
 
 /* Hide scrollbars on horizontal "shelves" without losing scrollability. */
 @utility no-scrollbar {

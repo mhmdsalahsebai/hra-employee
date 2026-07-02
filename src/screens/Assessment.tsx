@@ -7,7 +7,6 @@ import {
   ChevronRight,
   Clock,
   Home,
-  Lock,
   MessageCircleHeart,
   PlayCircle,
   ScrollText,
@@ -24,6 +23,7 @@ import {
 } from "../components/ui";
 import { cn } from "../lib/cn";
 import { Illustration } from "../illustrations/Illustration";
+import { PrivacyNote } from "../components/PrivacyNote";
 import { useAssessment } from "../assessment/useAssessment";
 import type { DimensionResult } from "../assessment/useAssessment";
 import { dimensions, dimensionsById, type Dimension, type DimensionId } from "../data/dimensions";
@@ -246,21 +246,20 @@ export function Assessment() {
                   </span>
 
                   {/* Topic art on a soft accent stage, recolored to the
-                      dimension accent. Takes the flexible middle space and
-                      shrinks first on short screens. */}
-                  <div className="flex min-h-0 flex-1 items-center justify-center py-3">
-                    <div className="relative grid place-items-center">
-                      <span
-                        aria-hidden
-                        className="absolute h-44 w-44 rounded-full opacity-60 blur-xl"
-                        style={{ background: dim.accent.soft }}
-                      />
-                      <Illustration
-                        name={getQuestionArt(q.slug, chapter.slug)}
-                        tone={dim.accent.solid}
-                        className="relative w-36 max-w-[48%]"
-                      />
-                    </div>
+                      dimension accent. Fills the flexible middle space and
+                      scales to *contain* within it, so tall art never overflows
+                      onto the question title on short screens. */}
+                  <div className="relative flex min-h-0 flex-1 items-center justify-center py-3">
+                    <span
+                      aria-hidden
+                      className="absolute left-1/2 top-1/2 h-40 w-40 -translate-x-1/2 -translate-y-1/2 rounded-full opacity-60 blur-xl"
+                      style={{ background: dim.accent.soft }}
+                    />
+                    <Illustration
+                      name={getQuestionArt(q.slug, chapter.slug)}
+                      tone={dim.accent.solid}
+                      className="is-contained relative h-full w-full max-w-[9.5rem]"
+                    />
                   </div>
 
                   <div className="flex shrink-0 gap-3">
@@ -423,10 +422,7 @@ function Intro({ onStart, resuming }: { onStart: () => void; resuming: boolean }
           </div>
         </div>
 
-        <p className="mt-6 flex items-center justify-center gap-1.5 text-center text-xs font-semibold text-ink-400">
-          <Lock className="h-3.5 w-3.5" strokeWidth={2.2} />
-          إجاباتك سرية ولا تطّلع عليها جهة عملك إطلاقًا
-        </p>
+        <PrivacyNote className="mt-6" />
       </div>
 
       <Button fullWidth size="lg" onClick={onStart}>

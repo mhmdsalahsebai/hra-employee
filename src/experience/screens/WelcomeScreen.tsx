@@ -1,4 +1,3 @@
-import { ShieldCheck } from "lucide-react";
 import { PrimaryButton } from "../components/PrimaryButton";
 import { BrandMark } from "../components/BrandMark";
 import { WellbeingOrb } from "../illustrations/WellbeingOrb";
@@ -30,10 +29,6 @@ export function WelcomeScreen({ onStart, loading }: { onStart: () => void; loadi
         <PrimaryButton className="mt-7" onClick={onStart} loading={loading}>
           ابدأ رحلتك
         </PrimaryButton>
-        <p className="mt-4 flex items-center justify-center gap-1.5 text-[12.5px] font-medium text-[#9aa0ae]">
-          <ShieldCheck className="h-4 w-4" strokeWidth={2} />
-          بياناتك سرية ولا تُشارك مع جهة عملك
-        </p>
       </div>
     </>
   );

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   Clock,
@@ -181,8 +182,10 @@ export function Consultation() {
   /* ── In call (live video simulation) ───────────────────────────────────── */
   if (phase === "in-call" && expert) {
     const dim = dimensionsById[expert.specialty];
-    return (
-      <div className="fixed inset-y-0 left-1/2 z-50 flex w-full max-w-[480px] -translate-x-1/2 flex-col bg-brand-950">
+    // Portal to <body> for the same reason as `CallStage` — a transformed route
+    // ancestor would otherwise capture this fixed overlay's positioning.
+    return createPortal(
+      <div className="fixed inset-0 z-50 mx-auto flex h-dvh w-full max-w-[480px] flex-col bg-brand-950">
         {/* "Video feed" — the specialist, filling the frame */}
         <div className="relative flex-1 overflow-hidden">
           <div
@@ -246,7 +249,8 @@ export function Consultation() {
             label={cameraOff ? "تشغيل الكاميرا" : "إيقاف الكاميرا"}
           />
         </div>
-      </div>
+      </div>,
+      document.body,
     );
   }
 
@@ -386,10 +390,14 @@ export function Consultation() {
 /* ── A full-screen immersive stage for matching / ringing ──────────────────── */
 
 function CallStage({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="fixed inset-y-0 left-1/2 z-50 flex w-full max-w-[480px] -translate-x-1/2 flex-col items-center justify-center bg-brand-950 px-6 text-center">
+  // Portal to <body>: the routed screen animates with a transform, which would
+  // otherwise make this `fixed` overlay resolve against that transformed
+  // ancestor instead of the viewport — leaving it mis-positioned and clipped.
+  return createPortal(
+    <div className="fixed inset-0 z-50 mx-auto flex h-dvh w-full max-w-[480px] flex-col items-center justify-center bg-brand-950 px-6 text-center">
       {children}
-    </div>
+    </div>,
+    document.body,
   );
 }
 

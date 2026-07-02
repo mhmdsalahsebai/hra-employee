@@ -19,6 +19,7 @@ import { usePlan } from "../plan/usePlan";
 import { dimensionsById, tileStyle, type DimensionId } from "../data/dimensions";
 import { hraBySlug } from "../data/hra";
 import { DimensionQuiz } from "../components/DimensionQuiz";
+import { PrivacyNote } from "../components/PrivacyNote";
 
 const VALID = new Set(Object.keys(dimensionsById));
 
@@ -113,6 +114,13 @@ export function Dimension() {
           </div>
         )}
       </section>
+
+      {/* What the employer sees vs never sees — shown before answering starts. */}
+      {!complete && (
+        <section className="px-5 pt-3">
+          <PrivacyNote />
+        </section>
+      )}
 
       {/* What it measures */}
       <section className="px-5 pt-5">
@@ -227,22 +235,26 @@ export function Dimension() {
         </section>
       )}
 
-      {/* Consultation CTA */}
-      <section className="px-5 pt-6">
-        <button
-          onClick={() => navigate("/consultation")}
-          className="group flex w-full items-center gap-3.5 rounded-xl border border-ink-100 bg-surface p-4 text-right shadow-card transition hover:-translate-y-0.5 hover:shadow-pop active:translate-y-0"
-        >
-          <span className="grid h-12 w-12 shrink-0 place-items-center rounded-[0.85rem] bg-coral-soft text-coral-600">
-            <MessageCircleHeart className="h-[1.35rem] w-[1.35rem]" strokeWidth={2} />
-          </span>
-          <div className="min-w-0 flex-1">
-            <p className="text-[15px] font-bold text-ink-900">ناقش هذا البُعد مع خبير</p>
-            <p className="text-xs font-semibold text-ink-400">استشارة مجانية لتقييم حالتك ووضع خطة</p>
-          </div>
-          <ChevronLeft className="h-5 w-5 shrink-0 text-ink-300 transition group-hover:-translate-x-0.5" strokeWidth={2.4} />
-        </button>
-      </section>
+      {/* Consultation CTA — only once the dimension is complete: the free
+          consultation is a reward for finishing, not an entry point before the
+          person has even answered this dimension. */}
+      {complete && (
+        <section className="px-5 pt-6">
+          <button
+            onClick={() => navigate("/consultation")}
+            className="group flex w-full items-center gap-3.5 rounded-xl border border-ink-100 bg-surface p-4 text-right shadow-card transition hover:-translate-y-0.5 hover:shadow-pop active:translate-y-0"
+          >
+            <span className="grid h-12 w-12 shrink-0 place-items-center rounded-[0.85rem] bg-coral-soft text-coral-600">
+              <MessageCircleHeart className="h-[1.35rem] w-[1.35rem]" strokeWidth={2} />
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="text-[15px] font-bold text-ink-900">ناقش هذا البُعد مع خبير</p>
+              <p className="text-xs font-semibold text-ink-400">استشارة مجانية لتقييم حالتك ووضع خطة</p>
+            </div>
+            <ChevronLeft className="h-5 w-5 shrink-0 text-ink-300 transition group-hover:-translate-x-0.5" strokeWidth={2.4} />
+          </button>
+        </section>
+      )}
 
       {quizOpen && <DimensionQuiz dimId={id} onClose={() => setQuizOpen(false)} />}
     </div>
