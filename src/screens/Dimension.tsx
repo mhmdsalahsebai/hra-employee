@@ -39,6 +39,10 @@ export function Dimension() {
   const e = effort[id];
   const complete = r.complete;
   const answeredPct = Math.round((r.answered / r.total) * 100);
+  // Same ~5s-per-question heuristic as the full assessment flow: an honest,
+  // small commitment beats a scary question count.
+  const minutes = Math.max(1, Math.round((r.total * 5) / 60));
+  const minutesPhrase = minutes === 1 ? "دقيقة واحدة" : minutes === 2 ? "دقيقتين" : `${minutes} دقائق`;
 
   return (
     <div className="animate-rise pb-6">
@@ -86,7 +90,8 @@ export function Dimension() {
             </ScoreRing>
             <h2 className="mt-5 text-lg font-bold text-ink-900">لنقِس بُعد {dim.title}</h2>
             <p className="mt-1.5 max-w-xs text-sm leading-relaxed text-ink-500">
-              أجب عن <span className="nums">{r.total}</span> أسئلة قصيرة لتظهر لك درجتك وتحليلك والتوصيات المناسبة.
+              <span className="nums">{r.total}</span> سؤالًا بلمسة واحدة — نحو {minutesPhrase} —
+              وتظهر درجتك وتحليلك فورًا.
             </p>
             {r.answered > 0 && (
               <p className="nums mt-3 text-xs font-bold text-brand-700">
@@ -100,6 +105,9 @@ export function Dimension() {
               </Button>
               <p className="mt-3 text-xs font-semibold text-ink-400">
                 سؤال واحد في كل خطوة · يمكنك الرجوع أو الخروج في أي وقت
+              </p>
+              <p className="mt-1.5 text-xs font-semibold text-brand-700">
+                كل بُعد تكمله يقرّبك من تقريرك واستشارتك المجانية مع مختص
               </p>
             </div>
           </div>

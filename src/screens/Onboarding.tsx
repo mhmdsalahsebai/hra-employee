@@ -20,35 +20,35 @@ interface FeatureSlide {
   body: string;
 }
 
-/** The app's core loop, one feature per slide. */
+/** Value before effort: what the employee gets — ending with how little it costs. */
 const slides: FeatureSlide[] = [
   {
-    art: "questions",
-    accent: "brand",
-    eyebrow: "التقييم",
-    title: "ابدأ بتقييم بسيط",
-    body: "أجب عن أسئلة قصيرة لنفهم صحتك النفسية والجسدية بدقة.",
+    art: "instant-support",
+    accent: "coral",
+    eyebrow: "استشارة مجانية",
+    title: "مختص معتمد يستمع لك",
+    body: "جلسة خاصة وسرّية تناقش فيها حالك مع مختص — مجانية بالكامل، تدفع عنك شركتك.",
   },
   {
     art: "regain-focus",
-    accent: "coral",
-    eyebrow: "التقرير",
-    title: "اعرف نتيجتك بوضوح",
-    body: "احصل على تقرير مفصّل يبرز نقاط قوتك وفرص تحسّنك عبر كل بُعد.",
+    accent: "brand",
+    eyebrow: "تقريرك الشخصي",
+    title: "اعرف نقاط قوّتك بوضوح",
+    body: "تقرير مفصّل عبر 9 أبعاد يبرز ما تتميّز به وما يستحق انتباهك — يراه أنت وحدك.",
   },
   {
     art: "personal-goals",
     accent: "brand",
-    eyebrow: "الخطة",
+    eyebrow: "خطتك",
     title: "خطة مصمّمة لك",
-    body: "خطوات عملية وبرامج يومية تناسب احتياجك، خطوة بخطوة.",
+    body: "خطوات عملية وبرامج يومية مبنية على نتائجك أنت — لا نصائح عامة.",
   },
   {
-    art: "instant-support",
+    art: "questions",
     accent: "coral",
-    eyebrow: "الدعم",
-    title: "خبراء ومحتوى بجانبك",
-    body: "استشر مختصين معتمدين بسرية تامة، مع محتوى ملهم يدعم رحلتك.",
+    eyebrow: "كل هذا مقابل دقائق",
+    title: "أسئلة قصيرة بلمسة واحدة",
+    body: "9 أبعاد قصيرة، دقيقة إلى دقيقتين لكل بُعد، وتقدّمك محفوظ دائمًا. تقريرك المبدئي يفتح بعد 3 أبعاد فقط.",
   },
 ];
 
@@ -131,7 +131,7 @@ export function Onboarding() {
             </div>
             <div className="animate-rise mt-8">
               <span className="inline-flex items-center gap-1.5 rounded-pill bg-surface px-3 py-1.5 text-[11px] font-bold text-brand-700 shadow-soft ring-1 ring-ink-100">
-                مقدّمة من شركتك
+                هدية لك من شركتك
               </span>
               <h1 className="mx-auto mt-4 max-w-[20rem] text-[1.75rem] font-extrabold leading-[1.25] text-ink-900">
                 نحو حياة
@@ -139,7 +139,8 @@ export function Onboarding() {
                 أكثر توازنًا
               </h1>
               <p className="mx-auto mt-3 max-w-[19rem] text-[15px] leading-relaxed text-ink-500">
-                افهم رفاهيتك النفسية والجسدية، واحصل على تقرير وخطة واستشارة ومحتوى مصمّم خصيصًا لك.
+                استشارة مجانية مع مختص، وتقرير يشرح حالك، وخطة مصمّمة لك — كل ذلك دون أي تكلفة
+                عليك.
               </p>
             </div>
           </div>

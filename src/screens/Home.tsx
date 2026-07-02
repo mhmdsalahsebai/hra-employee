@@ -32,6 +32,9 @@ import { useContentRecommendations } from "../content/useContentRecommendations"
 /** Soft pastel fill from a solid accent — the modern colour-blocked card look. */
 const pastel = (hex: string, pct = 12) => `color-mix(in srgb, ${hex} ${pct}%, white)`;
 
+/** Arabic count phrase for dimensions: بُعد واحد / بُعدان / N أبعاد. */
+const dimsPhrase = (n: number) => (n === 1 ? "بُعدًا واحدًا" : n === 2 ? "بُعدين" : `${n} أبعاد`);
+
 export function Home() {
   const navigate = useNavigate();
   const {
@@ -144,6 +147,11 @@ export function Home() {
                   <p className="mt-1.5 text-[1.25rem] font-extrabold leading-snug text-ink-900">
                     {started ? "خطوة كل يوم نحو توازنك" : "لنبدأ رحلتك نحو توازن أفضل"}
                   </p>
+                  <p className="mt-1 text-xs font-semibold leading-relaxed text-ink-600">
+                    {completedCount < MIN_DIMS_FOR_PREVIEW
+                      ? `أكمل ${dimsPhrase(MIN_DIMS_FOR_PREVIEW - completedCount)} ويفتح تقريرك المبدئي`
+                      : `أكمل ${dimsPhrase(totalDimensions - completedCount)} وتفتح استشارتك المجانية مع مختص`}
+                  </p>
                 </>
               )}
             </div>
@@ -184,8 +192,9 @@ export function Home() {
         </div>
       </section>
 
-      {/* First-run welcome — a warm illustrated greeting the brand-new employee sees. */}
-      {!started && (
+      {/* Why answer? The reward ladder — what unlocks and when. It answers the
+          "what's in it for me?" question and stays until the results land. */}
+      {!hasResults && (
         <section className="px-5 pt-4">
           <div
             className="relative overflow-hidden rounded-[1.75rem] p-5"
@@ -197,16 +206,59 @@ export function Home() {
               style={{ background: "radial-gradient(circle, rgba(46,128,210,0.22), transparent 70%)" }}
             />
             <span className="dot-cluster pointer-events-none absolute bottom-4 left-4 h-12 w-16 text-violet-400/40" />
-            <Illustration
-              name="journey"
-              className="relative mx-auto w-52 max-w-[68%]"
-              tone="#6757b8"
-            />
-            <div className="relative pt-3 text-center">
-              <h2 className="text-base font-extrabold text-ink-900">رحلتك تبدأ من هنا</h2>
-              <p className="mx-auto mt-1.5 max-w-xs text-[13px] leading-relaxed text-ink-600">
-                أجب عن أبعادك التسعة لتكشف صورة رفاهيتك الكاملة — خطوة واحدة كل يوم.
+            {!started && (
+              <Illustration
+                name="journey"
+                className="relative mx-auto w-44 max-w-[58%]"
+                tone="#6757b8"
+              />
+            )}
+            <div className="relative pt-2">
+              <h2 className="text-base font-extrabold text-ink-900">
+                {started ? "مكافآت رحلتك" : "رحلتك تبدأ من هنا — وهذا ما تكسبه"}
+              </h2>
+              <p className="mt-1 text-[13px] leading-relaxed text-ink-600">
+                دقيقة إلى دقيقتين لكل بُعد، وتقدّمك محفوظ دائمًا — وكل خطوة تفتح مكافأة حقيقية.
               </p>
+              <ol className="mt-4 space-y-3">
+                {[
+                  {
+                    at: 1,
+                    title: "نتيجتك الأولى فورًا",
+                    desc: "درجة وتحليل لحظي بعد كل بُعد تكمله",
+                  },
+                  {
+                    at: MIN_DIMS_FOR_PREVIEW,
+                    title: "تقريرك المبدئي",
+                    desc: `يفتح بعد ${MIN_DIMS_FOR_PREVIEW} أبعاد فقط، ويزداد دقة مع كل بُعد`,
+                  },
+                  {
+                    at: totalDimensions,
+                    title: "استشارة مجانية مع مختص + تقريرك الكامل",
+                    desc: "جلسة خاصة وسرّية تدفع عنها شركتك، مع خطة مصمّمة لك",
+                  },
+                ].map((step) => {
+                  const reached = completedCount >= step.at;
+                  return (
+                    <li key={step.at} className="flex items-start gap-3">
+                      <span
+                        className={cn(
+                          "nums mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-full text-[12px] font-extrabold shadow-soft",
+                          reached ? "bg-good text-white" : "bg-white text-violet-600",
+                        )}
+                      >
+                        {reached ? <Check className="h-3.5 w-3.5" strokeWidth={3} /> : step.at}
+                      </span>
+                      <div className="min-w-0">
+                        <p className="text-[13px] font-extrabold text-ink-900">{step.title}</p>
+                        <p className="mt-0.5 text-[11px] font-semibold leading-relaxed text-ink-500">
+                          {step.desc}
+                        </p>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ol>
             </div>
           </div>
         </section>
@@ -260,7 +312,7 @@ export function Home() {
           <DeliverableTile
             icon={MessageCircleHeart}
             title="استشارة خبير"
-            desc={hasResults ? "جلسة فورية مجانية الآن" : "تُفتح بعد تقريرك"}
+            desc={hasResults ? "جلسة فورية مجانية الآن" : "جلسة مجانية مع مختص · تُفتح بعد التقييم"}
             cta="ابدأ فورًا"
             tint="#dc604f"
             unlocked={hasResults}
