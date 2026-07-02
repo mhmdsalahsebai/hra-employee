@@ -78,6 +78,21 @@ export function AssessmentProvider({ children }: { children: ReactNode }) {
     persist(next);
   }, []);
 
+  const setDimensionFilled = useCallback((slug: DimensionId, filled: boolean) => {
+    setAnswers((prev) => {
+      const next = { ...prev };
+      for (const q of hraBySlug[slug].questions) {
+        if (filled) {
+          next[q.slug] = q.answers[Math.floor(Math.random() * q.answers.length)].value;
+        } else {
+          delete next[q.slug];
+        }
+      }
+      persist(next);
+      return next;
+    });
+  }, []);
+
   const value = useMemo<AssessmentValue>(() => {
     const results: DimensionResult[] = dimensions.map(({ id }) => {
       const d = hraBySlug[id];
@@ -110,6 +125,7 @@ export function AssessmentProvider({ children }: { children: ReactNode }) {
       setAnswer,
       fillRandomAnswers,
       fillDimensions,
+      setDimensionFilled,
       resetAnswers,
       results,
       resultBySlug,
@@ -128,7 +144,14 @@ export function AssessmentProvider({ children }: { children: ReactNode }) {
       totalQuestions,
       progressPct: totalQuestions ? Math.round((answeredQuestions / totalQuestions) * 100) : 0,
     };
-  }, [answers, setAnswer, fillRandomAnswers, fillDimensions, resetAnswers]);
+  }, [
+    answers,
+    setAnswer,
+    fillRandomAnswers,
+    fillDimensions,
+    setDimensionFilled,
+    resetAnswers,
+  ]);
 
   return <AssessmentContext.Provider value={value}>{children}</AssessmentContext.Provider>;
 }

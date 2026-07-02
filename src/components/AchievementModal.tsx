@@ -7,7 +7,6 @@ import {
   MessageCircleHeart,
   ScrollText,
   Sparkles,
-  Trophy,
   Video,
   X,
 } from "lucide-react";
@@ -17,7 +16,7 @@ import { useAssessment } from "../assessment/useAssessment";
 /** Shown once, ever — the first time every dimension is complete. */
 export const CELEBRATED_KEY = "cura-assessment-celebrated";
 
-/* A scatter of sparkles that burst outward behind the trophy — the small bit of
+/* A scatter of sparkles that burst outward behind the celebration art — the small bit of
    delight that makes finishing feel like an achievement. */
 const CONFETTI = [
   { x: -74, y: -20, c: "#e23e6b", d: 0 },
@@ -91,7 +90,7 @@ export function AchievementModal() {
               <X className="h-4 w-4" strokeWidth={2.4} />
             </button>
 
-            {/* Celebratory header — trophy bursting with confetti */}
+            {/* Celebratory header — achievement art bursting with confetti */}
             <div
               className="relative flex flex-col items-center overflow-hidden px-6 pb-6 pt-9 text-center"
               style={{ background: "linear-gradient(150deg, #e3f0fd 0%, #eae9fb 55%, #e6f5fb 100%)" }}
@@ -108,14 +107,15 @@ export function AchievementModal() {
                       transition={{ duration: 1.1, delay: 0.15 + p.d, ease: "easeOut" }}
                     />
                   ))}
-                <motion.span
-                  className="grid h-20 w-20 place-items-center rounded-full bg-white text-brand-600 shadow-pop"
+                <motion.img
+                  src="/images/congrat.png"
+                  alt=""
+                  aria-hidden
+                  className="h-24 w-24 object-contain drop-shadow-lg"
                   initial={reduce ? {} : { scale: 0, rotate: -20 }}
                   animate={{ scale: 1, rotate: 0 }}
                   transition={{ type: "spring", stiffness: 240, damping: 14, delay: 0.05 }}
-                >
-                  <Trophy className="h-9 w-9" strokeWidth={2} />
-                </motion.span>
+                />
               </div>
 
               <span className="mt-4 inline-flex items-center gap-1.5 rounded-pill bg-white/70 px-3 py-1 text-[11px] font-bold text-brand-700">

@@ -37,6 +37,19 @@ import { useContentRecommendations } from "../content/useContentRecommendations"
 /** Soft pastel fill from a solid accent — the modern colour-blocked card look. */
 const pastel = (hex: string, pct = 12) => `color-mix(in srgb, ${hex} ${pct}%, white)`;
 
+/** Supplied home-card artwork for every wellbeing dimension. */
+const DIMENSION_IMAGE: Partial<Record<Dimension["id"], string>> = {
+  physical: "/images/physical.png",
+  psycho: "/images/psycho.png",
+  financial: "/images/financial.png",
+  intellectual: "/images/intellectual.png",
+  community: "/images/community.png",
+  social: "/images/social.png",
+  belonging: "/images/belonging.png",
+  professional: "/images/professional.png",
+  workplace: "/images/workplace.png",
+};
+
 /** Arabic count phrase for dimensions: بُعد واحد / بُعدان / N أبعاد. */
 const dimsPhrase = (n: number) => (n === 1 ? "بُعدًا واحدًا" : n === 2 ? "بُعدين" : `${n} أبعاد`);
 
@@ -237,10 +250,11 @@ export function Home() {
             />
             <span className="dot-cluster pointer-events-none absolute bottom-4 left-4 h-12 w-16 text-violet-400/40" />
             {!started && (
-              <Illustration
-                name="journey"
-                className="relative mx-auto w-44 max-w-[58%]"
-                tone="#6757b8"
+              <img
+                src="/images/marker.png"
+                alt=""
+                aria-hidden
+                className="relative mx-auto w-44 max-w-[58%] object-contain"
               />
             )}
             <div className="relative pt-2">
@@ -535,7 +549,8 @@ function NextDimensionSpotlight({
 }) {
   const accent = dimension.accent;
   const resume = result.answered > 0;
-  const isPhysical = dimension.id === "physical";
+  const image = DIMENSION_IMAGE[dimension.id];
+  const hasDimensionImage = image !== undefined;
   return (
     <button
       onClick={onClick}
@@ -551,12 +566,12 @@ function NextDimensionSpotlight({
         style={{ color: accent.solid, opacity: 0.3 }}
       />
 
-      <div className={cn("relative flex items-center", isPhysical ? "gap-0" : "gap-3")}>
+      <div className={cn("relative flex items-center", hasDimensionImage ? "gap-0" : "gap-3")}>
         <div className="min-w-0 flex-1">
           <span
             className={cn(
               "inline-flex items-center gap-1.5 rounded-pill bg-white/80 font-extrabold",
-              isPhysical ? "px-2 py-0.5 text-[10px]" : "px-2.5 py-1 text-[11px]",
+              hasDimensionImage ? "px-2 py-0.5 text-[10px]" : "px-2.5 py-1 text-[11px]",
             )}
             style={{ color: accent.fg }}
           >
@@ -566,7 +581,7 @@ function NextDimensionSpotlight({
           <h3
             className={cn(
               "font-extrabold leading-snug text-ink-900",
-              isPhysical ? "mt-2 text-[1.15rem]" : "mt-2.5 text-[1.35rem]",
+              hasDimensionImage ? "mt-2 text-[1.15rem]" : "mt-2.5 text-[1.35rem]",
             )}
           >
             {dimName(dimension.title)}
@@ -574,7 +589,7 @@ function NextDimensionSpotlight({
           <p
             className={cn(
               "mt-1 font-semibold leading-relaxed text-ink-600",
-              isPhysical ? "text-[11px]" : "text-xs",
+              hasDimensionImage ? "text-[11px]" : "text-xs",
             )}
           >
             {dimension.tagline}
@@ -582,7 +597,7 @@ function NextDimensionSpotlight({
           <div
             className={cn(
               "flex flex-wrap items-center gap-y-1.5 font-bold text-ink-500",
-              isPhysical ? "mt-2 gap-x-2 text-[10px]" : "mt-3 gap-x-3 text-[11px]",
+              hasDimensionImage ? "mt-2 gap-x-2 text-[10px]" : "mt-3 gap-x-3 text-[11px]",
             )}
           >
             <span className="inline-flex items-center gap-1">
@@ -595,9 +610,9 @@ function NextDimensionSpotlight({
             </span>
           </div>
         </div>
-        {isPhysical ? (
+        {image ? (
           <img
-            src="/images/physical.png"
+            src={image}
             alt=""
             aria-hidden
             className="w-[9.5rem] max-w-[44%] shrink-0 object-contain"

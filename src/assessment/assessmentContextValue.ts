@@ -23,6 +23,8 @@ export interface AssessmentValue {
   fillRandomAnswers: () => void;
   /** Dev-only: complete only the first N dimensions (partial state). */
   fillDimensions: (count: number) => void;
+  /** Dev-only: fill or clear one dimension without changing the others. */
+  setDimensionFilled: (slug: DimensionId, filled: boolean) => void;
   resetAnswers: () => void;
   /** Results in dimension order. */
   results: DimensionResult[];
