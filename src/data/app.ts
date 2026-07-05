@@ -6,6 +6,7 @@ import type { DimensionId } from "./dimensions";
 export interface User {
   name: string;
   firstName: string;
+  avatar: string;
   org: string;
   role: string;
   /** Overall wellbeing score (0–100). */
@@ -17,6 +18,7 @@ export interface User {
 export const currentUser: User = {
   name: "مالك محمد",
   firstName: "مالك",
+  avatar: "/images/malik-avatar.webp",
   org: "شركة نسيج",
   role: "أخصائية موارد بشرية",
   overallScore: 72,

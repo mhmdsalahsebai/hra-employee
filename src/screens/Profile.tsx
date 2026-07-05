@@ -54,7 +54,7 @@ export function Profile() {
       {/* Identity card */}
       <section className="px-5 pt-5">
         <div className="flex flex-col items-center rounded-xl border border-ink-100 bg-surface p-7 text-center shadow-card">
-          <Avatar name={currentUser.name} size={84} />
+          <Avatar name={currentUser.name} src={currentUser.avatar} size={84} />
           <h2 className="mt-3.5 text-lg font-bold text-ink-900">{currentUser.name}</h2>
           <p className="text-[0.8125rem] font-semibold text-ink-400">{currentUser.role}</p>
           {hasResults ? (

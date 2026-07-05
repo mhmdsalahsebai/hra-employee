@@ -115,7 +115,12 @@ export function Home() {
         <section className="relative px-5 pb-[5.75rem] pt-[max(1.5rem,env(safe-area-inset-top))]">
           <div className="flex items-center justify-between gap-3">
             <div className="flex min-w-0 items-center gap-3">
-              <Avatar name={currentUser.name} size={52} className="shadow-soft ring-2 ring-white/80" />
+              <Avatar
+                name={currentUser.name}
+                src={currentUser.avatar}
+                size={52}
+                className="shadow-soft ring-2 ring-white/80"
+              />
               <div className="min-w-0 leading-tight">
                 <p className="text-xs font-bold text-ink-500">{todayLabel}</p>
                 <h1 className="mt-0.5 truncate text-[1.45rem] font-extrabold text-ink-900">
