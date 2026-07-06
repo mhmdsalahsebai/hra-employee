@@ -147,9 +147,24 @@ export function Plan() {
 
           {plan.flagged > 0 && (
             <div className="mt-4 grid grid-cols-3 gap-2.5 text-center">
-              <SeverityStat count={plan.critical} label="يحتاج تدخّلًا" tone="text-alert" />
-              <SeverityStat count={plan.warning} label="يحتاج انتباهًا" tone="text-warn" />
-              <SeverityStat count={plan.info} label="للمتابعة" tone="text-brand-700" />
+              <SeverityStat
+                count={plan.critical}
+                label="يحتاج تدخّلًا"
+                tone="text-alert"
+                onOpen={() => navigate("/plan/findings/critical")}
+              />
+              <SeverityStat
+                count={plan.warning}
+                label="يحتاج انتباهًا"
+                tone="text-warn"
+                onOpen={() => navigate("/plan/findings/warning")}
+              />
+              <SeverityStat
+                count={plan.info}
+                label="للمتابعة"
+                tone="text-brand-700"
+                onOpen={() => navigate("/plan/findings/info")}
+              />
             </div>
           )}
 
@@ -510,12 +525,39 @@ function PlanStep({
   );
 }
 
-function SeverityStat({ count, label, tone }: { count: number; label: string; tone: string }) {
+/** One severity count in the plan overview. With findings behind it, it becomes
+ *  a door into the drill-down page listing them in full detail. */
+function SeverityStat({
+  count,
+  label,
+  tone,
+  onOpen,
+}: {
+  count: number;
+  label: string;
+  tone: string;
+  onOpen: () => void;
+}) {
+  if (count === 0) {
+    return (
+      <div className="rounded-card bg-sand/70 py-2.5">
+        <p className="nums text-xl font-extrabold text-ink-300">{count}</p>
+        <p className="mt-0.5 text-[10px] font-bold text-ink-500">{label}</p>
+      </div>
+    );
+  }
   return (
-    <div className="rounded-card bg-sand/70 py-2.5">
-      <p className={cn("nums text-xl font-extrabold", count > 0 ? tone : "text-ink-300")}>{count}</p>
+    <button
+      onClick={onOpen}
+      className="rounded-card bg-sand/70 py-2.5 transition hover:bg-sand active:scale-[0.97]"
+    >
+      <p className={cn("nums text-xl font-extrabold", tone)}>{count}</p>
       <p className="mt-0.5 text-[10px] font-bold text-ink-500">{label}</p>
-    </div>
+      <p className="mt-1 flex items-center justify-center gap-0.5 text-[10px] font-bold text-brand-600">
+        التفاصيل
+        <ChevronLeft className="h-3 w-3" strokeWidth={2.6} />
+      </p>
+    </button>
   );
 }
 

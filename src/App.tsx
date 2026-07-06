@@ -13,6 +13,7 @@ import { Report } from "./screens/Report";
 import { Dimension } from "./screens/Dimension";
 import { Focus } from "./screens/Focus";
 import { Plan } from "./screens/Plan";
+import { PlanFindings } from "./screens/PlanFindings";
 import { Program } from "./screens/Program";
 import { Content } from "./screens/Content";
 import { Consultation } from "./screens/Consultation";
@@ -123,6 +124,7 @@ export default function App() {
           <Route path="/dimension/:slug" element={<Dimension />} />
           <Route path="/focus/:slug" element={<Focus />} />
           <Route path="/plan" element={<Plan />} />
+          <Route path="/plan/findings/:severity" element={<PlanFindings />} />
           <Route path="/program/:id" element={<Program />} />
           <Route path="/content" element={<Content />} />
           <Route path="/consultation" element={<Consultation />} />

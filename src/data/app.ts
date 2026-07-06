@@ -79,22 +79,6 @@ export const todayTasks: PlanTask[] = [
   },
 ];
 
-export interface PlanWeek {
-  label: string;
-  focus: DimensionId;
-  done: number;
-  total: number;
-}
-
-export const journeyWeeks: PlanWeek[] = [
-  { label: "الأسبوع 1", focus: "psycho", done: 6, total: 6 },
-  { label: "الأسبوع 2", focus: "professional", done: 4, total: 6 },
-  { label: "الأسبوع 3", focus: "physical", done: 1, total: 6 },
-  { label: "الأسبوع 4", focus: "financial", done: 0, total: 6 },
-];
-
-export const streakDays = 6;
-
 /* ── Plan → report feedback: effort the employee has invested per dimension ─── */
 
 export interface DimensionEffort {
@@ -104,10 +88,32 @@ export interface DimensionEffort {
   total: number;
 }
 
-/** Roll the 4-week journey and today's live tasks into per-dimension effort, so
+/** One past day of plan activity — the unit the journey's impact is built from.
+ *  Days are appended as they end, so streaks, totals and per-dimension effort
+ *  all derive from what the employee actually did. */
+export interface DayLog {
+  /** Local calendar date, "YYYY-MM-DD". */
+  date: string;
+  byDimension: Partial<Record<DimensionId, DimensionEffort>>;
+}
+
+/** Local (not UTC) calendar date — a task done at 11pm belongs to that day. */
+export function isoDate(d = new Date()): string {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
+
+function shiftDate(base: Date, days: number): Date {
+  const d = new Date(base);
+  d.setDate(d.getDate() + days);
+  return d;
+}
+
+/** Roll the logged history and today's live tasks into per-dimension effort, so
  *  the report can recognise the work an employee is already putting in. Only
- *  dimensions with planned activity appear. */
+ *  dimensions with activity appear. */
 export function computeEffort(
+  history: DayLog[],
   tasks: PlanTask[],
 ): Partial<Record<DimensionId, DimensionEffort>> {
   const acc: Partial<Record<DimensionId, DimensionEffort>> = {};
@@ -115,9 +121,52 @@ export function computeEffort(
     const cur = acc[id] ?? { done: 0, total: 0 };
     acc[id] = { done: cur.done + done, total: cur.total + total };
   };
-  for (const w of journeyWeeks) bump(w.focus, w.done, w.total);
+  for (const day of history)
+    for (const [id, e] of Object.entries(day.byDimension))
+      bump(id as DimensionId, e.done, e.total);
   for (const t of tasks) bump(t.dimension, t.done ? 1 : 0, 1);
   return acc;
+}
+
+/** Consecutive active days ending today (or yesterday — today isn't "broken"
+ *  until it ends without activity). History holds active days only. */
+export function computeStreak(history: DayLog[], todayDone: number): number {
+  const active = new Set(history.map((d) => d.date));
+  const today = new Date();
+  let streak = todayDone > 0 ? 1 : 0;
+  for (let back = 1; active.has(isoDate(shiftDate(today, -back))); back++) streak++;
+  return streak;
+}
+
+/** Fold a finished day's tasks into a log entry — or null if nothing was done,
+ *  so empty days never pad the history (and correctly break the streak). */
+export function toDayLog(date: string, tasks: PlanTask[]): DayLog | null {
+  if (!tasks.some((t) => t.done)) return null;
+  const byDimension: DayLog["byDimension"] = {};
+  for (const t of tasks) {
+    const cur = byDimension[t.dimension] ?? { done: 0, total: 0 };
+    byDimension[t.dimension] = { done: cur.done + (t.done ? 1 : 0), total: cur.total + 1 };
+  }
+  return { date, byDimension };
+}
+
+/** Demo seed: the week of activity this mock employee already has behind them
+ *  (assessment was 6 days ago). Written once to storage on first run — from
+ *  then on the history is purely what the user actually does. */
+export function seedHistory(): DayLog[] {
+  const today = new Date();
+  const days: [number, DayLog["byDimension"]][] = [
+    [-6, { psycho: { done: 2, total: 2 } }],
+    [-5, { psycho: { done: 2, total: 2 } }],
+    [-4, { psycho: { done: 2, total: 2 }, professional: { done: 1, total: 2 } }],
+    [-3, { professional: { done: 2, total: 2 } }],
+    [-2, { professional: { done: 1, total: 2 }, physical: { done: 1, total: 2 } }],
+    [-1, { physical: { done: 1, total: 3 } }],
+  ];
+  return days.map(([offset, byDimension]) => ({
+    date: isoDate(shiftDate(today, offset)),
+    byDimension,
+  }));
 }
 
 /* ── Deliverable 2: free expert consultations ─────────────────────────────── */

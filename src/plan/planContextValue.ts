@@ -1,6 +1,6 @@
 import { createContext } from "react";
 import type { DimensionId } from "../data/dimensions";
-import type { DimensionEffort, PlanTask, PlanWeek } from "../data/app";
+import type { DimensionEffort, PlanTask } from "../data/app";
 
 export interface PlanValue {
   tasks: PlanTask[];
@@ -8,8 +8,8 @@ export interface PlanValue {
   todayDone: number;
   todayTotal: number;
   todayPct: number;
+  /** Consecutive active days, derived from the persisted activity log. */
   streakDays: number;
-  journeyWeeks: PlanWeek[];
   /** Per-dimension effort (journey cumulative + today's live tasks). */
   effort: Partial<Record<DimensionId, DimensionEffort>>;
   /** Dimensions with at least one completed task, most progress first. */
