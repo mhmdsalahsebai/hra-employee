@@ -7,6 +7,8 @@ export { Avatar } from "./Avatar";
 export { SectionHeader } from "./SectionHeader";
 export { OptionCard } from "./OptionCard";
 export { ScaleSelect } from "./ScaleSelect";
+export { AutosaveNote } from "./AutosaveNote";
+export { ConfettiBurst } from "./ConfettiBurst";
 export { QuestionCardDeck } from "./QuestionCardDeck";
 export type { QuestionCardDeckHandle } from "./QuestionCardDeck";
 export { QuestionInsight } from "./QuestionInsight";

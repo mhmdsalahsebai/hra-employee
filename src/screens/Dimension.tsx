@@ -256,7 +256,10 @@ export function Dimension() {
         </section>
       )}
 
-      {quizOpen && <DimensionQuiz dimId={id} onClose={() => setQuizOpen(false)} />}
+      {/* Keyed by dimension: the quiz's next-dimension hand-off navigates to the
+          sibling route while the overlay stays open, so a fresh mount here drops
+          the person straight into the next dimension's questions. */}
+      {quizOpen && <DimensionQuiz key={id} dimId={id} onClose={() => setQuizOpen(false)} />}
     </div>
   );
 }

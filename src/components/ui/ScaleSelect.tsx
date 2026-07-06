@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { cn } from "../../lib/cn";
 import type { DimensionAccent } from "../../data/dimensions";
 import type { HraAnswerOption } from "../../data/hra";
@@ -9,71 +9,32 @@ import type { HraAnswerOption } from "../../data/hra";
  *
  * ~Every question in the assessment is an ordinal scale (agreement, frequency,
  * a graded quantity), so a flat card list threw away the one thing that matters:
- * that the options run from one pole to the other. Here each option is a graded
- * dot on a track — the dots grow and take on the dimension accent toward the
- * healthy end, so the shape of the scale is legible at a glance. One tap, no
- * scroll.
- *
- * Grading is oriented by *health*, not by raw value: `positiveHigh` says which
- * end is the good one, so a reverse-scored item (e.g. "I feel exhausted daily")
- * still reads correctly. Hovering (or focusing) a dot reveals that option's
- * title above the track, so you can confirm a choice before/after committing.
+ * that the options run from one pole to the other. Here each option is a dot on
+ * a track. The dots are deliberately identical — same size, same neutral colour —
+ * so no answer looks nudged or "healthier" than another; only the committed
+ * choice takes the dimension accent. Hovering (or focusing) a dot reveals that
+ * option's title above the track, so you can confirm a choice before/after
+ * committing.
  */
 
-/** Muted low-end colour the accent grades up from. */
+/** The one neutral dot colour — every unselected option looks the same. */
 const NEUTRAL = "#c2c8d2";
-
-/** Parse "#rrggbb" → [r,g,b]. */
-function toRgb(hex: string): [number, number, number] {
-  const h = hex.replace("#", "");
-  return [
-    parseInt(h.slice(0, 2), 16),
-    parseInt(h.slice(2, 4), 16),
-    parseInt(h.slice(4, 6), 16),
-  ];
-}
-
-/** Blend two hex colours by `t` (0 → a, 1 → b). */
-function mix(a: string, b: string, t: number): string {
-  const [r1, g1, b1] = toRgb(a);
-  const [r2, g2, b2] = toRgb(b);
-  const c = (x: number, y: number) => Math.round(x + (y - x) * t);
-  return `rgb(${c(r1, r2)}, ${c(g1, g2)}, ${c(b1, b2)})`;
-}
+/** The one dot size, px. */
+const DOT = 18;
 
 export function ScaleSelect({
   answers,
   value,
   onSelect,
   accent,
-  positiveHigh,
 }: {
   answers: HraAnswerOption[];
   value: number | undefined;
   onSelect: (value: number) => void;
   accent: DimensionAccent;
-  /** Whether a higher answer value is the healthy/positive pole. */
-  positiveHigh: boolean;
 }) {
   const n = answers.length;
   const [hovered, setHovered] = useState<number | null>(null);
-
-  // Rank each option along the *health* axis (0 = worst … n-1 = best) from its
-  // position among the sorted values, so the grade reads correctly on either
-  // scale direction. Values are distinct and monotonic within a question.
-  const meta = useMemo(() => {
-    const sortedAsc = [...answers.map((a) => a.value)].sort((x, y) => x - y);
-    return answers.map((a) => {
-      const rankAsc = sortedAsc.indexOf(a.value);
-      const rank = positiveHigh ? rankAsc : n - 1 - rankAsc;
-      const frac = n > 1 ? rank / (n - 1) : 1;
-      return {
-        color: mix(NEUTRAL, accent.solid, frac),
-        // Dots grow toward the healthy end for a legible gradient of intensity.
-        size: (n >= 6 ? 12 : 14) + frac * (n >= 6 ? 10 : 14),
-      };
-    });
-  }, [answers, n, positiveHigh, accent.solid]);
 
   const selectedIndex = answers.findIndex((a) => a.value === value);
   // What the label above shows: the hovered option (a preview) wins, else the
@@ -104,12 +65,11 @@ export function ScaleSelect({
         )}
       </div>
 
-      {/* The spectrum: a static track with a graded dot per option. */}
+      {/* The spectrum: a static track with an identical dot per option. */}
       <div className="relative mt-3 h-11">
         <div className="pointer-events-none absolute inset-x-3 top-1/2 h-[3px] -translate-y-1/2 rounded-pill bg-ink-100" />
         <div className="relative flex h-full items-center justify-between">
           {answers.map((answer, i) => {
-            const { color, size } = meta[i];
             const isOn = i === selectedIndex;
             return (
               <button
@@ -135,13 +95,13 @@ export function ScaleSelect({
                   style={
                     isOn
                       ? {
-                          width: size + 8,
-                          height: size + 8,
+                          width: DOT + 8,
+                          height: DOT + 8,
                           background: accent.solid,
                           // A soft accent halo (the "selected" ring) plus a lift.
                           boxShadow: `0 0 0 5px ${accent.soft}, 0 6px 16px -6px ${accent.solid}`,
                         }
-                      : { width: size, height: size, background: color }
+                      : { width: DOT, height: DOT, background: NEUTRAL }
                   }
                 />
               </button>

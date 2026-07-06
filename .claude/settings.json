@@ -22,7 +22,10 @@
       "Bash(echo \"tsc-exit:$?\")",
       "Bash(fuser -k 5174/tcp)",
       "Bash(git -C /home/mhmdsalah/Desktop/work/hra-employee status --short)",
-      "Bash(git -C /home/mhmdsalah/Desktop/work/hra-employee diff src/data/app.ts)"
+      "Bash(git -C /home/mhmdsalah/Desktop/work/hra-employee diff src/data/app.ts)",
+      "Bash(python3 -)",
+      "Bash(awk '/QuestionSlug\\\\./{slug=$0; getline; print slug\" ||| \"$0}')",
+      "Bash(node /tmp/claude-1000/-home-mhmdsalah-Desktop-work-hra-employee/734d1e7d-6a9a-427b-aad7-abda0619a509/scratchpad/sync-insights.mjs)"
     ]
   }
 }

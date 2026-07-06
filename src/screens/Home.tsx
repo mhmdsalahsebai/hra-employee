@@ -3,7 +3,6 @@ import {
   Bell,
   Check,
   ChevronLeft,
-  Gift,
   GraduationCap,
   ListChecks,
   Lock,
@@ -23,7 +22,7 @@ import { RecommendedContentSwiper } from "../components/cards/RecommendedContent
 import { ProgramRecommendationCard } from "../components/cards/ProgramRecommendationCard";
 import { WellbeingTrackers } from "../components/cards/WellbeingTrackers";
 import { JournalSection } from "../components/cards/JournalSection";
-import { TrailMap, dimensionStation, type TrailStation } from "../components/TrailMap";
+import { TrailMap, buildJourneyStations } from "../components/TrailMap";
 import { cn } from "../lib/cn";
 import { scoreMeta } from "../lib/score";
 import { useAssessment, type DimensionResult } from "../assessment/useAssessment";
@@ -90,6 +89,7 @@ export function Home() {
   const recommendedPrograms = hasResults
     ? recommendPrograms(insights.insights).slice(0, 2)
     : [];
+  const topProgram = recommendedPrograms[0]?.program ?? null;
 
   return (
     <div className="animate-rise pb-4">
@@ -358,13 +358,20 @@ export function Home() {
           />
         )}
 
-        <JourneyTrail
-          results={results}
-          nextIndex={nextIndex}
-          hasResults={hasResults}
+        <TrailMap
+          stations={buildJourneyStations({
+            results,
+            nextIndex,
+            reportReady,
+            hasResults,
+            topProgram,
+            onOpenDimension: (id) => navigate(`/dimension/${id}`),
+            onOpenReport: () => navigate("/report"),
+            onOpenConsultation: () => navigate("/consultation"),
+            onOpenPlan: () => navigate("/plan"),
+            onOpenProgram: (id) => navigate(`/program/${id}`),
+          })}
           className={nextDim ? "mt-2" : undefined}
-          onOpenDimension={(id) => navigate(`/dimension/${id}`)}
-          onOpenGift={() => navigate("/consultation")}
         />
 
         {/* The full journey page — the extended road with every reward, plus
@@ -665,61 +672,4 @@ function NextDimensionSpotlight({
       </span>
     </button>
   );
-}
-
-/* ── The journey trail — nine stations on a winding dotted path, in answering
-   order, ending at the gift the company already paid for. Rendered by the
-   shared TrailMap; the dedicated /journey page shows the extended road. ────── */
-
-function JourneyTrail({
-  results,
-  nextIndex,
-  hasResults,
-  className,
-  onOpenDimension,
-  onOpenGift,
-}: {
-  results: DimensionResult[];
-  nextIndex: number;
-  hasResults: boolean;
-  className?: string;
-  onOpenDimension: (id: Dimension["id"]) => void;
-  onOpenGift: () => void;
-}) {
-  const stations: TrailStation[] = dimensions.map((dimension, i) =>
-    dimensionStation({
-      dimension,
-      result: results[i],
-      isNext: i === nextIndex,
-      step: i + 1,
-      onClick: () => onOpenDimension(dimension.id),
-    }),
-  );
-
-  // The finale — the employer-paid gift, visible from step one.
-  stations.push({
-    key: "gift",
-    icon: <Gift className="h-6 w-6" strokeWidth={2.1} />,
-    size: 58,
-    labelWidth: "w-36",
-    circleClassName: hasResults
-      ? "bg-coral-500 text-white shadow-pop"
-      : "border-2 border-dashed border-coral-300 bg-white/80 text-coral-400",
-    badge: hasResults ? (
-      <span className="absolute -bottom-0.5 -left-0.5 grid h-5 w-5 place-items-center rounded-full bg-good text-white shadow-soft ring-2 ring-white">
-        <Check className="h-3 w-3" strokeWidth={3.5} />
-      </span>
-    ) : undefined,
-    title: hasResults ? "احجز استشارتك المجانية" : "هديتك في النهاية",
-    titleClassName: hasResults ? "text-coral-600" : "text-ink-600",
-    caption: (
-      <span className="text-[10px] font-semibold leading-tight text-ink-400">
-        {hasResults ? "خبيرك بانتظارك الآن" : "استشارة مجانية + تقريرك الكامل"}
-      </span>
-    ),
-    disabled: !hasResults,
-    onClick: hasResults ? onOpenGift : undefined,
-  });
-
-  return <TrailMap stations={stations} className={className} />;
 }

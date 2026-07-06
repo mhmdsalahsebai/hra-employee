@@ -1,16 +1,20 @@
 import { useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { useNavigate } from "react-router-dom";
+import { motion, useReducedMotion } from "motion/react";
 import { Check, ChevronLeft, ChevronRight } from "lucide-react";
 import {
+  AutosaveNote,
   Button,
+  ConfettiBurst,
   QuestionCardDeck,
   QuestionInsight,
   ScaleSelect,
   type QuestionCardDeckHandle,
 } from "./ui";
 import { Illustration } from "../illustrations/Illustration";
-import { dimensionsById, type DimensionId } from "../data/dimensions";
-import { hraBySlug, higherIsBetter } from "../data/hra";
+import { dimensions, dimensionsById, type DimensionId } from "../data/dimensions";
+import { hraBySlug } from "../data/hra";
 import { getQuestionArt } from "../data/questionArt";
 import { getQuestionInsight, type QuestionInsight as QuestionInsightData } from "../data/questionInsights";
 import { useAssessment } from "../assessment/useAssessment";
@@ -122,6 +126,7 @@ export function DimensionQuiz({ dimId, onClose }: { dimId: DimensionId; onClose:
                 إنهاء لاحقًا
               </button>
             </div>
+            <AutosaveNote className="mt-1" />
           </div>
 
           {/* Swiper owns the physical card stack and swipe gesture; answer
@@ -190,7 +195,6 @@ export function DimensionQuiz({ dimId, onClose }: { dimId: DimensionId; onClose:
                         value={slideValue}
                         onSelect={(v) => choose(question.slug, questionIndex, v)}
                         accent={dim.accent}
-                        positiveHigh={higherIsBetter(dimId)}
                       />
                     </div>
                   </div>
@@ -217,6 +221,10 @@ export function DimensionQuiz({ dimId, onClose }: { dimId: DimensionId; onClose:
   );
 }
 
+/** The celebration after the last answer: a confetti-backed achievement pop,
+ *  then a straight hand-off into the next unfinished dimension so the momentum
+ *  isn't dropped at the moment it's highest. Dimensions unlock in order, so
+ *  "the next one" is simply the first incomplete dimension. */
 function DimensionDone({
   dim,
   onClose,
@@ -224,27 +232,71 @@ function DimensionDone({
   dim: (typeof dimensionsById)[DimensionId];
   onClose: () => void;
 }) {
+  const navigate = useNavigate();
+  const reduce = useReducedMotion();
+  const { results, completedCount, totalDimensions } = useAssessment();
+  const nextIndex = results.findIndex((r) => !r.complete);
+  const next = nextIndex === -1 ? undefined : dimensions[nextIndex];
+
   return (
     <div className="animate-rise relative z-10 flex flex-1 flex-col items-center justify-center px-6 pb-[max(1.25rem,env(safe-area-inset-bottom))] text-center">
       <div className="relative grid h-32 w-32 place-items-center">
+        <ConfettiBurst accent={dim.accent.solid} />
         <span className="absolute inset-0 rounded-full opacity-40" style={{ background: dim.accent.soft }} />
         <span className="absolute inset-3 rounded-full opacity-75" style={{ background: dim.accent.soft }} />
-        <span
+        <motion.span
           className="relative grid h-[4.5rem] w-[4.5rem] place-items-center rounded-full text-white shadow-soft"
           style={{ background: dim.accent.solid }}
+          initial={reduce ? { opacity: 0 } : { scale: 0, rotate: -20 }}
+          animate={{ opacity: 1, scale: 1, rotate: 0 }}
+          transition={{ type: "spring", stiffness: 240, damping: 14, delay: 0.05 }}
         >
           <Check className="h-9 w-9" strokeWidth={2.6} />
-        </span>
+        </motion.span>
       </div>
-      <h1 className="mt-7 text-2xl font-extrabold text-ink-900">اكتمل بُعد {dim.title}</h1>
-      <p className="mt-3 max-w-xs text-[15px] leading-relaxed text-ink-500">
-        احتسبنا درجتك وجهّزنا قراءة وتوصيات تناسب إجاباتك في هذا البُعد.
+
+      <p className="nums mt-6 text-[0.8125rem] font-bold" style={{ color: dim.accent.fg }}>
+        {completedCount} من {totalDimensions} أبعاد مكتملة
       </p>
-      <div className="mt-8 w-full">
-        <Button fullWidth size="lg" onClick={onClose}>
-          عرض نتيجتي
-          <ChevronLeft className="h-5 w-5" strokeWidth={2.4} />
-        </Button>
+      <h1 className="mt-2 text-2xl font-extrabold text-ink-900">أحسنت! اكتمل بُعد {dim.title} 🎉</h1>
+      <p className="mt-3 max-w-xs text-[15px] leading-relaxed text-ink-500">
+        {next
+          ? `احتسبنا درجتك وفتحنا لك البُعد التالي — واصل وأنت في أفضل انطلاقة.`
+          : "احتسبنا درجتك وجهّزنا قراءة وتوصيات تناسب إجاباتك في هذا البُعد."}
+      </p>
+
+      {/* The walked/next segment bar — the same nine steps the maps speak. */}
+      <div className="mt-7 flex w-full max-w-xs items-center gap-1.5">
+        {results.map((r, i) => (
+          <div
+            key={i}
+            className="h-1.5 flex-1 rounded-pill"
+            style={{ background: r.complete ? dim.accent.solid : "var(--color-ink-100)" }}
+          />
+        ))}
+      </div>
+
+      <div className="mt-8 w-full space-y-3">
+        {next ? (
+          <>
+            <Button
+              fullWidth
+              size="lg"
+              onClick={() => navigate(`/dimension/${next.id}`)}
+            >
+              البُعد التالي: {next.title}
+              <ChevronLeft className="h-5 w-5" strokeWidth={2.4} />
+            </Button>
+            <Button fullWidth size="lg" variant="ghost" onClick={onClose}>
+              عرض نتيجتي
+            </Button>
+          </>
+        ) : (
+          <Button fullWidth size="lg" onClick={onClose}>
+            عرض نتيجتي
+            <ChevronLeft className="h-5 w-5" strokeWidth={2.4} />
+          </Button>
+        )}
       </div>
     </div>
   );

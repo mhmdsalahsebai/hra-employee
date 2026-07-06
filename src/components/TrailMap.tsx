@@ -1,9 +1,22 @@
 import { useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
-import { Check } from "lucide-react";
+import {
+  Check,
+  Gift,
+  GraduationCap,
+  Lock,
+  RefreshCw,
+  Route as RouteIcon,
+  ScrollText,
+  Trophy,
+} from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { cn } from "../lib/cn";
 import { LEVEL_HEX } from "../lib/score";
 import type { DimensionResult } from "../assessment/useAssessment";
-import type { Dimension } from "../data/dimensions";
+import { currentUser } from "../data/app";
+import { dimensions, type Dimension } from "../data/dimensions";
+import type { Program } from "../data/programs";
+import { MIN_DIMS_FOR_PREVIEW } from "../data/report";
 
 /** Soft pastel fill from a solid accent — the modern colour-blocked card look. */
 export const pastel = (hex: string, pct = 12) => `color-mix(in srgb, ${hex} ${pct}%, white)`;
@@ -150,25 +163,52 @@ export function TrailMap({
   );
 }
 
-/** One wellbeing dimension as a trail station — completed stations fill with
- *  their accent, the next one pulses, and every station stays tappable
- *  (dimensions are never locked). */
+/** One wellbeing dimension as a trail station. The road is walked in order:
+ *  completed stations fill with their accent, the next one pulses and is the
+ *  only tappable frontier — every dimension past it stays locked (dashed, with
+ *  a padlock) until the one before it is finished. */
 export function dimensionStation({
   dimension,
   result,
   isNext,
+  locked = false,
   step,
   onClick,
 }: {
   dimension: Dimension;
   result: DimensionResult;
   isNext: boolean;
+  /** Sequential gate: not yet reachable because an earlier dimension is unfinished. */
+  locked?: boolean;
   /** 1-based station number shown on the badge while incomplete. */
   step: number;
   onClick: () => void;
 }): TrailStation {
   const accent = dimension.accent;
   const done = result.complete;
+
+  if (locked) {
+    return {
+      key: dimension.id,
+      icon: <dimension.icon className="relative h-6 w-6" strokeWidth={2} />,
+      circleClassName: "border-2 border-dashed bg-white/80",
+      circleStyle: { borderColor: pastel(accent.solid, 40), color: pastel(accent.solid, 55) },
+      badge: (
+        <span className="absolute -right-1 -top-1 grid h-5 w-5 place-items-center rounded-full bg-white text-ink-400 shadow-soft">
+          <Lock className="h-3 w-3" strokeWidth={2.6} />
+        </span>
+      ),
+      title: dimension.title,
+      titleClassName: "text-ink-400",
+      caption: (
+        <span className="w-full text-center text-[10px] font-semibold leading-tight text-ink-400">
+          يفتح بعد إكمال البُعد السابق
+        </span>
+      ),
+      disabled: true,
+    };
+  }
+
   return {
     key: dimension.id,
     icon: <dimension.icon className="relative h-6 w-6" strokeWidth={2} />,
@@ -212,4 +252,208 @@ export function dimensionStation({
     pathColor: accent.solid,
     onClick,
   };
+}
+
+/* ── Reward milestones — the non-dimension stops the road passes through ──── */
+
+export interface MilestoneDef {
+  key: string;
+  icon: LucideIcon;
+  /** Milestone accent — unused for "soon" stops. */
+  tint?: string;
+  title: string;
+  caption: string;
+  /** Caption shown while still locked (defaults to `caption`). */
+  lockedCaption?: string;
+  unlocked?: boolean;
+  /** Whether the segment leaving this stop is coloured. */
+  walked?: boolean;
+  /** Future feature — dimmed, disabled, and tagged "قريبًا". */
+  soon?: boolean;
+  onClick?: () => void;
+}
+
+export function milestoneStation(m: MilestoneDef): TrailStation {
+  const Icon = m.icon;
+  const base = { key: m.key, size: 58, labelWidth: "w-36" };
+
+  if (m.soon) {
+    return {
+      ...base,
+      icon: <Icon className="relative h-6 w-6" strokeWidth={2} />,
+      circleClassName: "border-2 border-dashed border-ink-200 bg-white/80 text-ink-300",
+      title: m.title,
+      titleClassName: "text-ink-400",
+      caption: (
+        <>
+          <span className="text-[10px] font-semibold leading-tight text-ink-400">{m.caption}</span>
+          <span className="mt-1 rounded-pill bg-sand px-2 py-0.5 text-[9px] font-extrabold text-ink-400">
+            قريبًا
+          </span>
+        </>
+      ),
+      disabled: true,
+    };
+  }
+
+  if (!m.unlocked) {
+    return {
+      ...base,
+      icon: <Icon className="relative h-6 w-6" strokeWidth={2} />,
+      circleClassName: "border-2 border-dashed bg-white/80",
+      circleStyle: { borderColor: pastel(m.tint!, 45), color: pastel(m.tint!, 60) },
+      badge: (
+        <span className="absolute -right-1 -top-1 grid h-5 w-5 place-items-center rounded-full bg-white text-ink-400 shadow-soft">
+          <Lock className="h-3 w-3" strokeWidth={2.6} />
+        </span>
+      ),
+      title: m.title,
+      titleClassName: "text-ink-600",
+      caption: (
+        <span className="text-[10px] font-semibold leading-tight text-ink-400">
+          {m.lockedCaption ?? m.caption}
+        </span>
+      ),
+      disabled: true,
+    };
+  }
+
+  return {
+    ...base,
+    icon: <Icon className="relative h-6 w-6" strokeWidth={2.1} />,
+    circleClassName: "text-white shadow-pop",
+    circleStyle: { background: m.tint },
+    badge: (
+      <span className="absolute -bottom-0.5 -left-0.5 grid h-5 w-5 place-items-center rounded-full bg-good text-white shadow-soft ring-2 ring-white">
+        <Check className="h-3 w-3" strokeWidth={3.5} />
+      </span>
+    ),
+    title: m.title,
+    caption: (
+      <span className="text-[10px] font-semibold leading-tight text-ink-400">{m.caption}</span>
+    ),
+    walked: m.walked,
+    pathColor: m.tint,
+    onClick: m.onClick,
+  };
+}
+
+/** The full journey road: the nine dimensions interleaved with every reward
+ *  milestone they unlock (preliminary report, full report, free consultation,
+ *  personal plan, recommended program, and two "soon" stops). Shared so
+ *  Home's trail preview and the dedicated /journey page always render the
+ *  identical road — one source of truth for what the road looks like. */
+export function buildJourneyStations({
+  results,
+  nextIndex,
+  reportReady,
+  hasResults,
+  topProgram,
+  onOpenDimension,
+  onOpenReport,
+  onOpenConsultation,
+  onOpenPlan,
+  onOpenProgram,
+}: {
+  results: DimensionResult[];
+  nextIndex: number;
+  reportReady: boolean;
+  hasResults: boolean;
+  topProgram: Program | null;
+  onOpenDimension: (id: Dimension["id"]) => void;
+  onOpenReport: () => void;
+  onOpenConsultation: () => void;
+  onOpenPlan: () => void;
+  onOpenProgram: (id: string) => void;
+}): TrailStation[] {
+  const stations: TrailStation[] = [];
+  dimensions.forEach((dimension, i) => {
+    stations.push(
+      dimensionStation({
+        dimension,
+        result: results[i],
+        isNext: i === nextIndex,
+        // Sequential road: only finished dimensions and the frontier are open.
+        locked: !results[i].complete && i !== nextIndex,
+        step: i + 1,
+        onClick: () => onOpenDimension(dimension.id),
+      }),
+    );
+    // The preliminary report opens mid-road — right after its unlocking dimension.
+    if (i === MIN_DIMS_FOR_PREVIEW - 1) {
+      stations.push(
+        milestoneStation({
+          key: "report-preview",
+          icon: ScrollText,
+          tint: "#7c6ee6",
+          title: "تقريرك المبدئي",
+          caption: "جاهز الآن — يزداد دقة مع كل بُعد",
+          lockedCaption: `يفتح بعد ${MIN_DIMS_FOR_PREVIEW} أبعاد`,
+          unlocked: reportReady,
+          walked: reportReady,
+          onClick: onOpenReport,
+        }),
+      );
+    }
+  });
+  stations.push(
+    milestoneStation({
+      key: "report",
+      icon: ScrollText,
+      tint: "#7c6ee6",
+      title: "تقريرك الكامل",
+      caption: "تحليل مفصّل لأبعادك التسعة",
+      lockedCaption: "يفتح بعد إكمال التقييم",
+      unlocked: hasResults,
+      walked: hasResults,
+      onClick: onOpenReport,
+    }),
+    milestoneStation({
+      key: "consultation",
+      icon: Gift,
+      tint: "#dc604f",
+      title: "استشارتك المجانية",
+      caption: `جلسة خاصة مع مختص — تدفع عنها ${currentUser.org}`,
+      lockedCaption: "تفتح بعد إكمال التقييم",
+      unlocked: hasResults,
+      walked: hasResults,
+      onClick: onOpenConsultation,
+    }),
+    milestoneStation({
+      key: "plan",
+      icon: RouteIcon,
+      tint: "#2f7dcc",
+      title: "خطتك الشخصية",
+      caption: "خطة تعالج ملاحظات تقريرك خطوة بخطوة",
+      lockedCaption: "تفتح بعد إكمال التقييم",
+      unlocked: hasResults,
+      walked: hasResults,
+      onClick: onOpenPlan,
+    }),
+    milestoneStation({
+      key: "program",
+      icon: GraduationCap,
+      tint: "#13a394",
+      title: "برنامجك المقترح",
+      caption: topProgram ? topProgram.title : "برنامج مختص يعالج أهم ملاحظة لديك",
+      lockedCaption: "يُختار لك بعد تحليل تقريرك",
+      unlocked: topProgram !== null,
+      onClick: topProgram ? () => onOpenProgram(topProgram.id) : undefined,
+    }),
+    milestoneStation({
+      key: "reassess",
+      icon: RefreshCw,
+      title: "إعادة التقييم",
+      caption: "بعد 3 أشهر — لتتابع أثر خطتك على درجاتك",
+      soon: true,
+    }),
+    milestoneStation({
+      key: "ambassador",
+      icon: Trophy,
+      title: "شارة سفير الرفاهية",
+      caption: "مكافأة ختامية لمن يكمل رحلته كاملة",
+      soon: true,
+    }),
+  );
+  return stations;
 }

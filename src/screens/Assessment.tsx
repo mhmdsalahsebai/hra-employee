@@ -14,8 +14,11 @@ import {
   X,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import { motion, useReducedMotion } from "motion/react";
 import {
+  AutosaveNote,
   Button,
+  ConfettiBurst,
   QuestionCardDeck,
   QuestionInsight,
   ScaleSelect,
@@ -27,7 +30,7 @@ import { PrivacyNote } from "../components/PrivacyNote";
 import { useAssessment } from "../assessment/useAssessment";
 import type { DimensionResult } from "../assessment/useAssessment";
 import { dimensions, dimensionsById, type Dimension, type DimensionId } from "../data/dimensions";
-import { hraBySlug, higherIsBetter } from "../data/hra";
+import { hraBySlug } from "../data/hra";
 import { LEVEL_CLASS, LEVEL_HEX } from "../lib/score";
 import { getQuestionArt } from "../data/questionArt";
 import { getQuestionInsight, type QuestionInsight as QuestionInsightData } from "../data/questionInsights";
@@ -221,6 +224,7 @@ export function Assessment() {
 
       {stage === "questions" && (
         <div className="flex min-h-0 flex-1 flex-col overflow-hidden px-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-1">
+          <AutosaveNote className="mb-2 shrink-0" />
           <QuestionCardDeck
             key={dimIndex}
             ref={deckRef}
@@ -282,7 +286,6 @@ export function Assessment() {
                       value={answers[q.slug]}
                       onSelect={(v) => choose(q.slug, i, v)}
                       accent={dim.accent}
-                      positiveHigh={higherIsBetter(chapter.slug)}
                     />
                   </div>
 
@@ -514,16 +517,21 @@ function Milestone({
 }) {
   const remaining = TOTAL_DIMS - index - 1;
   const glimpse = result?.complete ? result : undefined;
+  const reduce = useReducedMotion();
   return (
     <div className="animate-rise flex flex-1 flex-col items-center justify-center px-6 pb-[max(1.25rem,env(safe-area-inset-bottom))] text-center">
       <div className="relative grid h-24 w-24 place-items-center">
+        <ConfettiBurst accent={dim.accent.solid} />
         <span className="absolute inset-0 rounded-full" style={{ background: dim.accent.soft }} />
-        <span
+        <motion.span
           className="relative grid h-14 w-14 place-items-center rounded-full text-white shadow-soft"
           style={{ background: dim.accent.solid }}
+          initial={reduce ? { opacity: 0 } : { scale: 0, rotate: -20 }}
+          animate={{ opacity: 1, scale: 1, rotate: 0 }}
+          transition={{ type: "spring", stiffness: 240, damping: 14, delay: 0.05 }}
         >
           <Sparkles className="h-7 w-7" strokeWidth={2.4} />
-        </span>
+        </motion.span>
       </div>
 
       <p className="mt-6 text-[0.8125rem] font-bold" style={{ color: dim.accent.fg }}>

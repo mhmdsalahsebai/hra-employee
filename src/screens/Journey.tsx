@@ -1,15 +1,10 @@
 import { useNavigate } from "react-router-dom";
 import {
-  Check,
   CheckCircle2,
   Flag,
   Flame,
   Footprints,
-  Gift,
-  GraduationCap,
   Lock,
-  RefreshCw,
-  Route as RouteIcon,
   ScrollText,
   Sparkles,
   Star,
@@ -19,19 +14,14 @@ import type { LucideIcon } from "lucide-react";
 import { PageHeader } from "../components/PageHeader";
 import { Spotlight } from "../components/Spotlight";
 import { ProgressBar } from "../components/ui";
-import { TrailMap, dimensionStation, pastel, type TrailStation } from "../components/TrailMap";
+import { TrailMap, buildJourneyStations, pastel } from "../components/TrailMap";
 import { cn } from "../lib/cn";
 import { computeGamification, POINTS } from "../lib/gamification";
 import { useAssessment } from "../assessment/useAssessment";
 import { useInsights } from "../assessment/useInsights";
 import { usePlan } from "../plan/usePlan";
-import { currentUser } from "../data/app";
-import { dimensions } from "../data/dimensions";
 import { recommendPrograms } from "../data/programs";
 import { MIN_DIMS_FOR_PREVIEW } from "../data/report";
-
-/** Muted tint of a milestone colour — for locked (dashed) stops. */
-const muted = (hex: string, pct: number) => `color-mix(in srgb, ${hex} ${pct}%, white)`;
 
 /**
  * The dedicated journey page: the nine dimension stations *plus* every reward
@@ -119,94 +109,20 @@ export function Journey() {
   ];
   const earnedCount = badges.filter((b) => b.earned).length;
 
-  /* ── The full road: dimensions interleaved with the rewards they unlock ──── */
-  const stations: TrailStation[] = [];
-  dimensions.forEach((dimension, i) => {
-    stations.push(
-      dimensionStation({
-        dimension,
-        result: results[i],
-        isNext: i === nextIndex,
-        step: i + 1,
-        onClick: () => navigate(`/dimension/${dimension.id}`),
-      }),
-    );
-    // The preliminary report opens mid-road — right after its unlocking dimension.
-    if (i === MIN_DIMS_FOR_PREVIEW - 1) {
-      stations.push(
-        milestoneStation({
-          key: "report-preview",
-          icon: ScrollText,
-          tint: "#7c6ee6",
-          title: "تقريرك المبدئي",
-          caption: "جاهز الآن — يزداد دقة مع كل بُعد",
-          lockedCaption: `يفتح بعد ${MIN_DIMS_FOR_PREVIEW} أبعاد`,
-          unlocked: reportReady,
-          walked: reportReady,
-          onClick: () => navigate("/report"),
-        }),
-      );
-    }
+  /* ── The full road: dimensions interleaved with the rewards they unlock —
+     the exact same builder Home's trail preview uses, so both stay in sync. */
+  const stations = buildJourneyStations({
+    results,
+    nextIndex,
+    reportReady,
+    hasResults,
+    topProgram,
+    onOpenDimension: (id) => navigate(`/dimension/${id}`),
+    onOpenReport: () => navigate("/report"),
+    onOpenConsultation: () => navigate("/consultation"),
+    onOpenPlan: () => navigate("/plan"),
+    onOpenProgram: (id) => navigate(`/program/${id}`),
   });
-  stations.push(
-    milestoneStation({
-      key: "report",
-      icon: ScrollText,
-      tint: "#7c6ee6",
-      title: "تقريرك الكامل",
-      caption: "تحليل مفصّل لأبعادك التسعة",
-      lockedCaption: "يفتح بعد إكمال التقييم",
-      unlocked: hasResults,
-      walked: hasResults,
-      onClick: () => navigate("/report"),
-    }),
-    milestoneStation({
-      key: "consultation",
-      icon: Gift,
-      tint: "#dc604f",
-      title: "استشارتك المجانية",
-      caption: `جلسة خاصة مع مختص — تدفع عنها ${currentUser.org}`,
-      lockedCaption: "تفتح بعد إكمال التقييم",
-      unlocked: hasResults,
-      walked: hasResults,
-      onClick: () => navigate("/consultation"),
-    }),
-    milestoneStation({
-      key: "plan",
-      icon: RouteIcon,
-      tint: "#2f7dcc",
-      title: "خطتك الشخصية",
-      caption: "خطة تعالج ملاحظات تقريرك خطوة بخطوة",
-      lockedCaption: "تفتح بعد إكمال التقييم",
-      unlocked: hasResults,
-      walked: hasResults,
-      onClick: () => navigate("/plan"),
-    }),
-    milestoneStation({
-      key: "program",
-      icon: GraduationCap,
-      tint: "#13a394",
-      title: "برنامجك المقترح",
-      caption: topProgram ? topProgram.title : "برنامج مختص يعالج أهم ملاحظة لديك",
-      lockedCaption: "يُختار لك بعد تحليل تقريرك",
-      unlocked: topProgram !== null,
-      onClick: topProgram ? () => navigate(`/program/${topProgram.id}`) : undefined,
-    }),
-    milestoneStation({
-      key: "reassess",
-      icon: RefreshCw,
-      title: "إعادة التقييم",
-      caption: "بعد 3 أشهر — لتتابع أثر خطتك على درجاتك",
-      soon: true,
-    }),
-    milestoneStation({
-      key: "ambassador",
-      icon: Trophy,
-      title: "شارة سفير الرفاهية",
-      caption: "مكافأة ختامية لمن يكمل رحلته كاملة",
-      soon: true,
-    }),
-  );
 
   return (
     <div className="animate-rise pb-4">
@@ -292,7 +208,7 @@ export function Journey() {
           <div>
             <h2 className="text-[1.05rem] font-extrabold text-ink-900">خريطة الرحلة</h2>
             <p className="mt-0.5 text-xs font-semibold text-ink-400">
-              اضغط أي محطة لفتح تفاصيلها — المكافآت تُفتح مع تقدّمك
+              الأبعاد تُفتح بالترتيب، والمكافآت تُفتح مع تقدّمك
             </p>
           </div>
           <span dir="ltr" className="nums shrink-0 pb-0.5 text-[13px] font-bold text-ink-500">
@@ -306,88 +222,6 @@ export function Journey() {
 }
 
 /* ── Milestone stations — the rewards the road passes through ─────────────── */
-
-interface MilestoneDef {
-  key: string;
-  icon: LucideIcon;
-  /** Milestone accent — unused for "soon" stops. */
-  tint?: string;
-  title: string;
-  caption: string;
-  /** Caption shown while still locked (defaults to `caption`). */
-  lockedCaption?: string;
-  unlocked?: boolean;
-  /** Whether the segment leaving this stop is coloured. */
-  walked?: boolean;
-  /** Future feature — dimmed, disabled, and tagged "قريبًا". */
-  soon?: boolean;
-  onClick?: () => void;
-}
-
-function milestoneStation(m: MilestoneDef): TrailStation {
-  const Icon = m.icon;
-  const base = { key: m.key, size: 58, labelWidth: "w-36" };
-
-  if (m.soon) {
-    return {
-      ...base,
-      icon: <Icon className="relative h-6 w-6" strokeWidth={2} />,
-      circleClassName: "border-2 border-dashed border-ink-200 bg-white/80 text-ink-300",
-      title: m.title,
-      titleClassName: "text-ink-400",
-      caption: (
-        <>
-          <span className="text-[10px] font-semibold leading-tight text-ink-400">{m.caption}</span>
-          <span className="mt-1 rounded-pill bg-sand px-2 py-0.5 text-[9px] font-extrabold text-ink-400">
-            قريبًا
-          </span>
-        </>
-      ),
-      disabled: true,
-    };
-  }
-
-  if (!m.unlocked) {
-    return {
-      ...base,
-      icon: <Icon className="relative h-6 w-6" strokeWidth={2} />,
-      circleClassName: "border-2 border-dashed bg-white/80",
-      circleStyle: { borderColor: muted(m.tint!, 45), color: muted(m.tint!, 60) },
-      badge: (
-        <span className="absolute -right-1 -top-1 grid h-5 w-5 place-items-center rounded-full bg-white text-ink-400 shadow-soft">
-          <Lock className="h-3 w-3" strokeWidth={2.6} />
-        </span>
-      ),
-      title: m.title,
-      titleClassName: "text-ink-600",
-      caption: (
-        <span className="text-[10px] font-semibold leading-tight text-ink-400">
-          {m.lockedCaption ?? m.caption}
-        </span>
-      ),
-      disabled: true,
-    };
-  }
-
-  return {
-    ...base,
-    icon: <Icon className="relative h-6 w-6" strokeWidth={2.1} />,
-    circleClassName: "text-white shadow-pop",
-    circleStyle: { background: m.tint },
-    badge: (
-      <span className="absolute -bottom-0.5 -left-0.5 grid h-5 w-5 place-items-center rounded-full bg-good text-white shadow-soft ring-2 ring-white">
-        <Check className="h-3 w-3" strokeWidth={3.5} />
-      </span>
-    ),
-    title: m.title,
-    caption: (
-      <span className="text-[10px] font-semibold leading-tight text-ink-400">{m.caption}</span>
-    ),
-    walked: m.walked,
-    pathColor: m.tint,
-    onClick: m.onClick,
-  };
-}
 
 /* ── Small building blocks ──────────────────────────────────────────────── */
 
