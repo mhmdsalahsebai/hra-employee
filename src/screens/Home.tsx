@@ -85,7 +85,7 @@ export function Home() {
   // The report opens as a preliminary preview once enough dimensions are in.
   const reportReady = hasResults || completedCount >= MIN_DIMS_FOR_PREVIEW;
   const meta = scoreMeta(overallScore);
-  const recommendations = useContentRecommendations(results);
+  const recommendations = useContentRecommendations(results, insights.insights);
   const recommendedPrograms = hasResults
     ? recommendPrograms(insights.insights).slice(0, 2)
     : [];

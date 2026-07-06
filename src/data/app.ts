@@ -42,6 +42,9 @@ export interface PlanTask {
   kind: TaskKind;
   durationMin: number;
   done: boolean;
+  /** The report finding this task targets (e.g. "نوم غير كافٍ") — present on
+   *  finding-driven tasks, absent on generic dimension habits. */
+  reason?: string;
 }
 
 /* ── Plan → report feedback: effort the employee has invested per dimension ───

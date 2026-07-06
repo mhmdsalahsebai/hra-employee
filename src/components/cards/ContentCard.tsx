@@ -12,11 +12,14 @@ const typeIcon: Record<ContentItem["type"], LucideIcon> = {
 /** Compact content tile for horizontal "recommended" shelves. */
 export function ContentCard({
   item,
+  why,
   className,
   opened = false,
   onClick,
 }: {
   item: ContentItem;
+  /** The report finding this item was recommended for. */
+  why?: string;
   className?: string;
   opened?: boolean;
   onClick?: () => void;
@@ -61,6 +64,11 @@ export function ContentCard({
         </span>
       </div>
       <div className="flex flex-1 flex-col p-3.5">
+        {why && (
+          <p className="mb-1 line-clamp-1 text-[10px] font-bold text-brand-600">
+            لملاحظة: {why}
+          </p>
+        )}
         <h3 className="line-clamp-2 text-[0.8125rem] font-bold leading-snug text-ink-900">
           {item.title}
         </h3>
@@ -78,10 +86,13 @@ export function ContentCard({
 /** Wide content row for the library list. */
 export function ContentRow({
   item,
+  why,
   active = false,
   onClick,
 }: {
   item: ContentItem;
+  /** The report finding this item was recommended for. */
+  why?: string;
   active?: boolean;
   onClick?: () => void;
 }) {
@@ -121,6 +132,11 @@ export function ContentRow({
         <p className="mt-1 text-[11px] font-semibold text-ink-400">
           {item.author} · <span className="nums">{item.duration}</span>
         </p>
+        {why && (
+          <p className="mt-1 line-clamp-1 text-[10px] font-bold text-brand-600">
+            لملاحظة: {why}
+          </p>
+        )}
       </div>
     </button>
   );

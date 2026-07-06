@@ -21,10 +21,12 @@ import { ExpertAvatarStack } from "../components/ExpertAvatarStack";
 import { Spotlight } from "../components/Spotlight";
 import { LockedState } from "../components/LockedState";
 import { ProgramRecommendationCard } from "../components/cards/ProgramRecommendationCard";
+import { ContentRow } from "../components/cards/ContentCard";
 import { cn } from "../lib/cn";
 import { useAssessment } from "../assessment/useAssessment";
 import { useInsights } from "../assessment/useInsights";
 import { usePlan } from "../plan/usePlan";
+import { useContentRecommendations } from "../content/useContentRecommendations";
 import { type TaskKind } from "../data/app";
 import { dimensionsById, tileStyle } from "../data/dimensions";
 import { buildPlan, type PlanFocusItem } from "../data/planEngine";
@@ -51,10 +53,14 @@ const SEV: Record<InsightSeverity, { chip: string; label: string; dot: string }>
 export function Plan() {
   const navigate = useNavigate();
   const { tasks, toggle, todayDone: done, streakDays, effort } = usePlan();
-  const { hasResults, started, progressPct } = useAssessment();
+  const { results, hasResults, started, progressPct } = useAssessment();
   const insights = useInsights();
   const plan = buildPlan(insights);
   const recommendedPrograms = recommendPrograms(insights.insights);
+  const recommendations = useContentRecommendations(results, insights.insights);
+  /* Only finding-matched content earns a place in the plan — each row can say
+     which report finding it answers. */
+  const planContent = recommendations.items.filter((pick) => pick.why).slice(0, 4);
 
   const allTodayDone = tasks.length > 0 && done === tasks.length;
   const hasRecommendations = plan.actions.length > 0 || tasks.length > 0;
@@ -84,12 +90,19 @@ export function Plan() {
       desc: "خطوات عملية صغيرة لكل ملاحظة في تقريرك",
       present: hasRecommendations,
     },
+    {
+      key: "content",
+      icon: BookOpen,
+      title: "محتوى مختار لملاحظاتك",
+      desc: "مقالات وفيديوهات قصيرة تعالج ما أظهره تقريرك",
+      present: planContent.length > 0,
+    },
   ];
   const steps = stepDefs.filter((s) => s.present);
   const stepNo = (key: string) => steps.findIndex((s) => s.key === key) + 1;
   const lastKey = steps[steps.length - 1]?.key;
   const stepCountLabel =
-    steps.length === 1 ? "خطوة واحدة" : steps.length === 2 ? "خطوتين" : "ثلاث خطوات";
+    ["خطوة واحدة", "خطوتين", "ثلاث خطوات", "أربع خطوات"][steps.length - 1] ?? `${steps.length} خطوات`;
 
   if (!hasResults) {
     return (
@@ -344,6 +357,11 @@ export function Plan() {
                         <p className="mt-0.5 text-[11px] font-semibold text-ink-400">
                           {dim.title} · <span className="nums">{task.durationMin}</span> دقائق
                         </p>
+                        {task.reason && !task.done && (
+                          <p className="mt-0.5 line-clamp-1 text-[10px] font-bold text-brand-600">
+                            لملاحظة: {task.reason}
+                          </p>
+                        )}
                       </div>
                       <span
                         className={cn(
@@ -406,6 +424,31 @@ export function Plan() {
               </div>
             </div>
           )}
+        </StepRow>
+      )}
+
+      {/* ── Step 4 — Content matched to the report's own findings ─────────── */}
+      {planContent.length > 0 && (
+        <StepRow n={stepNo("content")} last={lastKey === "content"}>
+          <StepTitle
+            title="اقرأ وشاهد بما يخصّك"
+            subtitle="محتوى قصير اختير لملاحظات تقريرك تحديدًا — كل مادة تقول أي ملاحظة تعالج"
+            icon={BookOpen}
+            tone="text-brand-600"
+          />
+          <div className="space-y-2.5">
+            {planContent.map(({ item, why }) => (
+              <ContentRow
+                key={item.id}
+                item={item}
+                why={why}
+                onClick={() => {
+                  recommendations.markOpened(item.id);
+                  navigate(`/content?item=${item.id}`);
+                }}
+              />
+            ))}
+          </div>
         </StepRow>
       )}
       </div>

@@ -29,7 +29,14 @@
       "Bash(npx tsx *)",
       "Bash(sed -i 's|\"./src/data/hra\"|\"/home/mhmdsalah/Desktop/work/hra-employee/src/data/hra\"|; s|\"./src/data/analysis\"|\"/home/mhmdsalah/Desktop/work/hra-employee/src/data/analysis\"|' /tmp/claude-1000/-home-mhmdsalah-Desktop-work-hra-employee/56b888f9-39f6-4d93-9dbb-665682370894/scratchpad/verify-analysis.ts)",
       "Bash(sed -i 's|- \\\\[deep analysis layer\\\\]\\(deep-analysis-layer.md\\) — .*|- [deep analysis layer]\\(deep-analysis-layer.md\\) — the 5-layer derived-metric stack; findings.ts cross-answer discoveries + leverage point \\(never restate answers back — hard rule\\), analysis.ts composites, docs/metrics-reference.md canonical|' /home/mhmdsalah/.claude/projects/-home-mhmdsalah-Desktop-work-hra-employee/memory/MEMORY.md)",
-      "Bash(npx tsx -e ' *)"
+      "Bash(npx tsx -e ' *)",
+      "Bash(npm init *)",
+      "Bash(npm install *)",
+      "Bash(nohup npx vite --port 5199 --strictPort)",
+      "Bash(curl -s http://localhost:5199/)",
+      "Bash(node shot.mjs)",
+      "Bash(node shot2.mjs)",
+      "Bash(pkill -f \"vite --port 5199\")"
     ]
   }
 }

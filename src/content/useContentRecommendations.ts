@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useState } from "react";
 import type { DimensionResult } from "../assessment/useAssessment";
+import type { Insight } from "../data/insights";
 import { buildContentRecommendations } from "./recommendations";
 
 const STORAGE_KEY = "cura-content-engagement";
@@ -45,7 +46,7 @@ function todayRotation() {
   return Math.floor(Date.UTC(today.getFullYear(), today.getMonth(), today.getDate()) / 86_400_000);
 }
 
-export function useContentRecommendations(results: DimensionResult[]) {
+export function useContentRecommendations(results: DimensionResult[], insights?: Insight[]) {
   const [engagement, setEngagement] = useState<ContentEngagement>(readEngagement);
   const rotation = todayRotation() + engagement.rotation;
 
@@ -53,10 +54,11 @@ export function useContentRecommendations(results: DimensionResult[]) {
     () =>
       buildContentRecommendations({
         results,
+        insights,
         openedIds: engagement.openedIds,
         rotation,
       }),
-    [engagement.openedIds, results, rotation],
+    [engagement.openedIds, results, insights, rotation],
   );
 
   const markOpened = useCallback((id: string) => {

@@ -9,6 +9,7 @@ import {
 } from "../data/app";
 import { buildDailyTasks } from "../data/taskEngine";
 import { useAssessment } from "../assessment/useAssessment";
+import { useInsights } from "../assessment/useInsights";
 import { PlanContext, type PlanValue } from "./planContextValue";
 
 /* ───────────────────────────────────────────────────────────────────────────
@@ -90,18 +91,20 @@ function readState(today: string): PlanState {
 
 export function PlanProvider({ children }: { children: ReactNode }) {
   const { results } = useAssessment();
+  const { insights } = useInsights();
   const today = isoDate();
   const [{ history, doneById }, setState] = useState(() => readState(today));
 
-  // Today's checklist, generated from the employee's own results and overlaid
-  // with the persisted toggles. Regenerates live as more dimensions complete.
+  // Today's checklist, generated from the employee's own results — report
+  // findings claim their micro-actions first — and overlaid with the persisted
+  // toggles. Regenerates live as more dimensions complete.
   const tasks = useMemo(
     () =>
-      buildDailyTasks(results, today).map((t) => ({
+      buildDailyTasks(results, today, insights).map((t) => ({
         ...t,
         done: doneById[t.id] ?? false,
       })),
-    [results, today, doneById],
+    [results, today, insights, doneById],
   );
 
   // Keep the stored day in sync with the current checklist, so a passed day

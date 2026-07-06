@@ -3,6 +3,7 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "swiper/css/pagination";
 import type { ContentItem } from "../../data/content";
+import type { RecommendedContent } from "../../content/recommendations";
 import { ContentCard } from "./ContentCard";
 
 export function RecommendedContentSwiper({
@@ -10,13 +11,13 @@ export function RecommendedContentSwiper({
   openedIds,
   onOpen,
 }: {
-  items: ContentItem[];
+  items: RecommendedContent[];
   openedIds: string[];
   onOpen: (item: ContentItem) => void;
 }) {
   return (
     <Swiper
-      key={items.map((item) => item.id).join("-")}
+      key={items.map((pick) => pick.item.id).join("-")}
       dir="rtl"
       className="recommended-content-swiper"
       modules={[A11y, Pagination]}
@@ -43,10 +44,11 @@ export function RecommendedContentSwiper({
         paginationBulletMessage: "انتقل إلى المحتوى {{index}}",
       }}
     >
-      {items.map((item) => (
+      {items.map(({ item, why }) => (
         <SwiperSlide key={item.id} className="!h-auto !w-[10.5rem] pb-1">
           <ContentCard
             item={item}
+            why={why}
             className="h-full"
             opened={openedIds.includes(item.id)}
             onClick={() => onOpen(item)}
