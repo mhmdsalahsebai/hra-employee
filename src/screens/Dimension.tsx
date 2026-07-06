@@ -13,11 +13,15 @@ import {
 import { Button, ScoreRing } from "../components/ui";
 import { IconTile } from "../components/ui/Card";
 import { DeltaPill } from "../components/Trend";
+import { DeepAnalysis } from "../components/cards/DeepAnalysis";
 import { DetailedInsights } from "../components/cards/DetailedInsights";
+import { Findings } from "../components/cards/Findings";
 import { DimensionMetricsPanel } from "../components/cards/MetricsBreakdown";
 import { cn } from "../lib/cn";
 import { LEVEL_CLASS, LEVEL_HEX } from "../lib/score";
+import { useAnalysis } from "../assessment/useAnalysis";
 import { useAssessment } from "../assessment/useAssessment";
+import { useFindings } from "../assessment/useFindings";
 import { useInsights } from "../assessment/useInsights";
 import { useMetrics } from "../assessment/useMetrics";
 import { usePlan } from "../plan/usePlan";
@@ -35,6 +39,8 @@ export function Dimension() {
   const { effort } = usePlan();
   const insights = useInsights();
   const metricGroups = useMetrics();
+  const analysis = useAnalysis();
+  const findings = useFindings();
   const [quizOpen, setQuizOpen] = useState(false);
   const [showReview, setShowReview] = useState(false);
 
@@ -202,6 +208,14 @@ export function Dimension() {
               <DimensionMetricsPanel group={metricsGroup} />
             </section>
           )}
+
+          {/* Cross-answer discoveries touching this dimension — the findings
+              that needed answers from other dimensions crossed with this one */}
+          <Findings result={findings} dimension={id} />
+
+          {/* Composite indices touching this dimension — the same deep
+              analysis the report shows, scoped */}
+          <DeepAnalysis analysis={analysis} dimension={id} />
 
           {/* Detailed health notes — the report's derived findings, scoped to
               this dimension */}

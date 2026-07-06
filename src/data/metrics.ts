@@ -85,10 +85,6 @@ const ENGAGEMENT_MEANING = ["WorkMeaning", "PurposeMission", "ContributionToGoal
 const ENGAGEMENT_GROWTH = ["GrowthOpportunities", "CareerPathClarity"];
 const ENGAGEMENT_BELONGING = ["TeamBelonging", "RespectInclusion", "FeelLikeOutsider", "ProudRecommend"];
 
-/** All questions of a dimension (used for the single-trait dimensions). */
-const allOf = (slug: DimensionId): string[] =>
-  hraData.find((d) => d.slug === slug)?.questions.map((q) => q.slug) ?? [];
-
 const METRIC_DEFS: MetricDef[] = [
   /* ── المهني — أبعاد الاحتراق الوظيفي الثلاثة ─────────────────────────────── */
   {
@@ -150,37 +146,157 @@ const METRIC_DEFS: MetricDef[] = [
     },
   },
 
-  /* ── أبعاد السمات — درجة واحدة لكل بُعد ───────────────────────────────────── */
+  /* ── أبعاد السمات — الجوانب الفرعية بأسلوب NEO (٤ جوانب لكل بُعد) ─────────── */
+
+  /* الفكري — جوانب الانفتاح على الخبرة */
   {
-    id: "openness", dimension: "intellectual", label: "الانفتاح والفضول الفكري", slugs: allOf("intellectual"),
+    id: "o-curiosity", dimension: "intellectual", label: "الفضول المعرفي",
+    slugs: ["IntellectualCuriosity", "TheoriesIdeasEnjoyment", "UniversePhilosophyInterest"],
     read: {
-      good: "فضول فكري وانفتاح عالٍ على الأفكار والتجارب الجديدة.",
-      moderate: "انفتاح فكري متوسط — مساحة جيدة لاستكشاف المزيد.",
-      attention: "ميل للتمسّك بالمألوف وقلة الانفتاح على الجديد.",
+      good: "فضول معرفي عالٍ — تستمتع بالأفكار والنظريات والأسئلة الكبرى.",
+      moderate: "فضول معرفي انتقائي — تنشط أفكارك حين يلمس الموضوع اهتمامك.",
+      attention: "ميل عملي بحت — الأفكار المجردة لا تجذبك كثيرًا.",
     },
   },
   {
-    id: "agreeableness", dimension: "community", label: "التعاون والتعاطف", slugs: allOf("community"),
+    id: "o-aesthetics", dimension: "intellectual", label: "التذوق الفني والجمالي",
+    slugs: ["PoetryArtEnjoyment", "AestheticAppreciation", "PoetryLittleImpact"],
     read: {
-      good: "لطف وتعاون وثقة عالية في تعاملك مع الآخرين.",
-      moderate: "توازن بين التعاون والحزم في علاقاتك بالآخرين.",
-      attention: "ميل للحذر أو الجفاء في التعامل مع الآخرين.",
+      good: "حساسية جمالية عالية — الفن والشعر والطبيعة تحرّك شيئًا فيك.",
+      moderate: "تذوق جمالي معتدل — تستمتع بالجمال دون أن يكون محورًا لك.",
+      attention: "الجانب الجمالي هامشي لديك — قناة استرخاء وإلهام غير مستغلة.",
     },
   },
   {
-    id: "extraversion", dimension: "social", label: "الطاقة الاجتماعية", slugs: allOf("social"),
+    id: "o-flexibility", dimension: "intellectual", label: "المرونة تجاه الجديد",
+    slugs: ["TryingNewFoods", "AdherenceTradition", "OpposingSpeakers", "ReligiousAuthorityEthics"],
     read: {
-      good: "طاقة اجتماعية عالية وراحة في التفاعل مع الناس.",
-      moderate: "طاقة اجتماعية متوازنة بين الانبساط والحاجة للخصوصية.",
-      attention: "ميل للانطواء وتفضيل العمل والوقت بمفردك.",
+      good: "تتقبل الآراء المخالفة والتجارب الجديدة وتعيد النظر في المسلّمات.",
+      moderate: "توازن بين التجريب والتمسك بالمجرّب — تتبنى الجديد بعد أن يثبت.",
+      attention: "ارتياح للمألوف وحذر من المخالف — قد يضيّق خياراتك أحيانًا.",
     },
   },
   {
-    id: "conscientiousness", dimension: "belonging", label: "الانضباط والتنظيم", slugs: allOf("belonging"),
+    id: "o-imagination", dimension: "intellectual", label: "الخيال والوعي بالمشاعر",
+    slugs: ["DaydreamingDislike", "MoodChangeSensitivity"],
     read: {
-      good: "انضباط ذاتي وتنظيم عالٍ والتزام واضح بالمهام والمواعيد.",
-      moderate: "تنظيم مقبول مع مساحة لتحسين الانضباط وإدارة الوقت.",
-      attention: "ضعف في التنظيم والالتزام يستحق عادات أكثر انضباطًا.",
+      good: "خيال نشط ووعي دقيق بتقلبات مشاعرك مع تغيّر المواقف.",
+      moderate: "خيال ووعي عاطفي معتدلان — حاضران دون أن يشغلاك.",
+      attention: "تصرف انتباهك عن الخيال ومراقبة مشاعرك — أدوات إبداع غير مفعّلة.",
+    },
+  },
+
+  /* المجتمعي — جوانب التعاون والطيبة */
+  {
+    id: "a-trust", dimension: "community", label: "الثقة بالآخرين",
+    slugs: ["CynicismOthers", "OthersExploitation"],
+    read: {
+      good: "تفترض حسن النية — أساس متين للعلاقات والتعاون.",
+      moderate: "ثقة مشروطة — تمنحها تدريجيًا لمن يثبت أهليتها.",
+      attention: "ميل للشك في نوايا الآخرين — يحميك أحيانًا ويعزلك غالبًا.",
+    },
+  },
+  {
+    id: "a-kindness", dimension: "community", label: "اللطف ومراعاة الآخرين",
+    slugs: ["KindnessPeople", "ConsiderationRights", "PeopleLikeMe"],
+    read: {
+      good: "لطف حقيقي ومراعاة لمشاعر الآخرين وحقوقهم — ويبادلك الناس ودًّا.",
+      moderate: "لطف انتقائي — تراعي الآخرين مع حفاظك على مساحتك.",
+      attention: "خشونة في التعامل قد لا تقصدها — تكلفك رصيدًا اجتماعيًا.",
+    },
+  },
+  {
+    id: "a-cooperation", dimension: "community", label: "التعاون وتجنب الصدام",
+    slugs: ["CooperationPreference", "ArgumentsFamilyWork", "DirectDislike"],
+    read: {
+      good: "تفضّل التعاون على التنافس وتدير الخلاف دون تصعيد.",
+      moderate: "توازن بين التعاون والمواجهة — تصعّد حين يلزم فقط.",
+      attention: "نمط صدامي في الخلافات — يستنزف علاقاتك في البيت والعمل.",
+    },
+  },
+  {
+    id: "a-sincerity", dimension: "community", label: "النزاهة والتواضع",
+    slugs: ["SelfishArrogant", "IndifferenceSelfishness", "ManipulationNecessity", "RationalConvictions"],
+    read: {
+      good: "تعامل مستقيم بلا مناورة — يُبنى عليك وتُؤتمن.",
+      moderate: "نزاهة عملية — مستقيم غالبًا مع براغماتية عند الحاجة.",
+      attention: "استعداد للمناورة لتحقيق أهدافك — مكسب قصير يُكلف ثقة طويلة.",
+    },
+  },
+
+  /* الاجتماعي — جوانب الانبساط */
+  {
+    id: "e-warmth", dimension: "social", label: "الدفء الاجتماعي",
+    slugs: ["PeopleAroundMe", "EnjoyTalkingOthers", "WorkAlonePreference"],
+    read: {
+      good: "تستمتع بالناس والحديث معهم — الوجود وسطهم يشحنك.",
+      moderate: "اجتماعي انتقائي — تستمتع بالتفاعل وتحتاج وقتك الخاص.",
+      attention: "تفضّل العمل والوقت بمفردك — انتبه ألا يتحول إلى عزلة.",
+    },
+  },
+  {
+    id: "e-positivity", dimension: "social", label: "المشاعر الإيجابية",
+    slugs: ["SmileLaughEasily", "HappyCheerful", "CarefreeNot", "CarefreeeFree"],
+    read: {
+      good: "بهجة وتفاؤل حاضران — تضحك بسهولة وترى الجانب المضيء.",
+      moderate: "مزاج معتدل — لست مثقلًا ولا مبتهجًا باستمرار.",
+      attention: "بهجة منخفضة وهموم حاضرة — مؤشر مزاج يستحق الرعاية.",
+    },
+  },
+  {
+    id: "e-energy", dimension: "social", label: "وتيرة الطاقة والنشاط",
+    slugs: ["EnergeticActive", "VeryActive", "LifePassesQuickly"],
+    read: {
+      good: "طاقة ونشاط عاليان — أيامك ممتلئة وتمضي سريعًا.",
+      moderate: "وتيرة نشاط معتدلة — طاقة كافية ليومك دون فائض.",
+      attention: "طاقة منخفضة ووتيرة بطيئة — قد يكون عرضًا لا سمة؛ راقبه.",
+    },
+  },
+  {
+    id: "e-assertiveness", dimension: "social", label: "الحضور والمبادرة",
+    slugs: ["CenterAttention", "LeadSelfPreference"],
+    read: {
+      good: "مرتاح في الواجهة وقيادة الآخرين — حضورك ملحوظ.",
+      moderate: "تقود حين يُطلب منك وتكتفي بالمشاركة حين لا يُطلب.",
+      attention: "تتجنب الأضواء والقيادة — قد يحجب مساهماتك عن من يقيّمها.",
+    },
+  },
+
+  /* الشمولي — جوانب يقظة الضمير */
+  {
+    id: "c-order", dimension: "belonging", label: "الترتيب والتنظيم",
+    slugs: ["KeepThingsOrganized", "NotOrganized", "NeverOrganized"],
+    read: {
+      good: "بيئتك وأدواتك مرتبة — نظام خارجي يخفف الحمل الذهني.",
+      moderate: "ترتيب وظيفي — منظم بما يكفي لإنجاز المطلوب.",
+      attention: "فوضى متكررة في أشيائك — تسرق وقتًا وتركيزًا يوميًا.",
+    },
+  },
+  {
+    id: "c-discipline", dimension: "belonging", label: "الانضباط الذاتي وإدارة الوقت",
+    slugs: ["TimeManagementSkill", "WasteTimeProcrastination", "ProductivePerson"],
+    read: {
+      good: "تبدأ في الوقت وتنهي في الوقت — التسويف لا يجد موطئًا عندك.",
+      moderate: "انضباط جيد مع نوبات تسويف — تُنجز لكن بعد مماطلة أحيانًا.",
+      attention: "التسويف يستهلك وقتك قبل البدء — أكلف عادة قابلة للكسر.",
+    },
+  },
+  {
+    id: "c-reliability", dimension: "belonging", label: "الالتزام والموثوقية",
+    slugs: ["ConscientiousDuty", "CommitmentCompletion", "UnreliableInconsistent"],
+    read: {
+      good: "كلمتك التزام — ما تعِد به يُنجز، ويعتمد عليك من حولك.",
+      moderate: "موثوق غالبًا مع تذبذب تحت الضغط أو تعدد الالتزامات.",
+      attention: "التزاماتك تفلت أحيانًا — يقرؤها الآخرون على حساب موثوقيتك.",
+    },
+  },
+  {
+    id: "c-ambition", dimension: "belonging", label: "السعي للإنجاز والتميز",
+    slugs: ["ClearGoalsSystematic", "HardWorkAchievement", "StriveExcellence"],
+    read: {
+      good: "أهداف واضحة وسعي منهجي نحو التميز — محرك إنجاز قوي.",
+      moderate: "طموح واقعي — تسعى لأهدافك دون هوس بالتميز.",
+      attention: "أهدافك غير محددة — الجهد بلا وجهة يتبدد سريعًا.",
     },
   },
 
@@ -195,11 +311,19 @@ const METRIC_DEFS: MetricDef[] = [
     },
   },
   {
-    id: "sitting", dimension: "physical", label: "الجلوس والخمول", slugs: ["SittingHours"],
+    id: "sitting", dimension: "physical", label: "الجلوس والخمول", slugs: ["SittingHours", "SedentaryWork"],
     read: {
       good: "ساعات جلوسك ضمن الحدود الصحية ولا تُطيل الخمول.",
       moderate: "ساعات جلوس متوسطة — احرص على كسرها بحركة متكرّرة.",
       attention: "جلوس مطوّل يوميًا، وهو عامل خطر مستقل حتى مع الرياضة.",
+    },
+  },
+  {
+    id: "commute", dimension: "physical", label: "التنقل النشط", slugs: ["VehicleUseDays", "VehicleDuration"],
+    read: {
+      good: "اعتمادك على المركبة محدود — تنقّلك يضيف حركة ليومك.",
+      moderate: "استخدام متوسط للمركبة — استبدال مشوار قصير بالمشي يصنع فرقًا.",
+      attention: "ساعات طويلة داخل المركبة أسبوعيًا — جلوس إضافي فوق جلوس يومك.",
     },
   },
   {
@@ -212,11 +336,19 @@ const METRIC_DEFS: MetricDef[] = [
   },
   {
     id: "nutrition", dimension: "physical", label: "نمط التغذية",
-    slugs: ["FruitVegetableIntake", "FastFoodFrequency", "HighFatFoodPreference", "HighSaltFoodPreference", "WaterIntake"],
+    slugs: ["FruitVegetableIntake", "FastFoodFrequency", "HighFatFoodPreference", "HighSaltFoodPreference"],
     read: {
-      good: "عادات غذائية متوازنة في الخضار والماء وتقليل الدهون والملح.",
+      good: "عادات غذائية متوازنة في الخضار وتقليل الدهون والملح.",
       moderate: "نمط غذائي مقبول مع عادات قليلة تستحق التحسين.",
       attention: "نمط غذائي يحتاج تحسينًا في عدة عادات تتراكم على صحتك.",
+    },
+  },
+  {
+    id: "hydration", dimension: "physical", label: "شرب الماء", slugs: ["WaterIntake"],
+    read: {
+      good: "ترطيبك اليومي جيد — يدعم تركيزك وطاقتك وكليتيك.",
+      moderate: "شرب ماء أقل من المثالي — قارورة على مكتبك تحل أغلبها.",
+      attention: "ترطيب منخفض بوضوح — أول أعراضه التعب وضعف التركيز لا العطش.",
     },
   },
   {
@@ -427,6 +559,11 @@ function bmiMetric(pi: PersonalInfoAnswers): Metric | null {
     answered: 1, total: 1, note: ar1(bmi),
   };
 }
+
+/** Metric id → the answer slugs it is computed from (for simulations etc.). */
+export const METRIC_SLUGS: Record<string, string[]> = Object.fromEntries(
+  METRIC_DEFS.map((d) => [d.id, d.slugs]),
+);
 
 /* ── Public API ────────────────────────────────────────────────────────────── */
 

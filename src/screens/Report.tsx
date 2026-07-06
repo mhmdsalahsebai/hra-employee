@@ -15,7 +15,9 @@ import { ProgressBar, ScoreRing } from "../components/ui";
 import { IconTile } from "../components/ui/Card";
 import { ExpertAvatarStack } from "../components/ExpertAvatarStack";
 import { DimensionDeepCard } from "../components/cards/DimensionCard";
+import { DeepAnalysis } from "../components/cards/DeepAnalysis";
 import { DetailedInsights } from "../components/cards/DetailedInsights";
+import { Findings } from "../components/cards/Findings";
 import { MetricsBreakdown } from "../components/cards/MetricsBreakdown";
 import { Spotlight } from "../components/Spotlight";
 import { Radar } from "../components/charts/Radar";
@@ -24,7 +26,9 @@ import { DeltaPill } from "../components/Trend";
 import { LockedState } from "../components/LockedState";
 import { cn } from "../lib/cn";
 import { scoreMeta, LEVEL_CLASS, LEVEL_HEX } from "../lib/score";
+import { useAnalysis } from "../assessment/useAnalysis";
 import { useAssessment } from "../assessment/useAssessment";
+import { useFindings } from "../assessment/useFindings";
 import { useInsights } from "../assessment/useInsights";
 import { useMetrics } from "../assessment/useMetrics";
 import { usePlan } from "../plan/usePlan";
@@ -102,6 +106,8 @@ export function Report() {
   const plan = usePlan();
   const insights = useInsights();
   const metricGroups = useMetrics();
+  const analysis = useAnalysis();
+  const findings = useFindings();
   const {
     overallScore,
     results,
@@ -273,6 +279,44 @@ export function Report() {
       </section>
       )}
 
+      {/* ── Executive summary — the sheer computed volume behind this report,
+             with a straight jump into the deep-analysis tab ───────────────── */}
+      {!preview && tab === "overview" && (
+        <section className="px-5 pt-4">
+          <div className="rounded-xl border border-ink-100 bg-surface p-4 shadow-card">
+            <div className="mb-3 flex items-center justify-between gap-2">
+              <div>
+                <h2 className="text-[1.0625rem] font-bold text-ink-900">ماذا صنعنا بإجاباتك؟</h2>
+                <p className="text-xs font-semibold text-ink-400">
+                  كل رقم أدناه محسوب من إجاباتك — لا شيء عام
+                </p>
+              </div>
+              {analysis.quality && (
+                <span
+                  className="nums shrink-0 rounded-pill px-2.5 py-1 text-[10px] font-bold text-white"
+                  style={{ background: LEVEL_HEX[analysis.quality.level] }}
+                >
+                  اتساق {analysis.quality.consistency}%
+                </span>
+              )}
+            </div>
+            <div className="grid grid-cols-4 gap-2 text-center">
+              <ImpactStat value={analysis.answeredCount} label="إجابة محلّلة" />
+              <ImpactStat value={analysis.extremes?.total ?? 0} label="مؤشرًا محسوبًا" />
+              <ImpactStat value={analysis.composites.length} label="تحليلًا مركّبًا" />
+              <ImpactStat value={findings.findings.length + (findings.leverage ? 1 : 0)} label="اكتشافًا" />
+            </div>
+            <button
+              onClick={() => changeTab("insights")}
+              className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-pill border border-brand-200 bg-brand-soft/50 py-2.5 text-[0.8125rem] font-bold text-brand-700 transition hover:bg-brand-soft active:scale-[0.99]"
+            >
+              اقرأ التحليل الكامل
+              <ChevronLeft className="h-4 w-4" strokeWidth={2.4} />
+            </button>
+          </div>
+        </section>
+      )}
+
       {/* ── Featured narrative — the headline reading of the whole report ── */}
       {!preview && tab === "overview" && (
       <section className="px-5 pt-4">
@@ -345,6 +389,14 @@ export function Report() {
         </div>
       </section>
       )}
+
+      {/* ── The findings: cross-answer discoveries + the leverage point — the
+             payoff of answering everything, so it leads the insights tab ──── */}
+      {!preview && tab === "insights" && <Findings result={findings} />}
+
+      {/* ── Deep analysis — the composite indices computed across dimensions,
+             each grounded in the published instrument behind the questions ── */}
+      {!preview && tab === "insights" && <DeepAnalysis analysis={analysis} />}
 
       {/* ── Detailed health insights — derived live from every answer ────── */}
       {!preview && tab === "insights" && <DetailedInsights summary={insights} />}
@@ -438,7 +490,7 @@ export function Report() {
       )}
 
       {/* ── Your journey's impact (plan → report loop) ───────────────────── */}
-      {!preview && tab === "insights" && plan.activeDimensions.length > 0 && (
+      {!preview && tab === "insights" && (
         <section className="px-5 pt-6">
           <h2 className="mb-1 flex items-center gap-2 text-[1.0625rem] font-bold text-ink-900">
             <CalendarHeart className="h-[1.15rem] w-[1.15rem] text-brand-600" strokeWidth={2.4} />
@@ -447,6 +499,24 @@ export function Report() {
           <p className="mb-3.5 text-xs font-semibold text-ink-400">
             كل مهمة تنجزها في خطتك تظهر هنا — والمجهود يعمل لصالحك
           </p>
+          {plan.activeDimensions.length === 0 ? (
+            <div className="rounded-xl border border-ink-100 bg-surface p-5 text-center shadow-card">
+              <span className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-brand-soft text-brand-600">
+                <CalendarHeart className="h-6 w-6" strokeWidth={2.2} />
+              </span>
+              <p className="mt-3 text-sm font-bold text-ink-900">رحلتك تبدأ بأول مهمة</p>
+              <p className="mx-auto mt-1 max-w-[16rem] text-[0.8125rem] leading-relaxed text-ink-500">
+                خطتك اليومية مبنية على نتائجك — أنجز أول مهمة وسيبدأ أثرها بالظهور هنا
+              </p>
+              <button
+                onClick={() => navigate("/plan")}
+                className="mt-4 inline-flex items-center justify-center gap-1.5 rounded-pill bg-brand-600 px-5 py-2.5 text-[0.8125rem] font-bold text-white transition hover:bg-brand-700 active:scale-[0.98]"
+              >
+                ابدأ مهام اليوم
+                <ChevronLeft className="h-4 w-4" strokeWidth={2.4} />
+              </button>
+            </div>
+          ) : (
           <div className="rounded-xl border border-ink-100 bg-surface p-5 shadow-card">
             <div className="mb-4 grid grid-cols-3 gap-3 text-center">
               <ImpactStat value={plan.totalCompleted} label="مهمة مكتملة" />
@@ -488,10 +558,18 @@ export function Report() {
             <div className="mt-4 flex items-start gap-2 rounded-md bg-brand-soft/50 p-3">
               <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-brand-600" strokeWidth={2.2} />
               <p className="text-[0.8125rem] leading-relaxed text-ink-700">
-                واصل خطواتك الصغيرة — سينعكس أثر هذا الالتزام في تقييمك القادم.
+                {plan.streakDays >= 2 ? (
+                  <>
+                    سلسلتك النشطة <span dir="ltr" className="nums font-bold">{plan.streakDays}</span>{" "}
+                    أيام — واصل خطواتك الصغيرة وسينعكس أثرها في تقييمك القادم.
+                  </>
+                ) : (
+                  "واصل خطواتك الصغيرة — سينعكس أثر هذا الالتزام في تقييمك القادم."
+                )}
               </p>
             </div>
           </div>
+          )}
         </section>
       )}
 

@@ -1,15 +1,14 @@
-import { useCallback, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import type { DimensionId } from "../data/dimensions";
 import {
   computeEffort,
   computeStreak,
   isoDate,
-  seedHistory,
   toDayLog,
-  todayTasks,
   type DayLog,
-  type PlanTask,
 } from "../data/app";
+import { buildDailyTasks } from "../data/taskEngine";
+import { useAssessment } from "../assessment/useAssessment";
 import { PlanContext, type PlanValue } from "./planContextValue";
 
 /* ───────────────────────────────────────────────────────────────────────────
@@ -17,98 +16,110 @@ import { PlanContext, type PlanValue } from "./planContextValue";
    work an employee does flow back into the Home preview and — the point of this
    loop — into the Report, which recognises effort per dimension.
 
-   Everything the "journey impact" shows (streak, totals, per-dimension effort)
-   derives from a persisted day-by-day activity log: today's toggles live in
-   `cura-plan-tasks` stamped with their date; when a new day starts, the finished
-   day is folded into `cura-plan-history` and the checklist resets. Nothing on
-   screen is a hardcoded figure.
+   The checklist is generated each day from the employee's own results (see
+   taskEngine.ts): weakest dimensions first, rotating through a task library so
+   the habits change day to day. Everything the "journey impact" shows (streak,
+   totals, per-dimension effort) derives from a persisted day-by-day activity
+   log: today's toggles live in `cura-plan-day` stamped with their date and
+   dimension; when a new day starts, the finished day is folded into
+   `cura-plan-log` and the checklist regenerates. The history starts empty and
+   only ever grows from real activity — nothing on screen is a seeded figure.
    ─────────────────────────────────────────────────────────────────────────── */
 
-const TASKS_KEY = "cura-plan-tasks";
-const HISTORY_KEY = "cura-plan-history";
+const DAY_KEY = "cura-plan-day";
+const HISTORY_KEY = "cura-plan-log";
+/** Pre-engine storage (static checklist + a seeded demo week) — cleared once. */
+const LEGACY_KEYS = ["cura-plan-tasks", "cura-plan-history"];
 
 interface StoredDay {
   date: string;
-  done: Record<string, boolean>;
+  /** Snapshot of the day's checklist — enough to fold it into the log later,
+   *  even after the generated task set has moved on. */
+  tasks: { id: string; dimension: DimensionId; done: boolean }[];
 }
 
-function readHistory(): DayLog[] {
-  try {
-    const raw = localStorage.getItem(HISTORY_KEY);
-    if (raw) return JSON.parse(raw) as DayLog[];
-  } catch {
-    /* ignore unavailable storage */
-  }
-  // First run: seed the mock employee's past week, then persist so the log
-  // only ever grows from real activity.
-  const seed = seedHistory();
-  persistHistory(seed);
-  return seed;
+interface PlanState {
+  history: DayLog[];
+  /** Today's toggles by task id. */
+  doneById: Record<string, boolean>;
 }
 
-function persistHistory(history: DayLog[]) {
+function readJson<T>(key: string): T | null {
   try {
-    localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+    const raw = localStorage.getItem(key);
+    return raw ? (JSON.parse(raw) as T) : null;
   } catch {
-    /* ignore unavailable storage */
+    return null;
   }
 }
 
-/** Today's checklist: restore same-day toggles; when the stored day has passed,
- *  fold it into the history and start the day fresh. */
-function readState(): { tasks: PlanTask[]; history: DayLog[] } {
-  const history = readHistory();
-  const today = isoDate();
+function writeJson(key: string, value: unknown) {
   try {
-    const raw = localStorage.getItem(TASKS_KEY);
-    if (raw) {
-      const stored = JSON.parse(raw) as StoredDay | Record<string, boolean>;
-      // Legacy shape (a bare id→done map) predates day stamping — treat as today.
-      const day: StoredDay =
-        "date" in stored && typeof stored.date === "string"
-          ? (stored as StoredDay)
-          : { date: today, done: stored as Record<string, boolean> };
-
-      const withDone = todayTasks.map((t) =>
-        t.id in day.done ? { ...t, done: day.done[t.id] } : t,
-      );
-      if (day.date === today) return { tasks: withDone, history };
-
-      // A new day: archive the finished one (if anything was done), reset tasks.
-      const log = toDayLog(day.date, withDone);
-      const nextHistory = log ? [...history.filter((d) => d.date !== log.date), log] : history;
-      if (log) persistHistory(nextHistory);
-      const fresh = todayTasks.map((t) => ({ ...t, done: false }));
-      persistTasks(fresh);
-      return { tasks: fresh, history: nextHistory };
-    }
+    localStorage.setItem(key, JSON.stringify(value));
   } catch {
     /* ignore unavailable storage */
   }
-  return { tasks: todayTasks, history };
 }
 
-function persistTasks(tasks: PlanTask[]) {
+/** Restore today's toggles; when the stored day has passed, fold its snapshot
+ *  into the history and start the day fresh. */
+function readState(today: string): PlanState {
   try {
-    const day: StoredDay = {
-      date: isoDate(),
-      done: Object.fromEntries(tasks.map((t) => [t.id, t.done])),
+    for (const key of LEGACY_KEYS) localStorage.removeItem(key);
+  } catch {
+    /* ignore unavailable storage */
+  }
+
+  const history = readJson<DayLog[]>(HISTORY_KEY) ?? [];
+  const stored = readJson<StoredDay>(DAY_KEY);
+  if (!stored || !Array.isArray(stored.tasks)) return { history, doneById: {} };
+
+  if (stored.date === today) {
+    return {
+      history,
+      doneById: Object.fromEntries(stored.tasks.map((t) => [t.id, t.done])),
     };
-    localStorage.setItem(TASKS_KEY, JSON.stringify(day));
-  } catch {
-    /* ignore unavailable storage */
   }
+
+  // A new day: archive the finished one (if anything was done), reset toggles.
+  const log = toDayLog(stored.date, stored.tasks);
+  const nextHistory = log ? [...history.filter((d) => d.date !== log.date), log] : history;
+  if (log) writeJson(HISTORY_KEY, nextHistory);
+  return { history: nextHistory, doneById: {} };
 }
 
 export function PlanProvider({ children }: { children: ReactNode }) {
-  const [{ tasks, history }, setState] = useState(readState);
+  const { results } = useAssessment();
+  const today = isoDate();
+  const [{ history, doneById }, setState] = useState(() => readState(today));
+
+  // Today's checklist, generated from the employee's own results and overlaid
+  // with the persisted toggles. Regenerates live as more dimensions complete.
+  const tasks = useMemo(
+    () =>
+      buildDailyTasks(results, today).map((t) => ({
+        ...t,
+        done: doneById[t.id] ?? false,
+      })),
+    [results, today, doneById],
+  );
+
+  // Keep the stored day in sync with the current checklist, so a passed day
+  // folds into the log from exactly what was on screen.
+  useEffect(() => {
+    if (tasks.length === 0) return;
+    const snapshot: StoredDay = {
+      date: today,
+      tasks: tasks.map(({ id, dimension, done }) => ({ id, dimension, done })),
+    };
+    writeJson(DAY_KEY, snapshot);
+  }, [tasks, today]);
 
   const toggle = useCallback((id: string) => {
-    setState((prev) => {
-      const tasks = prev.tasks.map((t) => (t.id === id ? { ...t, done: !t.done } : t));
-      persistTasks(tasks);
-      return { ...prev, tasks };
-    });
+    setState((prev) => ({
+      ...prev,
+      doneById: { ...prev.doneById, [id]: !prev.doneById[id] },
+    }));
   }, []);
 
   const todayDone = tasks.filter((t) => t.done).length;

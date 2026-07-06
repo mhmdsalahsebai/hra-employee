@@ -31,10 +31,12 @@ export function programForInsight(insightId: string): Program | undefined {
 const METRIC_PROGRAM: Record<string, string> = {
   activity: "fitness",
   sitting: "fitness",
+  commute: "fitness",
   fitness: "fitness",
   sleep: "sleep",
   tobacco: "smoking",
   nutrition: "healthy-lifestyle",
+  hydration: "healthy-lifestyle",
   screening: "healthy-lifestyle",
   bmi: "weight",
 };

@@ -44,42 +44,9 @@ export interface PlanTask {
   done: boolean;
 }
 
-export const todayTasks: PlanTask[] = [
-  {
-    id: "t1",
-    title: "تمرين تنفّس لتهدئة التوتر",
-    dimension: "psycho",
-    kind: "meditation",
-    durationMin: 5,
-    done: true,
-  },
-  {
-    id: "t2",
-    title: "مشي خفيف لمدة 10 دقائق",
-    dimension: "physical",
-    kind: "exercise",
-    durationMin: 10,
-    done: false,
-  },
-  {
-    id: "t3",
-    title: "اكتب ثلاثة أشياء أنت ممتن لها اليوم",
-    dimension: "psycho",
-    kind: "reflection",
-    durationMin: 5,
-    done: false,
-  },
-  {
-    id: "t4",
-    title: "حدّد حدًّا واضحًا لانتهاء يوم عملك",
-    dimension: "professional",
-    kind: "reading",
-    durationMin: 8,
-    done: false,
-  },
-];
-
-/* ── Plan → report feedback: effort the employee has invested per dimension ─── */
+/* ── Plan → report feedback: effort the employee has invested per dimension ───
+   The checklist itself is generated daily from the employee's results — see
+   taskEngine.ts. This module keeps the shared types and the log arithmetic. */
 
 export interface DimensionEffort {
   /** Tasks completed toward this dimension (journey + today). */
@@ -140,7 +107,10 @@ export function computeStreak(history: DayLog[], todayDone: number): number {
 
 /** Fold a finished day's tasks into a log entry — or null if nothing was done,
  *  so empty days never pad the history (and correctly break the streak). */
-export function toDayLog(date: string, tasks: PlanTask[]): DayLog | null {
+export function toDayLog(
+  date: string,
+  tasks: Pick<PlanTask, "dimension" | "done">[],
+): DayLog | null {
   if (!tasks.some((t) => t.done)) return null;
   const byDimension: DayLog["byDimension"] = {};
   for (const t of tasks) {
@@ -148,25 +118,6 @@ export function toDayLog(date: string, tasks: PlanTask[]): DayLog | null {
     byDimension[t.dimension] = { done: cur.done + (t.done ? 1 : 0), total: cur.total + 1 };
   }
   return { date, byDimension };
-}
-
-/** Demo seed: the week of activity this mock employee already has behind them
- *  (assessment was 6 days ago). Written once to storage on first run — from
- *  then on the history is purely what the user actually does. */
-export function seedHistory(): DayLog[] {
-  const today = new Date();
-  const days: [number, DayLog["byDimension"]][] = [
-    [-6, { psycho: { done: 2, total: 2 } }],
-    [-5, { psycho: { done: 2, total: 2 } }],
-    [-4, { psycho: { done: 2, total: 2 }, professional: { done: 1, total: 2 } }],
-    [-3, { professional: { done: 2, total: 2 } }],
-    [-2, { professional: { done: 1, total: 2 }, physical: { done: 1, total: 2 } }],
-    [-1, { physical: { done: 1, total: 3 } }],
-  ];
-  return days.map(([offset, byDimension]) => ({
-    date: isoDate(shiftDate(today, offset)),
-    byDimension,
-  }));
 }
 
 /* ── Deliverable 2: free expert consultations ─────────────────────────────── */

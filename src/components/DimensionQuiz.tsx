@@ -10,6 +10,7 @@ import {
   QuestionCardDeck,
   QuestionInsight,
   ScaleSelect,
+  ScoreRing,
   type QuestionCardDeckHandle,
 } from "./ui";
 import { Illustration } from "../illustrations/Illustration";
@@ -17,7 +18,11 @@ import { dimensions, dimensionsById, type DimensionId } from "../data/dimensions
 import { hraBySlug } from "../data/hra";
 import { getQuestionArt } from "../data/questionArt";
 import { getQuestionInsight, type QuestionInsight as QuestionInsightData } from "../data/questionInsights";
+import { LEVEL_CLASS } from "../lib/score";
+import { useAnalysis } from "../assessment/useAnalysis";
 import { useAssessment } from "../assessment/useAssessment";
+import { useFindings } from "../assessment/useFindings";
+import { useMetrics } from "../assessment/useMetrics";
 
 /**
  * Full-screen, one-question-at-a-time flow for answering a single dimension.
@@ -234,9 +239,26 @@ function DimensionDone({
 }) {
   const navigate = useNavigate();
   const reduce = useReducedMotion();
-  const { results, completedCount, totalDimensions } = useAssessment();
+  const { results, resultBySlug, completedCount, totalDimensions } = useAssessment();
+  const metricGroups = useMetrics();
+  const analysis = useAnalysis();
+  const { findings } = useFindings();
   const nextIndex = results.findIndex((r) => !r.complete);
   const next = nextIndex === -1 ? undefined : dimensions[nextIndex];
+
+  // The real payoff of the answers just given: the computed score + verdict,
+  // and exactly how much analysis those answers unlocked on the dimension page.
+  const r = resultBySlug[dim.id];
+  const level = LEVEL_CLASS[r.level];
+  const subMetrics = metricGroups.find((g) => g.dimension === dim.id)?.metrics.length ?? 0;
+  const discoveries = findings.filter((f) => f.dims.includes(dim.id)).length;
+  const composites = analysis.composites.filter((c) => c.dims.includes(dim.id)).length;
+  const unlocked = [
+    discoveries > 0 ? `${discoveries.toLocaleString("en-US")} اكتشافات مترابطة` : null,
+    subMetrics > 0 ? `${subMetrics.toLocaleString("en-US")} مؤشرات فرعية` : null,
+    composites > 0 ? `${composites.toLocaleString("en-US")} تحليلات مركّبة` : null,
+    r.band.advices.length > 0 ? `${r.band.advices.length.toLocaleString("en-US")} توصيات` : null,
+  ].filter(Boolean);
 
   return (
     <div className="animate-rise relative z-10 flex flex-1 flex-col items-center justify-center px-6 pb-[max(1.25rem,env(safe-area-inset-bottom))] text-center">
@@ -259,10 +281,28 @@ function DimensionDone({
         {completedCount} من {totalDimensions} أبعاد مكتملة
       </p>
       <h1 className="mt-2 text-2xl font-extrabold text-ink-900">أحسنت! اكتمل بُعد {dim.title} 🎉</h1>
-      <p className="mt-3 max-w-xs text-[15px] leading-relaxed text-ink-500">
+
+      {/* The computed result, immediately — not a promise that it exists. */}
+      <div className="mt-5 flex w-full max-w-xs items-center gap-4 rounded-xl border border-ink-100 bg-surface p-4 text-right shadow-card">
+        <ScoreRing value={r.score} size={72} stroke={7} className={level.text} trackClassName="text-ink-100">
+          <span className="nums text-xl font-extrabold text-ink-900">{r.score}</span>
+        </ScoreRing>
+        <div className="min-w-0 flex-1">
+          <span className={`inline-block rounded-pill px-2.5 py-0.5 text-[0.8125rem] font-bold ${level.soft}`}>
+            {r.band.title}
+          </span>
+          {unlocked.length > 0 && (
+            <p className="nums mt-2 text-[11px] font-semibold leading-relaxed text-ink-500">
+              جُهّز لك الآن: {unlocked.join(" · ")}
+            </p>
+          )}
+        </div>
+      </div>
+
+      <p className="mt-4 max-w-xs text-[15px] leading-relaxed text-ink-500">
         {next
-          ? `احتسبنا درجتك وفتحنا لك البُعد التالي — واصل وأنت في أفضل انطلاقة.`
-          : "احتسبنا درجتك وجهّزنا قراءة وتوصيات تناسب إجاباتك في هذا البُعد."}
+          ? "تحليلك الكامل بانتظارك في صفحة البُعد — والبُعد التالي مفتوح، واصل وأنت في أفضل انطلاقة."
+          : "تحليلك الكامل — مؤشرات، قراءات، وتوصيات مبنية على إجاباتك — جاهز في صفحة البُعد."}
       </p>
 
       {/* The walked/next segment bar — the same nine steps the maps speak. */}
