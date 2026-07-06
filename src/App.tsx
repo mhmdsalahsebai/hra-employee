@@ -129,6 +129,7 @@ export default function App() {
           <Route path="/content" element={<Content />} />
           <Route path="/consultation" element={<Consultation />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/profile/:section" element={<Profile />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />
