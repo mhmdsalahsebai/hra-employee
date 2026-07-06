@@ -6,15 +6,20 @@ import {
   ChevronLeft,
   ChevronRight,
   ClipboardList,
+  Gauge,
   MessageCircleHeart,
   Sparkles,
 } from "lucide-react";
 import { Button, ScoreRing } from "../components/ui";
 import { IconTile } from "../components/ui/Card";
 import { DeltaPill } from "../components/Trend";
+import { DetailedInsights } from "../components/cards/DetailedInsights";
+import { DimensionMetricsPanel } from "../components/cards/MetricsBreakdown";
 import { cn } from "../lib/cn";
-import { LEVEL_CLASS } from "../lib/score";
+import { LEVEL_CLASS, LEVEL_HEX } from "../lib/score";
 import { useAssessment } from "../assessment/useAssessment";
+import { useInsights } from "../assessment/useInsights";
+import { useMetrics } from "../assessment/useMetrics";
 import { usePlan } from "../plan/usePlan";
 import { dimensionsById, tileStyle, type DimensionId } from "../data/dimensions";
 import { hraBySlug } from "../data/hra";
@@ -28,6 +33,8 @@ export function Dimension() {
   const navigate = useNavigate();
   const { resultBySlug, answers, setAnswer } = useAssessment();
   const { effort } = usePlan();
+  const insights = useInsights();
+  const metricGroups = useMetrics();
   const [quizOpen, setQuizOpen] = useState(false);
   const [showReview, setShowReview] = useState(false);
 
@@ -36,6 +43,8 @@ export function Dimension() {
   const dim = dimensionsById[id];
   const hra = hraBySlug[id];
   const r = resultBySlug[id];
+  const metricsGroup = metricGroups.find((g) => g.dimension === id);
+  const vsPeers = r.score - dim.benchmark;
   const meta = LEVEL_CLASS[r.level];
   const e = effort[id];
   const complete = r.complete;
@@ -78,10 +87,6 @@ export function Dimension() {
             <div className="mt-3 flex items-center gap-2">
               <DeltaPill diff={dim.trend} />
               <span className="text-[11px] font-semibold text-ink-400">منذ آخر تقييم</span>
-              <span className="text-ink-200">·</span>
-              <span className="text-[11px] font-semibold text-ink-400">
-                متوسط الزملاء <span dir="ltr" className="nums font-bold text-ink-600">{dim.benchmark}</span>
-              </span>
             </div>
           </div>
         ) : (
@@ -130,10 +135,49 @@ export function Dimension() {
 
       {complete && (
         <>
-          {/* Verdict reading */}
+          {/* Verdict reading + score vs peers — the same comparison bar the
+              report's deep card shows, so the full reading lives here too.
+              The fill grows from the right (RTL), so the peer marker is
+              anchored from the right on the same 0–100 scale. */}
           <section className="px-5 pt-5">
             <div className="rounded-xl border border-ink-100 bg-surface p-5 shadow-soft">
-              <p className="text-[0.875rem] leading-[1.85] text-ink-700">{r.band.description}</p>
+              <div className="mb-2 flex items-center justify-between text-[11px] font-semibold">
+                <span className="flex items-center gap-1.5 text-ink-700">
+                  <span className="h-2.5 w-2.5 rounded-full" style={{ background: LEVEL_HEX[r.level] }} />
+                  درجتك <span dir="ltr" className="nums font-bold">{r.score}</span>
+                </span>
+                <span className="flex items-center gap-1.5 text-ink-400">
+                  <span className="h-3 w-[3px] rounded-full bg-ink-400" />
+                  متوسط الزملاء <span dir="ltr" className="nums font-bold">{dim.benchmark}</span>
+                </span>
+              </div>
+              <div className="relative h-2 w-full rounded-pill bg-ink-100">
+                <div
+                  className="h-full rounded-pill"
+                  style={{ width: `${r.score}%`, background: LEVEL_HEX[r.level] }}
+                />
+                <span
+                  className="absolute top-1/2 h-3.5 w-[3px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-ink-400 ring-2 ring-surface"
+                  style={{ right: `${dim.benchmark}%` }}
+                  title="متوسط الزملاء"
+                />
+              </div>
+              <p className="mt-2 text-[11px] font-semibold text-ink-400">
+                {vsPeers === 0 ? (
+                  <>بمستوى متوسط الزملاء في القطاع</>
+                ) : (
+                  <>
+                    <span dir="ltr" className={cn("nums font-bold", vsPeers > 0 ? "text-good" : "text-alert")}>
+                      {vsPeers > 0 ? "+" : "−"}
+                      {Math.abs(vsPeers)}
+                    </span>{" "}
+                    {vsPeers > 0 ? "فوق متوسط الزملاء في القطاع" : "تحت متوسط الزملاء في القطاع"}
+                  </>
+                )}
+              </p>
+              <p className="mt-3.5 border-t border-ink-100 pt-3.5 text-[0.875rem] leading-[1.85] text-ink-700">
+                {r.band.description}
+              </p>
               {r.band.alert && (
                 <div className="mt-3 flex items-start gap-2.5 rounded-md bg-warn-soft/60 p-3">
                   <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-warn" strokeWidth={2.2} />
@@ -142,6 +186,26 @@ export function Dimension() {
               )}
             </div>
           </section>
+
+          {/* Sub-scale metrics — the same 0–100 indicators the report breaks
+              down, scoped to this dimension only */}
+          {metricsGroup && metricsGroup.metrics.length > 0 && (
+            <section className="px-5 pt-6">
+              <h2 className="mb-1 flex items-center gap-2 text-[1.0625rem] font-bold text-ink-900">
+                <Gauge className="h-[1.15rem] w-[1.15rem] text-brand-600" strokeWidth={2.4} />
+                مؤشرات هذا البُعد
+              </h2>
+              <p className="mb-3.5 text-xs font-semibold text-ink-400">
+                <span className="nums font-bold text-ink-600">{metricsGroup.metrics.length}</span>{" "}
+                مؤشرًا فرعيًا محسوبًا من إجاباتك — درجة كل مؤشر من 100
+              </p>
+              <DimensionMetricsPanel group={metricsGroup} />
+            </section>
+          )}
+
+          {/* Detailed health notes — the report's derived findings, scoped to
+              this dimension */}
+          <DetailedInsights summary={insights} dimension={id} />
 
           {/* Real advices → recommendations */}
           <section className="px-5 pt-6">

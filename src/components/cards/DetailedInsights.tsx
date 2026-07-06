@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { CalendarClock, ChevronLeft, GraduationCap, Lightbulb, PlayCircle } from "lucide-react";
 import { cn } from "../../lib/cn";
+import type { DimensionId } from "../../data/dimensions";
 import {
   CATEGORY_META,
   type Insight,
@@ -170,9 +171,21 @@ function ActionChip({
   );
 }
 
-export function DetailedInsights({ summary }: { summary: InsightSummary }) {
-  const { insights, critical, warning, flagged } = summary;
+export function DetailedInsights({
+  summary,
+  dimension,
+}: {
+  summary: InsightSummary;
+  /** When set, only the findings belonging to this dimension are shown. */
+  dimension?: DimensionId;
+}) {
+  const insights = dimension
+    ? summary.insights.filter((i) => dimensionForInsight(i) === dimension)
+    : summary.insights;
   if (!insights.length) return null;
+  const critical = insights.filter((i) => i.severity === "critical").length;
+  const warning = insights.filter((i) => i.severity === "warning").length;
+  const flagged = insights.filter((i) => i.severity !== "positive").length;
 
   const groups = ORDER.map((cat) => ({
     cat,
@@ -202,9 +215,11 @@ export function DetailedInsights({ summary }: { summary: InsightSummary }) {
       <p className="mb-3.5 text-xs font-semibold text-ink-400">
         {flagged > 0 ? (
           <>
-            استخلصنا <span className="nums font-bold text-ink-600">{flagged}</span> ملاحظة من إجاباتك التفصيلية —
-            مرتّبة حسب الأولوية
+            استخلصنا <span className="nums font-bold text-ink-600">{flagged}</span> ملاحظة من إجاباتك
+            {dimension ? " في هذا البُعد" : " التفصيلية"} — مرتّبة حسب الأولوية
           </>
+        ) : dimension ? (
+          "تحليل دقيق لإجاباتك في هذا البُعد"
         ) : (
           "تحليل دقيق لإجاباتك عبر كل المؤشرات الصحية"
         )}

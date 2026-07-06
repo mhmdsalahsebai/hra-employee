@@ -17,7 +17,7 @@ import { ProgressBar } from "../ui";
    is a 0–100 score (higher = better), a level pill, and a one-line reading
    derived live from the employee's own answers. */
 
-function MetricRow({ metric }: { metric: Metric }) {
+function MetricRow({ metric, selfPage }: { metric: Metric; selfPage?: boolean }) {
   const navigate = useNavigate();
   const m = LEVEL_CLASS[metric.level];
   return (
@@ -40,7 +40,7 @@ function MetricRow({ metric }: { metric: Metric }) {
       </div>
       <ProgressBar value={metric.score} barStyle={{ background: LEVEL_HEX[metric.level] }} />
       <p className="mt-1.5 text-[0.8125rem] leading-relaxed text-ink-600">{metric.reading}</p>
-      <MetricAction metric={metric} navigate={navigate} />
+      <MetricAction metric={metric} navigate={navigate} selfPage={selfPage} />
     </div>
   );
 }
@@ -50,9 +50,13 @@ function MetricRow({ metric }: { metric: Metric }) {
 function MetricAction({
   metric,
   navigate,
+  selfPage,
 }: {
   metric: Metric;
   navigate: ReturnType<typeof useNavigate>;
+  /** True when rendered on the metric's own dimension page — fallbacks that
+   *  would link back to the same page route to the plan/content instead. */
+  selfPage?: boolean;
 }) {
   const program = programForMetric(metric);
 
@@ -61,7 +65,15 @@ function MetricAction({
     const item = contentForDimension(metric.dimension);
     return (
       <button
-        onClick={() => navigate(item ? `/content?item=${item.id}` : `/dimension/${metric.dimension}`)}
+        onClick={() =>
+          navigate(
+            item
+              ? `/content?item=${item.id}`
+              : selfPage
+                ? "/content"
+                : `/dimension/${metric.dimension}`,
+          )
+        }
         className="mt-2 inline-flex items-center gap-1.5 rounded-pill bg-good-soft px-2.5 py-1.5 text-[11px] font-bold text-good transition hover:brightness-95 active:scale-[0.98]"
       >
         <ShieldCheck className="h-3.5 w-3.5" strokeWidth={2.4} />
@@ -91,7 +103,7 @@ function MetricAction({
         </>
       ) : (
         <button
-          onClick={() => navigate(`/dimension/${metric.dimension}`)}
+          onClick={() => navigate(selfPage ? "/plan" : `/dimension/${metric.dimension}`)}
           className="inline-flex items-center gap-1 rounded-pill border border-ink-200 bg-surface px-3 py-1.5 text-[11px] font-bold text-ink-700 transition hover:border-brand-300 hover:text-brand-700 active:scale-[0.98]"
         >
           <Sparkles className="h-3.5 w-3.5" strokeWidth={2.3} />
@@ -133,6 +145,40 @@ function DimensionGroup({ group }: { group: DimensionMetrics }) {
       <div className="divide-y divide-ink-100 px-4">
         {group.metrics.map((metric) => (
           <MetricRow key={metric.id} metric={metric} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/** Single-dimension metrics panel for the dimension's own page: the same
+ *  metric rows as the report, minus the redundant dimension identity header. */
+export function DimensionMetricsPanel({ group }: { group: DimensionMetrics }) {
+  const d = dimensionsById[group.dimension as DimensionId];
+  return (
+    <div className="overflow-hidden rounded-xl border border-ink-100 bg-surface shadow-card">
+      <div className="flex items-center justify-between gap-3 border-b border-ink-100 px-4 py-3">
+        <p className="text-[11px] font-semibold text-ink-400">
+          <span className="nums">{group.metrics.length}</span> مؤشر
+          {group.attention > 0 && (
+            <>
+              {" · "}
+              <span className="font-bold text-alert">
+                <span className="nums">{group.attention}</span> يحتاج عناية
+              </span>
+            </>
+          )}
+        </p>
+        <div className="shrink-0 text-center leading-none">
+          <span className="nums block text-lg font-extrabold" style={{ color: d.accent.fg }}>
+            {group.average}
+          </span>
+          <span className="text-[9px] font-bold text-ink-400">المتوسط</span>
+        </div>
+      </div>
+      <div className="divide-y divide-ink-100 px-4 py-3">
+        {group.metrics.map((metric) => (
+          <MetricRow key={metric.id} metric={metric} selfPage />
         ))}
       </div>
     </div>
